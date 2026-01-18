@@ -31,7 +31,9 @@ export type NotificationType =
   | 'ovulation_day'
   | 'fertile_ending'
   | 'pms_reminder'
-  | 'daily_checkin';
+  | 'daily_checkin'
+  | 'water_reminder'
+  | 'exercise_reminder';
 
 export interface CycleSettings {
   cycleLength: number; // days (default: 28)
@@ -113,6 +115,8 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
     fertile_ending: true,
     pms_reminder: true,
     daily_checkin: true,
+    water_reminder: false,
+    exercise_reminder: false,
   },
   preferredTime: '09:00',
   quietHoursStart: '22:00',

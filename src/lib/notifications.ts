@@ -26,6 +26,8 @@ const NOTIFICATION_ID_BASE = {
   fertile_ending: 6000,
   pms_reminder: 7000,
   daily_checkin: 8000,
+  water_reminder: 9000,
+  exercise_reminder: 10000,
 } as const;
 
 // Get notification content based on type and privacy mode
@@ -99,6 +101,22 @@ export function getNotificationContent(
         : 'How are you feeling today? Log your status.',
       privateTitle: language === 'tr' ? 'Günlük Hatırlatma' : 'Daily Reminder',
       privateBody: language === 'tr' ? 'Günlük kaydını yap.' : 'Make your daily log.',
+    },
+    water_reminder: {
+      title: language === 'tr' ? 'Su İç 💧' : 'Drink Water 💧',
+      body: language === 'tr' 
+        ? 'Günlük su hedefin için bir bardak su iç!' 
+        : 'Drink a glass of water for your daily goal!',
+      privateTitle: language === 'tr' ? 'Wellness' : 'Wellness',
+      privateBody: language === 'tr' ? 'Wellness hatırlatması.' : 'Wellness reminder.',
+    },
+    exercise_reminder: {
+      title: language === 'tr' ? 'Hareket Zamanı 🏃‍♀️' : 'Time to Move 🏃‍♀️',
+      body: language === 'tr' 
+        ? 'Kısa bir yürüyüş veya esneme yapmaya ne dersin?' 
+        : 'How about a short walk or some stretching?',
+      privateTitle: language === 'tr' ? 'Wellness' : 'Wellness',
+      privateBody: language === 'tr' ? 'Wellness hatırlatması.' : 'Wellness reminder.',
     },
   };
 
@@ -277,6 +295,45 @@ export async function scheduleNotifications(
     for (let i = 1; i <= 30; i++) {
       const checkInDate = addDays(now, i);
       addNotification('daily_checkin', checkInDate);
+    }
+  }
+  
+  // Schedule water reminders for next 30 days (3 times per day: 10:00, 14:00, 18:00)
+  if (prefs.togglesByType.water_reminder) {
+    for (let i = 1; i <= 30; i++) {
+      const baseDate = addDays(now, i);
+      [10, 14, 18].forEach((hour) => {
+        const waterTime = setMinutes(setHours(baseDate, hour), 0);
+        if (!isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd) && isAfter(waterTime, now)) {
+          const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
+          notifications.push({
+            id: NOTIFICATION_ID_BASE.water_reminder + (i * 10) + hour,
+            title: content.title,
+            body: content.body,
+            schedule: { at: waterTime },
+            channelId: NOTIFICATION_CHANNELS.WELLNESS,
+            smallIcon: 'ic_stat_icon',
+          });
+        }
+      });
+    }
+  }
+  
+  // Schedule exercise reminders for next 30 days (once per day at 17:00)
+  if (prefs.togglesByType.exercise_reminder) {
+    for (let i = 1; i <= 30; i++) {
+      const exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
+      if (!isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd) && isAfter(exerciseDate, now)) {
+        const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
+        notifications.push({
+          id: NOTIFICATION_ID_BASE.exercise_reminder + i,
+          title: content.title,
+          body: content.body,
+          schedule: { at: exerciseDate },
+          channelId: NOTIFICATION_CHANNELS.WELLNESS,
+          smallIcon: 'ic_stat_icon',
+        });
+      }
     }
   }
   
