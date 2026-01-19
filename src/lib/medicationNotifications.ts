@@ -1,13 +1,77 @@
 // 💊 Medication Notification Service
-import { LocalNotifications, LocalNotificationSchema } from '@capacitor/local-notifications';
-import { setHours, setMinutes, addDays, isAfter, isBefore, format } from 'date-fns';
+import { LocalNotifications, LocalNotificationSchema, ActionPerformed } from '@capacitor/local-notifications';
+import { setHours, setMinutes, addDays, isAfter, format } from 'date-fns';
 import type { Medication } from '@/types/medication';
+import { recordMedicationDose } from '@/lib/medicationStorage';
 
 // Medication notification channel
 export const MEDICATION_NOTIFICATION_CHANNEL = 'medication_reminders';
 
 // Base ID for medication notifications (start from 20000 to avoid conflicts)
 const MEDICATION_NOTIFICATION_BASE_ID = 20000;
+
+// Register action types for medication notifications
+export async function registerMedicationActionTypes(): Promise<void> {
+  try {
+    await LocalNotifications.registerActionTypes({
+      types: [
+        {
+          id: 'MEDICATION_ACTIONS',
+          actions: [
+            {
+              id: 'take',
+              title: 'Aldım ✓',
+              foreground: false,
+            },
+            {
+              id: 'snooze',
+              title: '15dk Ertele',
+              foreground: false,
+            },
+          ],
+        },
+      ],
+    });
+    console.log('Medication action types registered');
+  } catch (error) {
+    console.error('Error registering medication action types:', error);
+  }
+}
+
+// Handle notification action
+export async function handleMedicationNotificationAction(action: ActionPerformed): Promise<void> {
+  const { actionId, notification } = action;
+  const extra = notification.extra;
+  
+  if (!extra || extra.type !== 'medication_reminder') return;
+  
+  const medicationId = extra.medicationId;
+  const medicationName = extra.medicationName;
+  
+  if (actionId === 'take') {
+    // Record the dose as taken
+    const today = format(new Date(), 'yyyy-MM-dd');
+    await recordMedicationDose(medicationId, today, true);
+    console.log(`Medication ${medicationName} marked as taken`);
+  } else if (actionId === 'snooze') {
+    // Schedule a reminder in 15 minutes
+    const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: MEDICATION_NOTIFICATION_BASE_ID + 99999,
+        title: `💊 ${medicationName} - Hatırlatma`,
+        body: `${extra.scheduledTime} dozunu almayı unutma!`,
+        schedule: { at: snoozeTime },
+        channelId: MEDICATION_NOTIFICATION_CHANNEL,
+        sound: 'notification.wav',
+        smallIcon: 'ic_stat_icon',
+        actionTypeId: 'MEDICATION_ACTIONS',
+        extra: extra,
+      }],
+    });
+    console.log(`Medication ${medicationName} snoozed for 15 minutes`);
+  }
+}
 
 // Create medication notification channel for Android
 export async function createMedicationNotificationChannel(): Promise<void> {
@@ -80,6 +144,7 @@ export async function scheduleMedicationNotification(medication: Medication): Pr
           channelId: MEDICATION_NOTIFICATION_CHANNEL,
           sound: 'notification.wav',
           smallIcon: 'ic_stat_icon',
+          actionTypeId: 'MEDICATION_ACTIONS',
           extra: {
             medicationId: medication.id,
             medicationName: medication.name,

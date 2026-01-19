@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Bell, 
   Calendar, 
   Shield, 
   Moon, 
@@ -12,40 +11,17 @@ import {
   Download,
   Trash2,
   Bug,
-  Clock,
-  VolumeX,
-  Eye,
   Minus,
-  Plus
+  Plus,
+  ArrowLeft,
+  type LucideIcon
 } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
 import { BottomNav } from '@/components/BottomNav';
-import { TimePicker } from '@/components/TimePicker';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAppLock } from '@/components/AppLockProvider';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useNavigate } from 'react-router-dom';
-import type { NotificationType, PrivacyMode } from '@/types/cycle';
-
-const notificationTypes: { key: NotificationType; label: string; emoji: string }[] = [
-  { key: 'period_approaching', label: 'Regl Yaklaşıyor', emoji: '🌸' },
-  { key: 'period_expected', label: 'Regl Bugün Bekleniyor', emoji: '📅' },
-  { key: 'period_late', label: 'Regl Gecikti', emoji: '⏰' },
-  { key: 'fertile_start', label: 'Doğurgan Dönem Başladı', emoji: '💐' },
-  { key: 'ovulation_day', label: 'Yumurtlama Günü', emoji: '🥚' },
-  { key: 'fertile_ending', label: 'Doğurgan Dönem Bitiyor', emoji: '🌙' },
-  { key: 'pms_reminder', label: 'PMS Hatırlatması', emoji: '⚡' },
-  { key: 'daily_checkin', label: 'Günlük Check-in', emoji: '✅' },
-  { key: 'water_reminder', label: 'Su İç Hatırlatması', emoji: '💧' },
-  { key: 'exercise_reminder', label: 'Egzersiz Hatırlatması', emoji: '🏃‍♀️' },
-];
-
-const privacyModes: { value: PrivacyMode; label: string; description: string }[] = [
-  { value: 'off', label: 'Tam', description: 'Detaylı bildirim' },
-  { value: 'partial', label: 'Kısmi', description: 'Genel hatırlatma' },
-  { value: 'full', label: 'Gizli', description: 'Sadece başlık' },
-];
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -54,9 +30,7 @@ export default function SettingsPage() {
   const { isEnabled: isLockEnabled, hasPin, enableLock, disableLock, removePin } = useAppLock();
   const { 
     cycleSettings, 
-    notificationPrefs, 
     updateCycleSettings,
-    updateNotificationPrefs,
   } = useCycleData();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -65,19 +39,9 @@ export default function SettingsPage() {
     openUpdateSheet({ initialTab: tab || 'flow' });
   };
 
-  const handleNotificationToggle = async (type: NotificationType, enabled: boolean) => {
-    await updateNotificationPrefs({
-      togglesByType: {
-        ...notificationPrefs.togglesByType,
-        [type]: enabled,
-      }
-    });
-  };
-
   const handleExportData = async () => {
     const data = {
       cycleSettings,
-      notificationPrefs,
       exportDate: new Date().toISOString(),
     };
     
@@ -106,7 +70,7 @@ export default function SettingsPage() {
     }
   };
 
-  const themes: { value: 'light' | 'dark' | 'system'; icon: typeof Sun; label: string }[] = [
+  const themes: { value: 'light' | 'dark' | 'system'; icon: LucideIcon; label: string }[] = [
     { value: 'light', icon: Sun, label: 'Açık' },
     { value: 'dark', icon: Moon, label: 'Koyu' },
     { value: 'system', icon: Monitor, label: 'Sistem' },
@@ -123,7 +87,7 @@ export default function SettingsPage() {
     rightElement
   }: {
     title: string;
-    icon: typeof Bell;
+    icon: LucideIcon;
     gradient: string;
     children: React.ReactNode;
     id?: string;
@@ -186,7 +150,7 @@ export default function SettingsPage() {
     rightElement,
     gradient = 'from-gray-400 to-gray-500'
   }: {
-    icon: typeof Bell;
+    icon: LucideIcon;
     label: string;
     description?: string;
     onClick?: () => void;
@@ -228,10 +192,21 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24 safe-area-top">
-      {/* Header */}
+      {/* Header with Back Button */}
       <header className="px-6 pt-6 pb-4">
-        <h1 className="text-2xl font-bold text-foreground">Ayarlar</h1>
-        <p className="text-sm text-muted-foreground mt-1">Uygulama tercihlerini özelleştir</p>
+        <div className="flex items-center gap-4 mb-2">
+          <motion.button
+            onClick={() => navigate('/')}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft className="w-5 h-5 text-foreground" />
+          </motion.button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Ayarlar</h1>
+            <p className="text-sm text-muted-foreground">Uygulama tercihlerini özelleştir</p>
+          </div>
+        </div>
       </header>
 
       <main className="px-4 space-y-4">
@@ -292,105 +267,6 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </SectionCard>
-
-        {/* Notifications */}
-        <SectionCard
-          title="Bildirimler"
-          icon={Bell}
-          gradient="from-violet-400 to-purple-500"
-          id="notifications"
-          collapsible
-          rightElement={
-            <div onClick={(e) => e.stopPropagation()}>
-              <AnimatedSwitch 
-                checked={notificationPrefs.enabled}
-                onChange={(checked) => updateNotificationPrefs({ enabled: checked })}
-              />
-            </div>
-          }
-        >
-          {notificationPrefs.enabled && (
-            <div className="space-y-3">
-              {/* Notification Types */}
-              <div className="bg-background rounded-xl p-3 space-y-2">
-                {notificationTypes.slice(0, 5).map((type) => (
-                  <div 
-                    key={type.key}
-                    className="flex items-center justify-between py-2"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">{type.emoji}</span>
-                      <span className="text-sm">{type.label}</span>
-                    </div>
-                    <Switch
-                      checked={notificationPrefs.togglesByType[type.key]}
-                      onCheckedChange={(checked) => handleNotificationToggle(type.key, checked)}
-                    />
-                  </div>
-                ))}
-              </div>
-              
-              {/* Time Settings */}
-              <div className="bg-background rounded-xl p-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Bildirim Saati</span>
-                  </div>
-                  <TimePicker
-                    value={notificationPrefs.preferredTime}
-                    onChange={(time) => updateNotificationPrefs({ preferredTime: time })}
-                    label="Saat"
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <VolumeX className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Sessiz Saatler</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <TimePicker
-                      value={notificationPrefs.quietHoursStart}
-                      onChange={(time) => updateNotificationPrefs({ quietHoursStart: time })}
-                      label=""
-                    />
-                    <span className="text-muted-foreground">-</span>
-                    <TimePicker
-                      value={notificationPrefs.quietHoursEnd}
-                      onChange={(time) => updateNotificationPrefs({ quietHoursEnd: time })}
-                      label=""
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Privacy Mode */}
-              <div className="bg-background rounded-xl p-3">
-                <div className="flex items-center gap-3 mb-3">
-                  <Eye className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Gizlilik Modu</span>
-                </div>
-                <div className="flex gap-2">
-                  {privacyModes.map((mode) => (
-                    <motion.button
-                      key={mode.value}
-                      onClick={() => updateNotificationPrefs({ privacyMode: mode.value })}
-                      className={`flex-1 p-2 rounded-xl text-center transition-all ${
-                        notificationPrefs.privacyMode === mode.value
-                          ? 'bg-gradient-to-r from-violet-400 to-purple-500 text-white shadow-md'
-                          : 'bg-muted text-muted-foreground'
-                      }`}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <p className="text-xs font-medium">{mode.label}</p>
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </SectionCard>
 
         {/* Appearance */}
