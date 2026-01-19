@@ -78,8 +78,8 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24 safe-area-top">
-      {/* Global Header - Settings & Notifications */}
+    <div className="relative min-h-screen bg-background pb-24 safe-area-top">
+      {/* Global Header - Settings & Notifications (positioned absolutely, scrolls with page) */}
       <GlobalHeader />
 
       {/* Header */}
