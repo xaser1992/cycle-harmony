@@ -1,4 +1,4 @@
-// 🌸 Calendar Page
+// 🌸 Calendar Page - Flo Inspired Design
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -17,7 +17,6 @@ import {
   isWithinInterval
 } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Button } from '@/components/ui/button';
 import { BottomNav } from '@/components/BottomNav';
 import { UpdateSheet } from '@/components/UpdateSheet';
 import { useCycleData } from '@/hooks/useCycleData';
@@ -76,33 +75,6 @@ export default function CalendarPage() {
     return null;
   };
 
-  const getDayStyles = (type: ReturnType<typeof getDayType>, isToday: boolean, isCurrentMonth: boolean) => {
-    let base = 'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ';
-    
-    if (!isCurrentMonth) {
-      base += 'text-muted-foreground/40 ';
-    }
-    
-    if (isToday) {
-      base += 'ring-2 ring-primary ring-offset-2 ring-offset-background ';
-    }
-    
-    switch (type) {
-      case 'period':
-        return base + 'bg-period text-white';
-      case 'predicted':
-        return base + 'bg-period/30 text-period-dark';
-      case 'fertile':
-        return base + 'bg-fertile/30 text-fertile-dark';
-      case 'ovulation':
-        return base + 'bg-ovulation text-white';
-      case 'pms':
-        return base + 'bg-pms/30 text-orange-700';
-      default:
-        return base + (isCurrentMonth ? 'text-foreground hover:bg-muted' : '');
-    }
-  };
-
   const getEntryForDate = (date: Date): DayEntry | undefined => {
     return entries.find(e => e.date === format(date, 'yyyy-MM-dd'));
   };
@@ -118,69 +90,77 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24 safe-area-top">
-      {/* Header */}
-      <header className="px-6 pt-6 pb-4">
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="rounded-full"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          
-          <motion.h1 
-            key={format(currentMonth, 'yyyy-MM')}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xl font-bold text-foreground"
-          >
-            {format(currentMonth, 'MMMM yyyy', { locale: tr })}
-          </motion.h1>
-          
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="rounded-full"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </Button>
+      {/* Header with gradient */}
+      <header className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
+        <div className="relative px-6 pt-6 pb-4">
+          <div className="flex items-center justify-between">
+            <motion.button 
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              className="w-10 h-10 rounded-full bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm flex items-center justify-center"
+            >
+              <ChevronLeft className="w-5 h-5 text-foreground" />
+            </motion.button>
+            
+            <motion.div
+              key={format(currentMonth, 'yyyy-MM')}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <h1 className="text-2xl font-bold text-foreground">
+                {format(currentMonth, 'MMMM', { locale: tr })}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {format(currentMonth, 'yyyy')}
+              </p>
+            </motion.div>
+            
+            <motion.button 
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              className="w-10 h-10 rounded-full bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm flex items-center justify-center"
+            >
+              <ChevronRight className="w-5 h-5 text-foreground" />
+            </motion.button>
+          </div>
         </div>
       </header>
 
-      <main className="px-6">
-        {/* Legend */}
-        <div className="flex flex-wrap gap-3 mb-4 text-xs">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-period" />
-            <span className="text-muted-foreground">Regl</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-period/30" />
-            <span className="text-muted-foreground">Tahmini</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-fertile/50" />
-            <span className="text-muted-foreground">Doğurgan</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-ovulation" />
-            <span className="text-muted-foreground">Yumurtlama</span>
-          </div>
-        </div>
+      <main className="px-4">
+        {/* Legend Pills */}
+        <motion.div 
+          className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          {[
+            { color: 'bg-gradient-to-r from-rose-400 to-pink-500', label: 'Regl' },
+            { color: 'bg-gradient-to-r from-rose-300/50 to-pink-400/50', label: 'Tahmini' },
+            { color: 'bg-gradient-to-r from-cyan-400 to-teal-400', label: 'Doğurgan' },
+            { color: 'bg-gradient-to-r from-violet-400 to-purple-500', label: 'Yumurtlama' },
+          ].map((item) => (
+            <div 
+              key={item.label}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 shrink-0"
+            >
+              <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label}</span>
+            </div>
+          ))}
+        </motion.div>
 
         {/* Calendar Grid */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-card rounded-2xl p-4 border border-border"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-card/80 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-lg"
         >
           {/* Weekday Headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="grid grid-cols-7 gap-1 mb-3">
             {WEEKDAYS.map(day => (
-              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+              <div key={day} className="text-center text-xs font-semibold text-muted-foreground py-2">
                 {day}
               </div>
             ))}
@@ -199,15 +179,29 @@ export default function CalendarPage() {
                   key={date.toISOString()}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.01 }}
+                  transition={{ delay: index * 0.008 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => handleDayClick(date)}
-                  className={`relative ${getDayStyles(dayType, isToday, isCurrentMonth)}`}
+                  className={`relative aspect-square rounded-2xl flex items-center justify-center text-sm font-medium transition-all
+                    ${!isCurrentMonth ? 'opacity-30' : ''}
+                    ${isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''}
+                    ${dayType === 'period' ? 'bg-gradient-to-br from-rose-400 to-pink-500 text-white shadow-md shadow-rose-500/30' : ''}
+                    ${dayType === 'predicted' ? 'bg-gradient-to-br from-rose-300/40 to-pink-400/40 text-rose-600 dark:text-rose-300' : ''}
+                    ${dayType === 'fertile' ? 'bg-gradient-to-br from-cyan-400/30 to-teal-400/30 text-teal-600 dark:text-teal-300' : ''}
+                    ${dayType === 'ovulation' ? 'bg-gradient-to-br from-violet-400 to-purple-500 text-white shadow-md shadow-violet-500/30' : ''}
+                    ${dayType === 'pms' ? 'bg-gradient-to-br from-orange-300/30 to-amber-400/30 text-orange-600 dark:text-orange-300' : ''}
+                    ${!dayType && isCurrentMonth ? 'text-foreground hover:bg-muted/50' : ''}
+                  `}
                 >
-                  {format(date, 'd')}
+                  <span>{format(date, 'd')}</span>
                   
-                  {/* Entry indicator dots */}
+                  {/* Entry indicator */}
                   {entry && (entry.symptoms.length > 0 || entry.mood) && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
+                    <motion.span 
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    />
                   )}
                 </motion.button>
               );
@@ -223,32 +217,71 @@ export default function CalendarPage() {
             transition={{ delay: 0.2 }}
             className="mt-6 space-y-3"
           >
-            <h3 className="text-sm font-medium text-muted-foreground">Yaklaşan</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground px-1">Yaklaşan Tarihler</h3>
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 p-3 bg-period-light rounded-xl">
-                <div className="w-10 h-10 rounded-full bg-period/20 flex items-center justify-center">
-                  <span>🌸</span>
+            <div className="space-y-3">
+              {/* Next Period Card */}
+              <motion.div 
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose-400 to-pink-500 p-4 shadow-lg shadow-rose-500/20"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="relative flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <span className="text-2xl">🌸</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-white">Sonraki Regl</p>
+                    <p className="text-sm text-white/80">
+                      {format(parseISO(prediction.nextPeriodStart), 'd MMMM EEEE', { locale: tr })}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-white/60" />
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">Sonraki Regl</p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(parseISO(prediction.nextPeriodStart), 'd MMMM', { locale: tr })}
-                  </p>
-                </div>
-              </div>
+              </motion.div>
               
-              <div className="flex items-center gap-3 p-3 bg-fertile-light rounded-xl">
-                <div className="w-10 h-10 rounded-full bg-fertile/20 flex items-center justify-center">
-                  <span>🥚</span>
+              {/* Ovulation Card */}
+              <motion.div 
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-400 to-purple-500 p-4 shadow-lg shadow-violet-500/20"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="relative flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <span className="text-2xl">🥚</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-white">Yumurtlama</p>
+                    <p className="text-sm text-white/80">
+                      {format(parseISO(prediction.ovulationDate), 'd MMMM EEEE', { locale: tr })}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-white/60" />
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">Yumurtlama</p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(parseISO(prediction.ovulationDate), 'd MMMM', { locale: tr })}
-                  </p>
+              </motion.div>
+
+              {/* Fertile Window Card */}
+              <motion.div 
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-400 p-4 shadow-lg shadow-teal-500/20"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="relative flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <span className="text-2xl">💐</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-white">Doğurgan Dönem</p>
+                    <p className="text-sm text-white/80">
+                      {format(parseISO(prediction.fertileWindowStart), 'd MMM', { locale: tr })} - {format(parseISO(prediction.fertileWindowEnd), 'd MMM', { locale: tr })}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-white/60" />
                 </div>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         )}
