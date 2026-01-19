@@ -1,5 +1,5 @@
 // 🌸 Settings Page - Flo Inspired Design
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, 
@@ -14,6 +14,7 @@ import {
   Minus,
   Plus,
   ArrowLeft,
+  Bell,
   type LucideIcon
 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
@@ -22,6 +23,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAppLock } from '@/components/AppLockProvider';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useNavigate } from 'react-router-dom';
+import { checkNotificationPermissions, requestNotificationPermissions } from '@/lib/notifications';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -34,6 +36,25 @@ export default function SettingsPage() {
   } = useCycleData();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [notificationGranted, setNotificationGranted] = useState<boolean | null>(null);
+  const [isRequestingNotification, setIsRequestingNotification] = useState(false);
+
+  // Check notification permission on mount
+  useEffect(() => {
+    checkNotificationPermissions().then(setNotificationGranted);
+  }, []);
+
+  const handleRequestNotification = async () => {
+    setIsRequestingNotification(true);
+    try {
+      const granted = await requestNotificationPermissions();
+      setNotificationGranted(granted);
+    } catch (error) {
+      console.error('Notification permission error:', error);
+    } finally {
+      setIsRequestingNotification(false);
+    }
+  };
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
     openUpdateSheet({ initialTab: tab || 'flow' });
@@ -291,6 +312,53 @@ export default function SettingsPage() {
                 <span className="text-sm font-medium">{t.label}</span>
               </motion.button>
             ))}
+          </div>
+        </SectionCard>
+
+        {/* Notifications */}
+        <SectionCard
+          title="Bildirimler"
+          icon={Bell}
+          gradient="from-violet-400 to-purple-500"
+        >
+          <div className="space-y-3">
+            {notificationGranted === false && (
+              <motion.button
+                onClick={handleRequestNotification}
+                disabled={isRequestingNotification}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800"
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-amber-800 dark:text-amber-200">Bildirimlere İzin Ver</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-300">Hatırlatmalar için izin gerekli</p>
+                </div>
+                {isRequestingNotification ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full"
+                  />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-amber-600" />
+                )}
+              </motion.button>
+            )}
+            
+            {notificationGranted === true && (
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-green-100 dark:bg-green-900/30">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-green-800 dark:text-green-200">Bildirimler Açık</p>
+                  <p className="text-xs text-green-600 dark:text-green-300">Hatırlatmalar aktif</p>
+                </div>
+              </div>
+            )}
           </div>
         </SectionCard>
 

@@ -112,9 +112,11 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
   }
 
   const phaseInfo = getPhaseInfo(phase, language);
+  const today = new Date();
   const nextPeriod = parseISO(prediction.nextPeriodStart);
   const ovulationDate = parseISO(prediction.ovulationDate);
-  const daysUntilPeriod = differenceInDays(nextPeriod, new Date());
+  const daysUntilPeriod = differenceInDays(nextPeriod, today);
+  const daysUntilOvulation = differenceInDays(ovulationDate, today);
   const cycleLength = 28;
   const progress = (phase.dayNumber / cycleLength) * 100;
   const details = phaseDetails[phase.type];
@@ -182,13 +184,15 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
                 </div>
               )}
 
-              {(phase.type === 'fertile' || phase.type === 'follicular') && (
+              {(phase.type === 'fertile' || phase.type === 'follicular') && daysUntilOvulation >= 0 && (
                 <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-3">
                   <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
                     {language === 'tr' ? 'Yumurtlama' : 'Ovulation'}
                   </p>
                   <p className="text-sm font-semibold text-white">
-                    {format(ovulationDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
+                    {daysUntilOvulation === 0 
+                      ? (language === 'tr' ? 'Bugün' : 'Today')
+                      : format(ovulationDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
                   </p>
                 </div>
               )}
