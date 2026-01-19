@@ -175,3 +175,16 @@ html.light {
     background: linear-gradient(135deg, hsl(var(--fertile)) 0%, hsl(var(--ovulation)) 100%);
   }
 }
+
+/* Icon tap animation */
+@keyframes icon-tap {
+  0% { transform: scale(1); }
+  25% { transform: scale(0.8); }
+  50% { transform: scale(1.15); }
+  75% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.animate-icon-tap {
+  animation: icon-tap 0.3s ease-out;
+}
