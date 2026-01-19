@@ -6,6 +6,7 @@ import { format, isToday } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -45,6 +46,9 @@ export default function Medications() {
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
   const [medicationStats, setMedicationStats] = useState<Record<string, number>>({});
   const today = format(new Date(), 'yyyy-MM-dd');
+  
+  // Swipe navigation - tab arası geçiş için
+  useSwipeNavigation({ threshold: 60 });
 
   // Form state
   const [formData, setFormData] = useState({

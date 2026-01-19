@@ -21,6 +21,7 @@ import {
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { format, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -44,6 +45,9 @@ export default function StatsPage() {
   const { openUpdateSheet } = useUpdateSheet();
   const { cycleSettings, entries, userSettings } = useCycleData();
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
+  
+  // Swipe navigation - tab arası geçiş için
+  useSwipeNavigation({ threshold: 60 });
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
     openUpdateSheet({ initialTab: tab || 'flow' });
