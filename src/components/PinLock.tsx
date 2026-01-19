@@ -1,8 +1,9 @@
-// 🌸 PIN Lock Screen Component
+// 🌸 PIN Lock Screen Component with Biometric Support
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Delete, Fingerprint } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Delete, Fingerprint, ScanFace } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { verifyBiometric, checkBiometricAvailability, type BiometricStatus } from '@/lib/biometric';
 
 interface PinLockProps {
   onUnlock: () => void;
@@ -17,8 +18,24 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin }:
   const [step, setStep] = useState<'enter' | 'confirm'>('enter');
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
+  const [biometricStatus, setBiometricStatus] = useState<BiometricStatus | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const PIN_LENGTH = 4;
+
+  // Check biometric availability on mount
+  useEffect(() => {
+    if (!isSettingPin) {
+      checkBiometricAvailability().then(setBiometricStatus);
+    }
+  }, [isSettingPin]);
+
+  // Auto-trigger biometric on mount if available
+  useEffect(() => {
+    if (!isSettingPin && biometricStatus?.isAvailable && !isVerifying) {
+      handleBiometric();
+    }
+  }, [biometricStatus, isSettingPin]);
 
   useEffect(() => {
     if (pin.length === PIN_LENGTH) {
@@ -69,10 +86,24 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin }:
   };
 
   const handleBiometric = async () => {
-    // Biometric authentication - requires actual biometric verification
-    // TODO: Integrate with @capacitor-community/biometric plugin
-    // For now, show a message that biometric is not yet configured
-    setError('Parmak izi henüz yapılandırılmadı');
+    if (isVerifying || !biometricStatus?.isAvailable) return;
+    
+    setIsVerifying(true);
+    setError('');
+    
+    try {
+      const result = await verifyBiometric();
+      
+      if (result.success) {
+        onUnlock();
+      } else if (result.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Biyometrik doğrulama başarısız');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -141,10 +172,32 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin }:
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={handleBiometric}
-          className="w-16 h-16 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors mx-auto"
-          disabled={isSettingPin}
+          className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors mx-auto ${
+            biometricStatus?.isAvailable && !isSettingPin
+              ? 'bg-primary/10 hover:bg-primary/20'
+              : 'bg-muted hover:bg-muted/80'
+          }`}
+          disabled={isSettingPin || !biometricStatus?.isAvailable || isVerifying}
         >
-          <Fingerprint className={`w-6 h-6 ${isSettingPin ? 'text-muted-foreground/50' : 'text-muted-foreground'}`} />
+          {isVerifying ? (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full"
+            />
+          ) : biometricStatus?.biometryType === 'face' ? (
+            <ScanFace className={`w-6 h-6 ${
+              biometricStatus?.isAvailable && !isSettingPin 
+                ? 'text-primary' 
+                : 'text-muted-foreground/50'
+            }`} />
+          ) : (
+            <Fingerprint className={`w-6 h-6 ${
+              biometricStatus?.isAvailable && !isSettingPin 
+                ? 'text-primary' 
+                : 'text-muted-foreground/50'
+            }`} />
+          )}
         </motion.button>
         
         {/* Zero */}
