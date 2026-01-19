@@ -49,17 +49,25 @@ const SettingsIcon = ({ className, isActive }: { className?: string; isActive?: 
   </svg>
 );
 
-const navItems: NavItem[] = [
+const leftNavItems: NavItem[] = [
   { icon: HomeIcon, label: 'Bugün', path: '/' },
   { icon: CalendarIcon, label: 'Takvim', path: '/calendar' },
+];
+
+const rightNavItems: NavItem[] = [
   { icon: ChartIcon, label: 'İstatistik', path: '/stats' },
   { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
 ];
 
-export function BottomNav() {
+interface BottomNavProps {
+  onCenterPress?: () => void;
+}
+
+export function BottomNav({ onCenterPress }: BottomNavProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [tappedItem, setTappedItem] = useState<string | null>(null);
+  const [isCenterPressed, setIsCenterPressed] = useState(false);
 
   const handleTap = (path: string) => {
     setTappedItem(path);
@@ -67,133 +75,201 @@ export function BottomNav() {
     setTimeout(() => setTappedItem(null), 600);
   };
 
+  const handleCenterPress = () => {
+    setIsCenterPressed(true);
+    onCenterPress?.();
+    setTimeout(() => setIsCenterPressed(false), 300);
+  };
+
+  const renderNavItem = (item: NavItem) => {
+    const isActive = location.pathname === item.path;
+    const isTapped = tappedItem === item.path;
+    const IconComponent = item.icon;
+    
+    return (
+      <motion.button
+        key={item.path}
+        onClick={() => handleTap(item.path)}
+        className="relative flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-300 overflow-hidden"
+        whileTap={{ scale: 0.88 }}
+      >
+        {/* Ripple effect on tap */}
+        <AnimatePresence>
+          {isTapped && (
+            <motion.div
+              className="absolute inset-0 bg-primary/20 rounded-2xl"
+              initial={{ scale: 0, opacity: 1 }}
+              animate={{ scale: 2.5, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Active background pill with glow */}
+        {isActive && (
+          <motion.div
+            layoutId="activeTab"
+            className="absolute inset-0 bg-gradient-to-br from-primary/15 to-primary/5 rounded-2xl"
+            initial={false}
+            transition={{
+              type: "spring",
+              stiffness: 380,
+              damping: 28
+            }}
+          >
+            {/* Subtle glow effect */}
+            <motion.div
+              className="absolute inset-0 rounded-2xl"
+              style={{
+                background: 'radial-gradient(circle at 50% 30%, hsl(var(--primary) / 0.2), transparent 70%)',
+              }}
+              animate={{ opacity: [0.5, 0.8, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
+        )}
+        
+        {/* Icon container with bounce */}
+        <motion.div 
+          className="relative z-10"
+          animate={isActive ? { 
+            scale: [1, 1.15, 1.05],
+            y: [0, -3, -1],
+            rotate: [0, -3, 3, 0],
+          } : { 
+            scale: 1,
+            y: 0,
+            rotate: 0
+          }}
+          transition={isActive ? { 
+            duration: 0.5, 
+            ease: "easeOut",
+            times: [0, 0.4, 1]
+          } : {
+            duration: 0.2
+          }}
+        >
+          {/* Pulse ring for active state */}
+          <AnimatePresence>
+            {isActive && (
+              <motion.div
+                className="absolute inset-0 -m-1 rounded-full border-2 border-primary/30"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ 
+                  scale: [1, 1.4, 1.6],
+                  opacity: [0.6, 0.3, 0]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeOut"
+                }}
+              />
+            )}
+          </AnimatePresence>
+          
+          <IconComponent 
+            className={`w-6 h-6 transition-colors duration-300 ${
+              isActive ? 'text-primary' : 'text-muted-foreground'
+            }`}
+            isActive={isActive}
+          />
+        </motion.div>
+        
+        {/* Label with fade effect */}
+        <motion.span 
+          className={`text-[11px] font-medium mt-1.5 relative z-10 transition-all duration-300 ${
+            isActive ? 'text-primary' : 'text-muted-foreground/70'
+          }`}
+          animate={{ 
+            opacity: isActive ? 1 : 0.7,
+            y: isActive ? 0 : 1
+          }}
+        >
+          {item.label}
+        </motion.span>
+
+        {/* Active dot indicator */}
+        <AnimatePresence>
+          {isActive && (
+            <motion.div
+              className="absolute -bottom-0.5 left-1/2 w-1 h-1 rounded-full bg-primary"
+              initial={{ scale: 0, x: "-50%" }}
+              animate={{ scale: 1, x: "-50%" }}
+              exit={{ scale: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
+        </AnimatePresence>
+      </motion.button>
+    );
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom z-50">
       <div className="flex items-center justify-around px-2 py-1.5">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          const isTapped = tappedItem === item.path;
-          const IconComponent = item.icon;
-          
-          return (
-            <motion.button
-              key={item.path}
-              onClick={() => handleTap(item.path)}
-              className="relative flex flex-col items-center py-2 px-6 rounded-2xl transition-all duration-300 overflow-hidden"
-              whileTap={{ scale: 0.88 }}
-            >
-              {/* Ripple effect on tap */}
-              <AnimatePresence>
-                {isTapped && (
-                  <motion.div
-                    className="absolute inset-0 bg-primary/20 rounded-2xl"
-                    initial={{ scale: 0, opacity: 1 }}
-                    animate={{ scale: 2.5, opacity: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                  />
-                )}
-              </AnimatePresence>
-
-              {/* Active background pill with glow */}
-              {isActive && (
+        {/* Left nav items */}
+        {leftNavItems.map(renderNavItem)}
+        
+        {/* Center Plus Button */}
+        <div className="relative -mt-6">
+          <motion.button
+            onClick={handleCenterPress}
+            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 shadow-lg shadow-rose-500/40 flex items-center justify-center"
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+          >
+            {/* Glow effect */}
+            <motion.div
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 blur-lg opacity-60"
+              animate={{ 
+                opacity: [0.4, 0.6, 0.4],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
+            
+            {/* Ripple on press */}
+            <AnimatePresence>
+              {isCenterPressed && (
                 <motion.div
-                  layoutId="activeTab"
-                  className="absolute inset-0 bg-gradient-to-br from-primary/15 to-primary/5 rounded-2xl"
-                  initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 380,
-                    damping: 28
-                  }}
-                >
-                  {/* Subtle glow effect */}
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl"
-                    style={{
-                      background: 'radial-gradient(circle at 50% 30%, hsl(var(--primary) / 0.2), transparent 70%)',
-                    }}
-                    animate={{ opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </motion.div>
-              )}
-              
-              {/* Icon container with bounce */}
-              <motion.div 
-                className="relative z-10"
-                animate={isActive ? { 
-                  scale: [1, 1.15, 1.05],
-                  y: [0, -3, -1],
-                  rotate: [0, -3, 3, 0],
-                } : { 
-                  scale: 1,
-                  y: 0,
-                  rotate: 0
-                }}
-                transition={isActive ? { 
-                  duration: 0.5, 
-                  ease: "easeOut",
-                  times: [0, 0.4, 1]
-                } : {
-                  duration: 0.2
-                }}
-              >
-                {/* Pulse ring for active state */}
-                <AnimatePresence>
-                  {isActive && (
-                    <motion.div
-                      className="absolute inset-0 -m-1 rounded-full border-2 border-primary/30"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ 
-                        scale: [1, 1.4, 1.6],
-                        opacity: [0.6, 0.3, 0]
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeOut"
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-                
-                <IconComponent 
-                  className={`w-6 h-6 transition-colors duration-300 ${
-                    isActive ? 'text-primary' : 'text-muted-foreground'
-                  }`}
-                  isActive={isActive}
+                  className="absolute inset-0 rounded-full bg-white/30"
+                  initial={{ scale: 0, opacity: 1 }}
+                  animate={{ scale: 1.5, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
                 />
-              </motion.div>
-              
-              {/* Label with fade effect */}
-              <motion.span 
-                className={`text-[11px] font-medium mt-1.5 relative z-10 transition-all duration-300 ${
-                  isActive ? 'text-primary' : 'text-muted-foreground/70'
-                }`}
-                animate={{ 
-                  opacity: isActive ? 1 : 0.7,
-                  y: isActive ? 0 : 1
-                }}
-              >
-                {item.label}
-              </motion.span>
-
-              {/* Active dot indicator */}
-              <AnimatePresence>
-                {isActive && (
-                  <motion.div
-                    className="absolute -bottom-0.5 left-1/2 w-1 h-1 rounded-full bg-primary"
-                    initial={{ scale: 0, x: "-50%" }}
-                    animate={{ scale: 1, x: "-50%" }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </AnimatePresence>
-            </motion.button>
-          );
-        })}
+              )}
+            </AnimatePresence>
+            
+            {/* Plus icon */}
+            <motion.svg
+              className="w-7 h-7 text-white relative z-10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              animate={isCenterPressed ? { rotate: 90 } : { rotate: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </motion.svg>
+          </motion.button>
+          
+          {/* Label */}
+          <motion.span 
+            className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-medium text-muted-foreground/70 whitespace-nowrap"
+          >
+            Güncelle
+          </motion.span>
+        </div>
+        
+        {/* Right nav items */}
+        {rightNavItems.map(renderNavItem)}
       </div>
     </nav>
   );

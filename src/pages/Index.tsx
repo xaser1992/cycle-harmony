@@ -134,7 +134,7 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Moved period and symptom logging */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -143,7 +143,6 @@ const Index = () => {
           <QuickActions
             onLogPeriod={handleLogPeriod}
             onLogSymptoms={handleLogSymptoms}
-            onOpenUpdate={handleOpenUpdate}
             language={userSettings.language}
             isOnPeriod={isOnPeriod}
           />
@@ -177,7 +176,7 @@ const Index = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav />
+      <BottomNav onCenterPress={handleOpenUpdate} />
 
       {/* Update Bottom Sheet */}
       <UpdateSheet

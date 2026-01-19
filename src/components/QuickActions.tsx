@@ -1,11 +1,10 @@
 // 🌸 Quick Actions Component - Flo Inspired Design
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
 
 interface QuickActionsProps {
   onLogPeriod: () => void;
   onLogSymptoms: () => void;
-  onOpenUpdate: () => void;
+  onLogMood?: () => void;
   language?: 'tr' | 'en';
   isOnPeriod?: boolean;
 }
@@ -62,7 +61,7 @@ const MoodIcon = ({ className }: { className?: string }) => (
 export function QuickActions({ 
   onLogPeriod, 
   onLogSymptoms, 
-  onOpenUpdate,
+  onLogMood,
   language = 'tr',
   isOnPeriod = false
 }: QuickActionsProps) {
@@ -88,93 +87,44 @@ export function QuickActions({
       label: language === 'tr' ? 'Ruh Hali' : 'Mood',
       gradient: 'from-amber-400 to-orange-400',
       shadowColor: 'shadow-amber-500/30',
-      onClick: onOpenUpdate,
+      onClick: onLogMood,
     },
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Main Update Button */}
-      <motion.button
-        onClick={onOpenUpdate}
-        className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose-400 via-pink-500 to-rose-500 p-4 shadow-lg shadow-rose-500/25"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        {/* Animated background elements */}
-        <motion.div
-          className="absolute inset-0"
-          initial={false}
+    <div className="grid grid-cols-3 gap-3">
+      {quickActions.map((action, index) => (
+        <motion.button
+          key={action.label}
+          onClick={action.onClick}
+          className={`relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br ${action.gradient} shadow-lg ${action.shadowColor}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
         >
+          {/* Glow effect */}
           <motion.div
-            className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full"
-            animate={{ 
-              scale: [1, 1.2, 1],
-              x: [0, 10, 0],
-              y: [0, -10, 0]
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 bg-white/10"
+            animate={{ opacity: [0, 0.3, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
           />
-          <motion.div
-            className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full"
-            animate={{ 
-              scale: [1.2, 1, 1.2],
-              x: [0, -5, 0],
-              y: [0, 5, 0]
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </motion.div>
-
-        <div className="relative flex items-center justify-center gap-3">
-          <motion.div
-            className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
-            whileHover={{ rotate: 90 }}
-            transition={{ type: "spring", stiffness: 300 }}
+          
+          {/* Icon container */}
+          <motion.div 
+            className="flex flex-col items-center gap-2"
+            whileHover={{ y: -2 }}
           >
-            <Plus className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <action.icon className="w-6 h-6" />
+            </div>
+            <span className="text-xs font-semibold text-white text-center leading-tight">
+              {action.label}
+            </span>
           </motion.div>
-          <span className="text-lg font-bold text-white">
-            {language === 'tr' ? 'Bugünü Güncelle' : 'Update Today'}
-          </span>
-        </div>
-      </motion.button>
-
-      {/* Quick Action Buttons Grid */}
-      <div className="grid grid-cols-3 gap-3">
-        {quickActions.map((action, index) => (
-          <motion.button
-            key={action.label}
-            onClick={action.onClick}
-            className={`relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br ${action.gradient} shadow-lg ${action.shadowColor}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {/* Glow effect */}
-            <motion.div
-              className="absolute inset-0 bg-white/10"
-              animate={{ opacity: [0, 0.3, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            
-            {/* Icon container */}
-            <motion.div 
-              className="flex flex-col items-center gap-2"
-              whileHover={{ y: -2 }}
-            >
-              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <action.icon className="w-6 h-6" />
-              </div>
-              <span className="text-xs font-semibold text-white text-center leading-tight">
-                {action.label}
-              </span>
-            </motion.div>
-          </motion.button>
-        ))}
-      </div>
+        </motion.button>
+      ))}
     </div>
   );
 }
