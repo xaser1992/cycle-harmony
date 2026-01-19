@@ -101,7 +101,13 @@ const Index = () => {
               {format(new Date(), 'd MMMM', { locale: tr })}
             </h1>
           </div>
-          <div className="text-4xl">🌸</div>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => navigate('/profile')}
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-500/30"
+          >
+            <span className="text-2xl">👩</span>
+          </motion.button>
         </motion.div>
       </header>
 
