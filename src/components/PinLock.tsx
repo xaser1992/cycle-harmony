@@ -10,9 +10,10 @@ interface PinLockProps {
   onSetPin?: (pin: string) => void;
   isSettingPin?: boolean;
   storedPin?: string | null;
+  title?: string;
 }
 
-export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin }: PinLockProps) {
+export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin, title }: PinLockProps) {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [step, setStep] = useState<'enter' | 'confirm'>('enter');
@@ -119,9 +120,9 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin }:
 
       {/* Title */}
       <h1 className="text-xl font-bold text-foreground mb-2">
-        {isSettingPin 
+        {title || (isSettingPin 
           ? (step === 'enter' ? 'Yeni PIN Oluştur' : 'PIN\'i Onayla')
-          : 'PIN Gir'
+          : 'PIN Gir')
         }
       </h1>
       

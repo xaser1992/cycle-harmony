@@ -116,9 +116,17 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const [isDisabling, setIsDisabling] = useState(false);
+
   const disableLock = () => {
+    // Show PIN screen to verify before disabling
+    setIsDisabling(true);
+  };
+
+  const confirmDisableLock = () => {
     setIsEnabled(false);
     setIsLocked(false);
+    setIsDisabling(false);
     Preferences.set({ key: LOCK_ENABLED_KEY, value: 'false' }).catch(() => {
       localStorage.setItem(LOCK_ENABLED_KEY, 'false');
     });
@@ -159,6 +167,13 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
           onUnlock={() => setIsSettingPin(false)}
           onSetPin={setPin}
           isSettingPin={true}
+        />
+      )}
+      {isDisabling && (
+        <PinLock 
+          onUnlock={confirmDisableLock}
+          storedPin={storedPin}
+          title="Kilidi Kaldır"
         />
       )}
       {children}
