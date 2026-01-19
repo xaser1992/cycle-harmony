@@ -61,7 +61,13 @@ export function UpdateSheetProvider({ children }: { children: ReactNode }) {
 export function useUpdateSheet() {
   const context = useContext(UpdateSheetContext);
   if (!context) {
-    throw new Error('useUpdateSheet must be used within UpdateSheetProvider');
+    // Return safe defaults during initial mount/HMR - prevents crashes
+    console.warn('useUpdateSheet called outside provider, returning safe defaults');
+    return {
+      openUpdateSheet: () => {},
+      closeUpdateSheet: () => {},
+      isOpen: false,
+    };
   }
   return context;
 }
