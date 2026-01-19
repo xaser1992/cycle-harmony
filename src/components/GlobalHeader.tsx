@@ -4,18 +4,12 @@ import { Settings, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useCycleData } from '@/hooks/useCycleData';
+import { NotificationSettingsSheet } from '@/components/NotificationSettingsSheet';
 
 export function GlobalHeader() {
   const navigate = useNavigate();
-  const { notificationPrefs, updateNotificationPrefs } = useCycleData();
-  const [showNotificationToast, setShowNotificationToast] = useState(false);
-
-  const handleNotificationToggle = async () => {
-    const newEnabled = !notificationPrefs.enabled;
-    await updateNotificationPrefs({ enabled: newEnabled });
-    setShowNotificationToast(true);
-    setTimeout(() => setShowNotificationToast(false), 2000);
-  };
+  const { notificationPrefs } = useCycleData();
+  const [isNotificationSheetOpen, setIsNotificationSheetOpen] = useState(false);
 
   return (
     <>
@@ -37,11 +31,11 @@ export function GlobalHeader() {
             </motion.div>
           </motion.button>
 
-          {/* Notification Button - Right */}
+          {/* Notification Button - Right - Opens Sheet */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
-            onClick={handleNotificationToggle}
+            onClick={() => setIsNotificationSheetOpen(true)}
             className={`pointer-events-auto w-11 h-11 rounded-full backdrop-blur-xl border shadow-lg flex items-center justify-center transition-colors ${
               notificationPrefs.enabled 
                 ? 'bg-gradient-to-br from-violet-400 to-purple-500 border-violet-400/50' 
@@ -75,31 +69,11 @@ export function GlobalHeader() {
         </div>
       </div>
 
-      {/* Notification Toast */}
-      <AnimatePresence>
-        {showNotificationToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-card/95 backdrop-blur-xl border border-border/50 shadow-xl"
-          >
-            <div className="flex items-center gap-2">
-              {notificationPrefs.enabled ? (
-                <>
-                  <Bell className="w-4 h-4 text-violet-500" />
-                  <span className="text-sm font-medium text-foreground">Bildirimler açık</span>
-                </>
-              ) : (
-                <>
-                  <BellOff className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Bildirimler kapalı</span>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Notification Settings Sheet */}
+      <NotificationSettingsSheet 
+        isOpen={isNotificationSheetOpen}
+        onClose={() => setIsNotificationSheetOpen(false)}
+      />
     </>
   );
 }

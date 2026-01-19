@@ -1,7 +1,7 @@
-// 🌸 Calendar Page - Flo Inspired Design
-import { useState, useMemo } from 'react';
+// 🌸 Calendar Page - Flo Inspired Design with Medication Integration
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pill } from 'lucide-react';
 import { 
   format, 
   startOfMonth, 
@@ -20,7 +20,9 @@ import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
+import { getMedicationLogsForDate, getMedications } from '@/lib/medicationStorage';
 import type { DayEntry } from '@/types/cycle';
+import type { Medication, MedicationLog } from '@/types/medication';
 
 const WEEKDAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
@@ -36,6 +38,35 @@ export default function CalendarPage() {
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [medicationLogs, setMedicationLogs] = useState<Record<string, MedicationLog[]>>({});
+
+  // Load medications and logs
+  useEffect(() => {
+    const loadMedicationData = async () => {
+      const meds = await getMedications();
+      setMedications(meds.filter(m => m.isActive));
+
+      // Load logs for all days in current month view
+      const monthStart = startOfMonth(currentMonth);
+      const monthEnd = endOfMonth(currentMonth);
+      const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+      const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+      const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+      
+      const logsMap: Record<string, MedicationLog[]> = {};
+      for (const day of days) {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        const logs = await getMedicationLogsForDate(dateStr);
+        if (logs.length > 0) {
+          logsMap[dateStr] = logs;
+        }
+      }
+      setMedicationLogs(logsMap);
+    };
+    
+    loadMedicationData();
+  }, [currentMonth]);
 
   // Get calendar days for the current month view
   const calendarDays = useMemo(() => {
@@ -77,6 +108,26 @@ export default function CalendarPage() {
 
   const getEntryForDate = (date: Date): DayEntry | undefined => {
     return entries.find(e => e.date === format(date, 'yyyy-MM-dd'));
+  };
+
+  const getMedicationLogsForDay = (date: Date): MedicationLog[] => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return medicationLogs[dateStr] || [];
+  };
+
+  const getMedicationProgress = (date: Date): { taken: number; total: number } => {
+    const logs = getMedicationLogsForDay(date);
+    const dateStr = format(date, 'yyyy-MM-dd');
+    
+    // Calculate total expected doses for this day
+    let totalDoses = 0;
+    medications.forEach(med => {
+      totalDoses += med.reminderTimes.length;
+    });
+    
+    const takenDoses = logs.filter(l => l.taken).length;
+    
+    return { taken: takenDoses, total: totalDoses };
   };
 
   const handleDayClick = (date: Date) => {
@@ -140,6 +191,7 @@ export default function CalendarPage() {
             { color: 'bg-gradient-to-r from-rose-300/50 to-pink-400/50', label: 'Tahmini' },
             { color: 'bg-gradient-to-r from-cyan-400 to-teal-400', label: 'Doğurgan' },
             { color: 'bg-gradient-to-r from-violet-400 to-purple-500', label: 'Yumurtlama' },
+            { color: 'bg-gradient-to-r from-emerald-400 to-green-500', label: 'İlaç ✓', icon: true },
           ].map((item) => (
             <div 
               key={item.label}
@@ -173,6 +225,10 @@ export default function CalendarPage() {
               const isToday = isSameDay(date, new Date());
               const isCurrentMonth = isSameMonth(date, currentMonth);
               const entry = getEntryForDate(date);
+              const medProgress = getMedicationProgress(date);
+              const hasMedications = medProgress.total > 0;
+              const allMedsTaken = medProgress.taken > 0 && medProgress.taken === medProgress.total;
+              const someMedsTaken = medProgress.taken > 0 && medProgress.taken < medProgress.total;
               
               return (
                 <motion.button
@@ -195,10 +251,25 @@ export default function CalendarPage() {
                 >
                   <span>{format(date, 'd')}</span>
                   
-                  {/* Entry indicator */}
+                  {/* Entry indicator (bottom left) */}
                   {entry && (entry.symptoms.length > 0 || entry.mood) && (
                     <motion.span 
-                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
+                      className="absolute bottom-1 left-1.5 w-1.5 h-1.5 rounded-full bg-primary"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    />
+                  )}
+                  
+                  {/* Medication indicator (bottom right) */}
+                  {hasMedications && isCurrentMonth && (
+                    <motion.span 
+                      className={`absolute bottom-1 right-1.5 w-1.5 h-1.5 rounded-full ${
+                        allMedsTaken 
+                          ? 'bg-emerald-500' 
+                          : someMedsTaken 
+                            ? 'bg-amber-500' 
+                            : 'bg-muted-foreground/30'
+                      }`}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                     />
@@ -208,6 +279,42 @@ export default function CalendarPage() {
             })}
           </div>
         </motion.div>
+
+        {/* Medication Summary for Today */}
+        {medications.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mt-4"
+          >
+            <div className="bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl p-4 border border-violet-200/30 dark:border-violet-800/30">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                  <Pill className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Bugünün İlaçları</p>
+                  <p className="text-xs text-muted-foreground">
+                    {getMedicationProgress(new Date()).taken} / {getMedicationProgress(new Date()).total} doz alındı
+                  </p>
+                </div>
+              </div>
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-violet-400 to-purple-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ 
+                    width: `${getMedicationProgress(new Date()).total > 0 
+                      ? (getMedicationProgress(new Date()).taken / getMedicationProgress(new Date()).total) * 100 
+                      : 0}%` 
+                  }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Upcoming Events */}
         {prediction && (

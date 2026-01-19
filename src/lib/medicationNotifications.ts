@@ -1,0 +1,185 @@
+// 💊 Medication Notification Service
+import { LocalNotifications, LocalNotificationSchema } from '@capacitor/local-notifications';
+import { setHours, setMinutes, addDays, isAfter, isBefore, format } from 'date-fns';
+import type { Medication } from '@/types/medication';
+
+// Medication notification channel
+export const MEDICATION_NOTIFICATION_CHANNEL = 'medication_reminders';
+
+// Base ID for medication notifications (start from 20000 to avoid conflicts)
+const MEDICATION_NOTIFICATION_BASE_ID = 20000;
+
+// Create medication notification channel for Android
+export async function createMedicationNotificationChannel(): Promise<void> {
+  try {
+    await LocalNotifications.createChannel({
+      id: MEDICATION_NOTIFICATION_CHANNEL,
+      name: 'İlaç Hatırlatmaları',
+      description: 'İlaç dozları için zamanında hatırlatmalar',
+      importance: 5, // MAX - will make sound and show heads-up notification
+      sound: 'notification.wav',
+      visibility: 1, // PUBLIC
+      vibration: true,
+    });
+    console.log('Medication notification channel created');
+  } catch (error) {
+    console.error('Error creating medication notification channel:', error);
+  }
+}
+
+// Generate a unique notification ID for a medication at a specific time
+function generateNotificationId(medicationId: string, dayOffset: number, timeIndex: number): number {
+  // Create a hash from the medication ID
+  const hash = medicationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return MEDICATION_NOTIFICATION_BASE_ID + (hash % 1000) * 100 + dayOffset * 10 + timeIndex;
+}
+
+// Cancel all medication notifications
+export async function cancelMedicationNotifications(): Promise<void> {
+  try {
+    const pending = await LocalNotifications.getPending();
+    const medicationNotifications = pending.notifications.filter(
+      n => n.id >= MEDICATION_NOTIFICATION_BASE_ID && n.id < MEDICATION_NOTIFICATION_BASE_ID + 100000
+    );
+    
+    if (medicationNotifications.length > 0) {
+      await LocalNotifications.cancel({ notifications: medicationNotifications });
+      console.log(`Cancelled ${medicationNotifications.length} medication notifications`);
+    }
+  } catch (error) {
+    console.error('Error cancelling medication notifications:', error);
+  }
+}
+
+// Schedule medication notifications for a single medication
+export async function scheduleMedicationNotification(medication: Medication): Promise<void> {
+  if (!medication.isActive || medication.reminderTimes.length === 0) {
+    return;
+  }
+
+  const notifications: LocalNotificationSchema[] = [];
+  const now = new Date();
+
+  // Schedule notifications for the next 30 days
+  for (let dayOffset = 0; dayOffset < 30; dayOffset++) {
+    const targetDate = addDays(now, dayOffset);
+    
+    medication.reminderTimes.forEach((time, timeIndex) => {
+      const [hour, minute] = time.split(':').map(Number);
+      const notificationTime = setMinutes(setHours(targetDate, hour), minute);
+      
+      // Only schedule if in the future
+      if (isAfter(notificationTime, now)) {
+        const notificationId = generateNotificationId(medication.id, dayOffset, timeIndex);
+        
+        notifications.push({
+          id: notificationId,
+          title: `💊 ${medication.name}`,
+          body: `${medication.dosage} almayı unutma! (${time})`,
+          schedule: { at: notificationTime },
+          channelId: MEDICATION_NOTIFICATION_CHANNEL,
+          sound: 'notification.wav',
+          smallIcon: 'ic_stat_icon',
+          extra: {
+            medicationId: medication.id,
+            medicationName: medication.name,
+            scheduledTime: time,
+            type: 'medication_reminder',
+          },
+        });
+      }
+    });
+  }
+
+  if (notifications.length > 0) {
+    try {
+      await LocalNotifications.schedule({ notifications });
+      console.log(`Scheduled ${notifications.length} notifications for ${medication.name}`);
+    } catch (error) {
+      console.error(`Error scheduling notifications for ${medication.name}:`, error);
+    }
+  }
+}
+
+// Schedule notifications for all active medications
+export async function scheduleMedicationNotifications(medications: Medication[]): Promise<void> {
+  // First, cancel existing medication notifications
+  await cancelMedicationNotifications();
+  
+  // Create channel if needed
+  await createMedicationNotificationChannel();
+  
+  // Check permissions
+  const permResult = await LocalNotifications.checkPermissions();
+  if (permResult.display !== 'granted') {
+    console.warn('Notification permissions not granted for medications');
+    return;
+  }
+  
+  // Schedule notifications for each active medication
+  const activeMedications = medications.filter(m => m.isActive);
+  
+  for (const medication of activeMedications) {
+    await scheduleMedicationNotification(medication);
+  }
+  
+  console.log(`Scheduled notifications for ${activeMedications.length} medications`);
+}
+
+// Get pending medication notifications (for debug)
+export async function getPendingMedicationNotifications(): Promise<LocalNotificationSchema[]> {
+  try {
+    const pending = await LocalNotifications.getPending();
+    return pending.notifications.filter(
+      n => n.id >= MEDICATION_NOTIFICATION_BASE_ID && n.id < MEDICATION_NOTIFICATION_BASE_ID + 100000
+    );
+  } catch (error) {
+    console.error('Error getting pending medication notifications:', error);
+    return [];
+  }
+}
+
+// Schedule a one-time reminder for taking medication (e.g., snooze)
+export async function scheduleOneTimeMedicationReminder(
+  medication: Medication,
+  delayMinutes: number = 15
+): Promise<void> {
+  const notificationTime = new Date(Date.now() + delayMinutes * 60 * 1000);
+  
+  try {
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: MEDICATION_NOTIFICATION_BASE_ID + 99999, // Special ID for snooze
+        title: `💊 ${medication.name} - Hatırlatma`,
+        body: `${medication.dosage} almayı unutma!`,
+        schedule: { at: notificationTime },
+        channelId: MEDICATION_NOTIFICATION_CHANNEL,
+        sound: 'notification.wav',
+        smallIcon: 'ic_stat_icon',
+      }],
+    });
+    console.log(`Scheduled one-time reminder for ${medication.name} in ${delayMinutes} minutes`);
+  } catch (error) {
+    console.error('Error scheduling one-time reminder:', error);
+  }
+}
+
+// Test medication notification
+export async function sendTestMedicationNotification(): Promise<void> {
+  try {
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: MEDICATION_NOTIFICATION_BASE_ID + 99998,
+        title: '💊 Test İlaç Hatırlatması',
+        body: 'İlaç bildirimleri düzgün çalışıyor!',
+        schedule: { at: new Date(Date.now() + 1000) }, // 1 second from now
+        channelId: MEDICATION_NOTIFICATION_CHANNEL,
+        sound: 'notification.wav',
+        smallIcon: 'ic_stat_icon',
+      }],
+    });
+  } catch (error) {
+    console.error('Error sending test medication notification:', error);
+    throw error;
+  }
+}
