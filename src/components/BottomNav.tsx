@@ -256,8 +256,9 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom z-50">
       <div className="flex items-center justify-around px-2 py-1.5">
-        {/* Left nav item */}
+        {/* Left nav items */}
         {renderNavItem(navItems[0])}
+        {renderNavItem(navItems[1])}
         
         {/* Center Plus Button with Circular Quick Actions */}
         <div className="relative -mt-6">
@@ -390,8 +391,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
           </motion.span>
         </div>
         
-        {/* Other nav items */}
-        {renderNavItem(navItems[1])}
+        {/* Right nav items */}
         {renderNavItem(navItems[2])}
         {renderNavItem(navItems[3])}
       </div>
