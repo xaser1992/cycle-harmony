@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AppLockProvider } from "@/components/AppLockProvider";
 import { UpdateSheetProvider } from "@/contexts/UpdateSheetContext";
 import { PageLoader } from "@/components/PageLoader";
-
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 // Lazy load all pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -55,6 +55,7 @@ const App = () => (
     <ThemeProvider defaultTheme="system" storageKey="cycle-tracker-theme">
       <AppLockProvider>
         <TooltipProvider>
+          <OfflineIndicator />
           <Toaster />
           <Sonner />
           <BrowserRouter>
