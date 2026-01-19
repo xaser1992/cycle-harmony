@@ -1,7 +1,6 @@
 // 🌸 Main Today Page
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
 import { useCycleData } from '@/hooks/useCycleData';
@@ -59,15 +58,9 @@ const Index = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <motion.div 
-          className="text-primary"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
-        >
-          <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="text-2xl">🌸</span>
-          </div>
-        </motion.div>
+        <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+          <span className="text-2xl">🌸</span>
+        </div>
       </div>
     );
   }
@@ -83,11 +76,7 @@ const Index = () => {
 
       {/* Header */}
       <header className="px-6 pt-20 pb-4">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center"
-        >
+        <div className="flex items-center justify-center animate-fade-in">
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               {format(new Date(), 'EEEE', { locale: userSettings.language === 'tr' ? tr : enUS })}
@@ -96,7 +85,7 @@ const Index = () => {
               {format(new Date(), 'd MMMM', { locale: userSettings.language === 'tr' ? tr : enUS })}
             </h1>
           </div>
-        </motion.div>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -109,38 +98,20 @@ const Index = () => {
         />
 
         {/* Phase Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-card rounded-2xl p-4 border border-border"
-        >
+        <div className="bg-card rounded-2xl p-4 border border-border animate-fade-in" style={{ animationDelay: '100ms' }}>
           <PhaseTimeline 
             prediction={prediction}
             settings={cycleSettings}
             language={userSettings.language}
           />
-        </motion.div>
+        </div>
 
         {/* Quick Actions - Period button only */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <motion.button
+        <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <button
             onClick={handleLogPeriod}
-            className="w-full relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30"
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-full relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30 transition-transform duration-150 active:scale-[0.98]"
           >
-            {/* Glow effect */}
-            <motion.div
-              className="absolute inset-0 bg-white/10"
-              animate={{ opacity: [0, 0.3, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            
             <div className="flex items-center justify-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                 <span className="text-xl">🩸</span>
@@ -152,8 +123,8 @@ const Index = () => {
                 }
               </span>
             </div>
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       </main>
 
       {/* Bottom Navigation */}

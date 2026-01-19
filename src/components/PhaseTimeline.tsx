@@ -1,5 +1,5 @@
-// 🌸 Phase Timeline Component
-import { motion } from 'framer-motion';
+// 🌸 Phase Timeline Component - Performance Optimized
+import { memo } from 'react';
 import type { CyclePrediction, CycleSettings } from '@/types/cycle';
 import { parseISO, format, differenceInDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -10,7 +10,7 @@ interface PhaseTimelineProps {
   language?: 'tr' | 'en';
 }
 
-export function PhaseTimeline({ prediction, settings, language = 'tr' }: PhaseTimelineProps) {
+export const PhaseTimeline = memo(function PhaseTimeline({ prediction, settings, language = 'tr' }: PhaseTimelineProps) {
   if (!prediction) return null;
 
   const today = new Date();
@@ -58,7 +58,7 @@ export function PhaseTimeline({ prediction, settings, language = 'tr' }: PhaseTi
       </div>
       
       <div className="relative h-3 rounded-full bg-muted overflow-hidden">
-        {phases.map((phase, index) => (
+        {phases.map((phase) => (
           <div
             key={phase.name}
             className={`absolute h-full ${phase.color} opacity-60`}
@@ -69,12 +69,10 @@ export function PhaseTimeline({ prediction, settings, language = 'tr' }: PhaseTi
           />
         ))}
         
-        {/* Progress Indicator */}
-        <motion.div
-          className="absolute top-0 bottom-0 w-1 bg-foreground rounded-full shadow-lg"
-          initial={{ left: '0%' }}
-          animate={{ left: `${progress}%` }}
-          transition={{ duration: 0.5 }}
+        {/* Progress Indicator - CSS transition instead of motion */}
+        <div
+          className="absolute top-0 bottom-0 w-1 bg-foreground rounded-full shadow-lg transition-all duration-500 ease-out"
+          style={{ left: `${progress}%` }}
         />
       </div>
 
@@ -95,4 +93,4 @@ export function PhaseTimeline({ prediction, settings, language = 'tr' }: PhaseTi
       </div>
     </div>
   );
-}
+});
