@@ -113,11 +113,17 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
               />
 
               {quickActions.map((action, index) => {
-                const buttonSize = 60;
-                const spacing = 70;
+                // Responsive button sizing based on viewport
+                const buttonSize = Math.min(60, window.innerWidth * 0.16);
+                // Responsive spacing: 20% of viewport width, clamped between 60-80px
+                const spacing = Math.max(60, Math.min(80, window.innerWidth * 0.2));
 
-                const xOffsets = [-spacing, 0, spacing];
-                const yOffsets = [80, 100, 80];
+                // Arc layout: left, center, right with equal distribution
+                const positions = [
+                  { x: window.innerWidth * 0.5 - spacing - buttonSize / 2, y: 85 },
+                  { x: window.innerWidth * 0.5 - buttonSize / 2, y: 105 },
+                  { x: window.innerWidth * 0.5 + spacing - buttonSize / 2, y: 85 },
+                ];
 
                 return (
                   <motion.button
@@ -139,8 +145,8 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
                     style={{
                       width: `${buttonSize}px`,
                       height: `${buttonSize}px`,
-                      left: `calc(50% - ${buttonSize / 2}px + ${xOffsets[index]}px)`,
-                      bottom: `calc(${yOffsets[index]}px + env(safe-area-inset-bottom))`,
+                      left: `${positions[index].x}px`,
+                      bottom: `calc(${positions[index].y}px + env(safe-area-inset-bottom))`,
                       touchAction: 'manipulation',
                       WebkitTapHighlightColor: 'transparent',
                     }}
