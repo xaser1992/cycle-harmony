@@ -112,6 +112,23 @@ export async function toggleMedicationLog(
   }
 }
 
+// Record a medication dose from notification action
+export async function recordMedicationDose(
+  medicationId: string,
+  date: string,
+  taken: boolean
+): Promise<void> {
+  const medications = await getMedications();
+  const medication = medications.find(m => m.id === medicationId);
+  
+  if (!medication) return;
+  
+  // Record for all reminder times of this medication
+  const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  
+  await toggleMedicationLog(medicationId, date, time, taken);
+}
+
 // Get adherence stats for a medication
 export async function getMedicationStats(medicationId: string, days: number = 30) {
   const logs = await getMedicationLogsForMedication(medicationId);
