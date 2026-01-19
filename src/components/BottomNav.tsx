@@ -24,24 +24,31 @@ const HomeIcon = ({ className, isActive, isTapped }: { className?: string; isAct
 );
 
 const CalendarIcon = ({ className, isActive, isTapped }: { className?: string; isActive?: boolean; isTapped?: boolean }) => (
-  <svg className={`${className} ${isTapped ? 'animate-icon-tap' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.15 : 0} />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-    {isActive && (
-      <>
-        <circle cx="8" cy="15" r="1.5" fill="currentColor" />
-        <circle cx="12" cy="15" r="1.5" fill="currentColor" />
-      </>
-    )}
+  <svg className={`${className} ${isTapped ? 'animate-icon-tap' : ''}`} viewBox="0 0 24 24" fill="none">
+    {/* Calendar body */}
+    <rect x="3" y="5" width="18" height="17" rx="2.5" fill={isActive ? "hsl(var(--primary))" : "hsl(var(--muted))"} fillOpacity={isActive ? 0.15 : 0.5} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1.5} />
+    {/* Red ribbon top */}
+    <rect x="3" y="5" width="18" height="4" rx="2.5" fill={isActive ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))"} fillOpacity={isActive ? 1 : 0.4} />
+    {/* Calendar pins */}
+    <line x1="8" y1="3" x2="8" y2="7" stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={2} strokeLinecap="round" />
+    <line x1="16" y1="3" x2="16" y2="7" stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={2} strokeLinecap="round" />
+    {/* Date number */}
+    <text x="12" y="17" textAnchor="middle" fontSize={isActive ? "8" : "7"} fontWeight="bold" fill={isActive ? "hsl(var(--primary))" : "currentColor"}>
+      {new Date().getDate()}
+    </text>
   </svg>
 );
 
 const ChartIcon = ({ className, isActive, isTapped }: { className?: string; isActive?: boolean; isTapped?: boolean }) => (
-  <svg className={`${className} ${isTapped ? 'animate-icon-tap' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-    <path d="M22 12A10 10 0 0 0 12 2v10z" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.3 : 0} />
+  <svg className={`${className} ${isTapped ? 'animate-icon-tap' : ''}`} viewBox="0 0 24 24" fill="none">
+    {/* Bar chart - growth style */}
+    <rect x="4" y="14" width="4" height="7" rx="1" fill={isActive ? "hsl(var(--primary))" : "currentColor"} fillOpacity={isActive ? 0.5 : 0.3} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1} />
+    <rect x="10" y="10" width="4" height="11" rx="1" fill={isActive ? "hsl(var(--primary))" : "currentColor"} fillOpacity={isActive ? 0.7 : 0.5} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1} />
+    <rect x="16" y="5" width="4" height="16" rx="1" fill={isActive ? "hsl(var(--primary))" : "currentColor"} fillOpacity={isActive ? 1 : 0.7} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1} />
+    {/* Trend line */}
+    {isActive && (
+      <path d="M6 13 L12 9 L18 4" stroke="hsl(var(--primary))" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" strokeDasharray="0" />
+    )}
   </svg>
 );
 
