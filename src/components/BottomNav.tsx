@@ -121,37 +121,43 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
                 />
                 
                 {quickActions.map((action, index) => {
-                  const positions = [
-                    { x: -65, y: -75 },
-                    { x: 0, y: -95 },
-                    { x: 65, y: -75 },
-                  ];
-                  const pos = positions[index];
+                  // Calculate fixed pixel positions from center
+                  const buttonSize = 60;
+                  const spacing = 70;
+                  
+                  // Left button: -spacing, Center: 0, Right: +spacing
+                  const xOffsets = [-spacing, 0, spacing];
+                  const yOffsets = [80, 100, 80]; // heights from bottom
                   
                   return (
                     <motion.button
                       key={action.tab}
                       initial={{ opacity: 0, scale: 0 }}
-                      animate={{ 
-                        opacity: 1, 
-                        scale: 1, 
-                      }}
+                      animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0 }}
                       transition={{ ...springConfig, delay: index * 0.05 }}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleQuickAction(action.tab);
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleQuickAction(action.tab);
                       }}
-                      className={`fixed z-[60] flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[56px] p-3 rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl touch-manipulation`}
+                      className={`fixed z-[9999] flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl cursor-pointer select-none`}
                       style={{ 
-                        left: `calc(50% + ${pos.x}px)`,
-                        bottom: `calc(68px + env(safe-area-inset-bottom) + ${Math.abs(pos.y)}px)`,
-                        transform: 'translateX(-50%)',
+                        width: `${buttonSize}px`,
+                        height: `${buttonSize}px`,
+                        left: `calc(50% - ${buttonSize / 2}px + ${xOffsets[index]}px)`,
+                        bottom: `calc(${yOffsets[index]}px + env(safe-area-inset-bottom))`,
+                        touchAction: 'manipulation',
+                        WebkitTapHighlightColor: 'transparent',
                       }}
                       whileTap={{ scale: 0.9 }}
                     >
-                      <span className="text-xl pointer-events-none">{action.icon}</span>
-                      <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none">{action.label}</span>
+                      <span className="text-xl pointer-events-none select-none">{action.icon}</span>
+                      <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none select-none">{action.label}</span>
                     </motion.button>
                   );
                 })}
