@@ -9,6 +9,7 @@ import { TodayCard } from '@/components/TodayCard';
 import { QuickActions } from '@/components/QuickActions';
 import { PhaseTimeline } from '@/components/PhaseTimeline';
 import { BottomNav } from '@/components/BottomNav';
+import { GlobalHeader } from '@/components/GlobalHeader';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import type { DayEntry } from '@/types/cycle';
 
@@ -78,14 +79,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 safe-area-top">
+      {/* Global Header - Settings & Notifications */}
+      <GlobalHeader />
+
       {/* Header */}
-      <header className="px-6 pt-6 pb-4">
+      <header className="px-6 pt-20 pb-4">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
+          className="flex items-center justify-center"
         >
-          <div>
+          <div className="text-center">
             <p className="text-sm text-muted-foreground">
               {format(new Date(), 'EEEE', { locale: tr })}
             </p>
@@ -93,13 +97,6 @@ const Index = () => {
               {format(new Date(), 'd MMMM', { locale: tr })}
             </h1>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => navigate('/profile')}
-            className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-500/30"
-          >
-            <span className="text-2xl">👩</span>
-          </motion.button>
         </motion.div>
       </header>
 
