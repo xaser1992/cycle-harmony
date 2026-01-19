@@ -19,8 +19,8 @@ export function GlobalHeader() {
 
   return (
     <>
-      {/* Fixed Header Buttons */}
-      <div className="fixed top-0 left-0 right-0 z-40 pointer-events-none safe-area-top">
+      {/* Header Buttons - Not fixed, scrolls with page */}
+      <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none safe-area-top">
         <div className="flex items-center justify-between px-4 pt-4">
           {/* Settings Button - Left */}
           <motion.button

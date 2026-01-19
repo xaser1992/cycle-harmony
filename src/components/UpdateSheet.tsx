@@ -12,6 +12,7 @@ import type { DayEntry, FlowLevel, Symptom, Mood } from '@/types/cycle';
 import { FLOW_LABELS, SYMPTOM_LABELS, MOOD_LABELS } from '@/types/cycle';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { App } from '@capacitor/app';
 
 interface UpdateSheetProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export function UpdateSheet({
   const [selectedMood, setSelectedMood] = useState<Mood | undefined>();
   const [notes, setNotes] = useState('');
 
+  // Reset form when opened
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialTab);
@@ -62,6 +64,19 @@ export function UpdateSheet({
       }
     }
   }, [isOpen, existingEntry, initialTab]);
+
+  // Handle Android back button
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const backHandler = App.addListener('backButton', () => {
+      onClose();
+    });
+    
+    return () => {
+      backHandler.then(handler => handler.remove());
+    };
+  }, [isOpen, onClose]);
 
   const toggleSymptom = (symptom: Symptom) => {
     setSelectedSymptoms(prev => 
@@ -91,7 +106,12 @@ export function UpdateSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="bottom" className="h-[90vh] rounded-t-[2rem] p-0 border-0">
+      <SheetContent 
+        side="bottom" 
+        className="h-[90vh] rounded-t-[2rem] p-0 border-0"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <div className="flex flex-col h-full">
           {/* Gradient Header */}
           <div className={`relative overflow-hidden bg-gradient-to-r ${tabs.find(t => t.id === activeTab)?.gradient} px-6 pt-6 pb-8`}>

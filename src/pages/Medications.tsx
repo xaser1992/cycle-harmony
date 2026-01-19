@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { App } from '@capacitor/app';
 import {
   getMedications,
   saveMedication,
@@ -60,6 +61,23 @@ export default function Medications() {
     loadData();
   }, []);
 
+  // Handle Android back button for sheets
+  useEffect(() => {
+    const hasOpenSheet = isAddSheetOpen || !!selectedMedication;
+    if (!hasOpenSheet) return;
+    
+    const backHandler = App.addListener('backButton', () => {
+      if (isAddSheetOpen) {
+        setIsAddSheetOpen(false);
+      } else if (selectedMedication) {
+        setSelectedMedication(null);
+      }
+    });
+    
+    return () => {
+      backHandler.then(handler => handler.remove());
+    };
+  }, [isAddSheetOpen, selectedMedication]);
   const loadData = async () => {
     const [meds, logs] = await Promise.all([
       getMedications(),
@@ -343,14 +361,27 @@ export default function Medications() {
 
       {/* Add/Edit Medication Sheet */}
       <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+        <SheetContent 
+          side="bottom" 
+          className="h-[85vh] rounded-t-3xl"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          {/* Custom Close Button */}
+          <button
+            onClick={() => setIsAddSheetOpen(false)}
+            className="absolute right-4 top-4 z-10 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+          
           <SheetHeader className="pb-4">
             <SheetTitle>
               {editingMedication ? 'İlaç Düzenle' : 'Yeni İlaç Ekle'}
             </SheetTitle>
           </SheetHeader>
 
-          <div className="space-y-4 overflow-y-auto h-[calc(100%-120px)] pb-4">
+          <div className="space-y-4 overflow-y-auto h-[calc(100%-120px)] pb-4 px-1">
             {/* Name */}
             <div>
               <Label htmlFor="name">İlaç Adı</Label>
@@ -485,9 +516,22 @@ export default function Medications() {
 
       {/* Medication Detail Sheet */}
       <Sheet open={!!selectedMedication} onOpenChange={() => setSelectedMedication(null)}>
-        <SheetContent side="bottom" className="h-[60vh] rounded-t-3xl">
+        <SheetContent 
+          side="bottom" 
+          className="h-[60vh] rounded-t-3xl"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           {selectedMedication && (
             <>
+              {/* Custom Close Button */}
+              <button
+                onClick={() => setSelectedMedication(null)}
+                className="absolute right-4 top-4 z-10 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+              
               <SheetHeader className="pb-4">
                 <div className="flex items-center gap-3">
                   <div 
