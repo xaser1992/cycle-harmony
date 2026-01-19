@@ -161,20 +161,30 @@ export function UpdateSheet({
             </div>
             
             {/* Tab Navigation */}
-            <div className="flex gap-2 mt-5">
+            <div className="relative flex gap-2 mt-5 z-10">
               {tabs.map((tab) => (
                 <motion.button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveTab(tab.id);
+                  }}
+                  className={`relative flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-sm font-semibold transition-all cursor-pointer select-none ${
                     activeTab === tab.id
-                      ? 'bg-white text-foreground shadow-lg'
-                      : 'bg-white/20 text-white/90 hover:bg-white/30'
+                      ? 'bg-white text-gray-900 shadow-lg'
+                      : 'bg-white/25 text-white hover:bg-white/35'
                   }`}
-                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent',
+                    minHeight: '48px',
+                  }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <span className="mr-1">{tab.icon}</span>
-                  {tab.label}
+                  <span className="text-base pointer-events-none">{tab.icon}</span>
+                  <span className="pointer-events-none">{tab.label}</span>
                 </motion.button>
               ))}
             </div>
