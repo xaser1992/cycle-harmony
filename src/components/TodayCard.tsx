@@ -1,5 +1,5 @@
 // 🌸 Today Status Card Component - Performance Optimized
-import { useState, memo } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPhaseInfo } from '@/lib/predictions';
 import type { CyclePhase, CyclePrediction } from '@/types/cycle';
@@ -64,13 +64,13 @@ const phaseDetails: Record<string, { tips: string[]; activities: string[]; nutri
   },
 };
 
-// Memoized circular progress for performance
-const CircularProgress = memo(({ progress, dayNumber, accentColor, language }: {
+// Circular progress component
+function CircularProgress({ progress, dayNumber, accentColor, language }: {
   progress: number;
   dayNumber: number;
   accentColor: string;
   language: string;
-}) => {
+}) {
   const radius = 52;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -96,11 +96,9 @@ const CircularProgress = memo(({ progress, dayNumber, accentColor, language }: {
       </div>
     </div>
   );
-});
+}
 
-CircularProgress.displayName = 'CircularProgress';
-
-export const TodayCard = memo(function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps) {
+export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   if (!phase || !prediction) {
@@ -323,4 +321,4 @@ export const TodayCard = memo(function TodayCard({ phase, prediction, language =
       </AnimatePresence>
     </>
   );
-});
+}
