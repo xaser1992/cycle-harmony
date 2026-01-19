@@ -18,13 +18,14 @@ import {
 } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
-import { UpdateSheet } from '@/components/UpdateSheet';
 import { useCycleData } from '@/hooks/useCycleData';
+import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import type { DayEntry } from '@/types/cycle';
 
 const WEEKDAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
 export default function CalendarPage() {
+  const { openUpdateSheet } = useUpdateSheet();
   const { 
     cycleSettings, 
     prediction, 
@@ -35,7 +36,6 @@ export default function CalendarPage() {
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Get calendar days for the current month view
   const calendarDays = useMemo(() => {
@@ -81,11 +81,11 @@ export default function CalendarPage() {
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
-    setIsSheetOpen(true);
+    openUpdateSheet({ date });
   };
 
-  const handleSaveEntry = async (entry: DayEntry) => {
-    await saveDayEntry(entry);
+  const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
+    openUpdateSheet({ initialTab: tab || 'flow' });
   };
 
   return (
@@ -287,17 +287,7 @@ export default function CalendarPage() {
         )}
       </main>
 
-      <BottomNav />
-
-      {/* Day Detail Sheet */}
-      <UpdateSheet
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-        onSave={handleSaveEntry}
-        existingEntry={selectedDate ? getEntryForDate(selectedDate) : undefined}
-        date={selectedDate || new Date()}
-        language={userSettings.language}
-      />
+      <BottomNav onCenterPress={handleCenterPress} />
     </div>
   );
 }

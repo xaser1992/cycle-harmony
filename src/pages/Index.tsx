@@ -7,13 +7,14 @@ import { tr } from 'date-fns/locale';
 import { useCycleData } from '@/hooks/useCycleData';
 import { TodayCard } from '@/components/TodayCard';
 import { QuickActions } from '@/components/QuickActions';
-import { UpdateSheet } from '@/components/UpdateSheet';
 import { PhaseTimeline } from '@/components/PhaseTimeline';
 import { BottomNav } from '@/components/BottomNav';
+import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import type { DayEntry } from '@/types/cycle';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { openUpdateSheet } = useUpdateSheet();
   const { 
     userSettings, 
     cycleSettings,
@@ -23,9 +24,6 @@ const Index = () => {
     saveDayEntry,
     isLoading 
   } = useCycleData();
-  
-  const [isUpdateSheetOpen, setIsUpdateSheetOpen] = useState(false);
-  const [updateSheetTab, setUpdateSheetTab] = useState<'flow' | 'symptoms' | 'mood'>('flow');
 
   // Redirect to onboarding if not completed
   useEffect(() => {
@@ -51,17 +49,11 @@ const Index = () => {
   };
 
   const handleLogSymptoms = () => {
-    setUpdateSheetTab('symptoms');
-    setIsUpdateSheetOpen(true);
+    openUpdateSheet({ initialTab: 'symptoms' });
   };
 
-  const handleOpenUpdate = () => {
-    setUpdateSheetTab('flow');
-    setIsUpdateSheetOpen(true);
-  };
-
-  const handleSaveEntry = async (entry: DayEntry) => {
-    await saveDayEntry(entry);
+  const handleOpenUpdate = (tab?: 'flow' | 'symptoms' | 'mood') => {
+    openUpdateSheet({ initialTab: tab || 'flow' });
   };
 
   if (isLoading) {
@@ -177,17 +169,6 @@ const Index = () => {
 
       {/* Bottom Navigation */}
       <BottomNav onCenterPress={handleOpenUpdate} />
-
-      {/* Update Bottom Sheet */}
-      <UpdateSheet
-        isOpen={isUpdateSheetOpen}
-        onClose={() => setIsUpdateSheetOpen(false)}
-        onSave={handleSaveEntry}
-        existingEntry={todayEntry}
-        date={new Date()}
-        language={userSettings.language}
-        initialTab={updateSheetTab}
-      />
     </div>
   );
 };
