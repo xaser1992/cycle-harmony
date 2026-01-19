@@ -131,27 +131,27 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
                   return (
                     <motion.button
                       key={action.tab}
-                      initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                      initial={{ opacity: 0, scale: 0 }}
                       animate={{ 
                         opacity: 1, 
                         scale: 1, 
-                        x: pos.x, 
-                        y: pos.y,
                       }}
-                      exit={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                      exit={{ opacity: 0, scale: 0 }}
                       transition={{ ...springConfig, delay: index * 0.05 }}
-                      onClick={() => handleQuickAction(action.tab)}
-                      className={`absolute z-50 flex flex-col items-center gap-1 p-3 rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleQuickAction(action.tab);
+                      }}
+                      className={`fixed z-[60] flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[56px] p-3 rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl touch-manipulation`}
                       style={{ 
-                        left: '50%',
-                        top: '50%',
-                        marginLeft: '-24px',
-                        marginTop: '-24px',
+                        left: `calc(50% + ${pos.x}px)`,
+                        bottom: `calc(68px + env(safe-area-inset-bottom) + ${Math.abs(pos.y)}px)`,
+                        transform: 'translateX(-50%)',
                       }}
                       whileTap={{ scale: 0.9 }}
                     >
-                      <span className="text-xl">{action.icon}</span>
-                      <span className="text-[10px] font-medium text-white whitespace-nowrap">{action.label}</span>
+                      <span className="text-xl pointer-events-none">{action.icon}</span>
+                      <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none">{action.label}</span>
                     </motion.button>
                   );
                 })}
