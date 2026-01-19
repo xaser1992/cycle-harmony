@@ -105,12 +105,13 @@ export function UpdateSheet({
   ] as const;
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Sheet open={isOpen} onOpenChange={() => {}}>
       <SheetContent 
         side="bottom" 
         className="h-[90vh] rounded-t-[2rem] p-0 border-0"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <div className="flex flex-col h-full">
           {/* Gradient Header */}

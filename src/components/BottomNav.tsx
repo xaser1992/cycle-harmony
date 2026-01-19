@@ -154,98 +154,122 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
         </AnimatePresence>
 
         {/* Active background pill with glow */}
-        {isActive && (
-          <motion.div
-            layoutId="activeTab"
-            className="absolute inset-0 bg-gradient-to-br from-primary/15 to-primary/5 rounded-2xl"
-            initial={false}
-            transition={{
-              type: "spring",
-              stiffness: 380,
-              damping: 28
-            }}
-          >
-            {/* Subtle glow effect */}
+        <AnimatePresence>
+          {isActive && (
             <motion.div
-              className="absolute inset-0 rounded-2xl"
-              style={{
-                background: 'radial-gradient(circle at 50% 30%, hsl(var(--primary) / 0.2), transparent 70%)',
+              layoutId="activeTab"
+              className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent rounded-2xl"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{
+                type: "spring",
+                stiffness: 380,
+                damping: 28
               }}
-              animate={{ opacity: [0.5, 0.8, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
-        )}
+            >
+              {/* Subtle glow effect */}
+              <motion.div
+                className="absolute inset-0 rounded-2xl"
+                style={{
+                  background: 'radial-gradient(circle at 50% 30%, hsl(var(--primary) / 0.25), transparent 70%)',
+                }}
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
-        {/* Icon container with bounce */}
+        {/* Icon container with enhanced animations */}
         <motion.div 
           className="relative z-10"
           animate={isActive ? { 
-            scale: [1, 1.15, 1.05],
-            y: [0, -3, -1],
-            rotate: [0, -3, 3, 0],
+            scale: 1.15,
+            y: -2,
           } : { 
             scale: 1,
             y: 0,
-            rotate: 0
           }}
-          transition={isActive ? { 
-            duration: 0.5, 
-            ease: "easeOut",
-            times: [0, 0.4, 1]
-          } : {
-            duration: 0.2
+          transition={{ 
+            type: "spring",
+            stiffness: 400,
+            damping: 20
           }}
         >
           {/* Pulse ring for active state */}
           <AnimatePresence>
             {isActive && (
-              <motion.div
-                className="absolute inset-0 -m-1 rounded-full border-2 border-primary/30"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ 
-                  scale: [1, 1.4, 1.6],
-                  opacity: [0.6, 0.3, 0]
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeOut"
-                }}
-              />
+              <>
+                <motion.div
+                  className="absolute inset-0 -m-2 rounded-full border-2 border-primary/40"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ 
+                    scale: [1, 1.5, 2],
+                    opacity: [0.6, 0.3, 0]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeOut"
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 -m-1 rounded-full bg-primary/10"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                />
+              </>
             )}
           </AnimatePresence>
           
-          <IconComponent 
-            className={`w-6 h-6 transition-colors duration-300 ${
-              isActive ? 'text-primary' : 'text-muted-foreground'
-            }`}
-            isActive={isActive}
-          />
+          <motion.div
+            animate={isActive ? {
+              rotate: [0, -5, 5, 0],
+            } : {}}
+            transition={{
+              duration: 0.5,
+              ease: "easeInOut"
+            }}
+          >
+            <IconComponent 
+              className={`w-6 h-6 transition-all duration-300 ${
+                isActive ? 'text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]' : 'text-muted-foreground'
+              }`}
+              isActive={isActive}
+            />
+          </motion.div>
         </motion.div>
         
-        {/* Label with fade effect */}
+        {/* Label with scale animation */}
         <motion.span 
-          className={`text-[11px] font-medium mt-1.5 relative z-10 transition-all duration-300 ${
+          className={`text-[11px] font-semibold mt-1.5 relative z-10 transition-all duration-300 ${
             isActive ? 'text-primary' : 'text-muted-foreground/70'
           }`}
           animate={{ 
+            scale: isActive ? 1.05 : 1,
             opacity: isActive ? 1 : 0.7,
-            y: isActive ? 0 : 1
           }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
         >
           {item.label}
         </motion.span>
 
-        {/* Active dot indicator */}
+        {/* Active dot indicator with bounce */}
         <AnimatePresence>
           {isActive && (
             <motion.div
-              className="absolute -bottom-0.5 left-1/2 w-1 h-1 rounded-full bg-primary"
-              initial={{ scale: 0, x: "-50%" }}
-              animate={{ scale: 1, x: "-50%" }}
-              exit={{ scale: 0 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className="absolute -bottom-0.5 left-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-rose-400"
+              initial={{ scale: 0, x: "-50%", y: 5 }}
+              animate={{ scale: 1, x: "-50%", y: 0 }}
+              exit={{ scale: 0, y: 5 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 500, 
+                damping: 25,
+                delay: 0.1
+              }}
             />
           )}
         </AnimatePresence>

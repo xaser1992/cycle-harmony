@@ -366,12 +366,13 @@ export default function Medications() {
       </div>
 
       {/* Add/Edit Medication Sheet */}
-      <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
+      <Sheet open={isAddSheetOpen} onOpenChange={() => {}}>
         <SheetContent 
           side="bottom" 
           className="h-[85vh] rounded-t-3xl"
           onPointerDownOutside={(e) => e.preventDefault()}
           onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
           {/* Custom Close Button */}
           <button
@@ -521,12 +522,13 @@ export default function Medications() {
       </Sheet>
 
       {/* Medication Detail Sheet */}
-      <Sheet open={!!selectedMedication} onOpenChange={() => setSelectedMedication(null)}>
+      <Sheet open={!!selectedMedication} onOpenChange={() => {}}>
         <SheetContent 
           side="bottom" 
           className="h-[60vh] rounded-t-3xl"
           onPointerDownOutside={(e) => e.preventDefault()}
           onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
           {selectedMedication && (
             <>

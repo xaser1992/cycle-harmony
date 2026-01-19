@@ -3,10 +3,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr, enUS } from 'date-fns/locale';
 import { useCycleData } from '@/hooks/useCycleData';
 import { TodayCard } from '@/components/TodayCard';
-import { QuickActions } from '@/components/QuickActions';
 import { PhaseTimeline } from '@/components/PhaseTimeline';
 import { BottomNav } from '@/components/BottomNav';
 import { GlobalHeader } from '@/components/GlobalHeader';
@@ -91,10 +90,10 @@ const Index = () => {
         >
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
-              {format(new Date(), 'EEEE', { locale: tr })}
+              {format(new Date(), 'EEEE', { locale: userSettings.language === 'tr' ? tr : enUS })}
             </p>
             <h1 className="text-2xl font-bold text-foreground">
-              {format(new Date(), 'd MMMM', { locale: tr })}
+              {format(new Date(), 'd MMMM', { locale: userSettings.language === 'tr' ? tr : enUS })}
             </h1>
           </div>
         </motion.div>
@@ -123,45 +122,38 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* Quick Actions - Moved period and symptom logging */}
+        {/* Quick Actions - Period button only */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <QuickActions
-            onLogPeriod={handleLogPeriod}
-            onLogSymptoms={handleLogSymptoms}
-            language={userSettings.language}
-            isOnPeriod={isOnPeriod}
-          />
-        </motion.div>
-
-        {/* Today's Log Summary */}
-        {todayEntry && (todayEntry.symptoms.length > 0 || todayEntry.mood) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-card rounded-2xl p-4 border border-border"
+          <motion.button
+            onClick={handleLogPeriod}
+            className="w-full relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">
-              {userSettings.language === 'tr' ? "Bugünün Kaydı" : "Today's Log"}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {todayEntry.mood && (
-                <span className="px-3 py-1 bg-accent/20 rounded-full text-sm">
-                  {userSettings.language === 'tr' ? 'Ruh hali' : 'Mood'}: {todayEntry.mood}
-                </span>
-              )}
-              {todayEntry.symptoms.map(symptom => (
-                <span key={symptom} className="px-3 py-1 bg-secondary rounded-full text-sm">
-                  {symptom}
-                </span>
-              ))}
+            {/* Glow effect */}
+            <motion.div
+              className="absolute inset-0 bg-white/10"
+              animate={{ opacity: [0, 0.3, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <span className="text-xl">🩸</span>
+              </div>
+              <span className="text-base font-semibold text-white">
+                {isOnPeriod 
+                  ? (userSettings.language === 'tr' ? 'Regl Bitti' : 'Period Ended')
+                  : (userSettings.language === 'tr' ? 'Regl Başladı' : 'Period Started')
+                }
+              </span>
             </div>
-          </motion.div>
-        )}
+          </motion.button>
+        </motion.div>
       </main>
 
       {/* Bottom Navigation */}
