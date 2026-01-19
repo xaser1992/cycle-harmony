@@ -69,7 +69,27 @@ export interface UserSettings {
   appLockEnabled: boolean;
   cloudSyncEnabled: boolean;
   onboardingCompleted: boolean;
+  // Personal info for better predictions
+  birthDate?: string; // ISO date
+  healthConditions?: HealthCondition[];
+  contraceptiveMethod?: ContraceptiveMethod;
 }
+
+export type HealthCondition = 
+  | 'pcos' 
+  | 'endometriosis' 
+  | 'thyroid' 
+  | 'diabetes' 
+  | 'none';
+
+export type ContraceptiveMethod = 
+  | 'none' 
+  | 'pill' 
+  | 'iud' 
+  | 'implant' 
+  | 'injection' 
+  | 'condom' 
+  | 'natural';
 
 export interface CyclePrediction {
   nextPeriodStart: string;
@@ -130,6 +150,9 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   appLockEnabled: false,
   cloudSyncEnabled: false,
   onboardingCompleted: false,
+  birthDate: undefined,
+  healthConditions: [],
+  contraceptiveMethod: 'none',
 };
 
 // Symptom labels
