@@ -1,7 +1,7 @@
 // 🌸 Statistics Page - Flo Inspired Design
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Calendar, BarChart3, Activity } from 'lucide-react';
+import { TrendingUp, Calendar, BarChart3, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
   BarChart, 
   Bar, 
@@ -22,8 +22,10 @@ import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
-import { format, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks } from 'date-fns';
+import { getCycleHistory, type CycleRecord } from '@/lib/storage';
+import { format, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks, startOfMonth, endOfMonth, addMonths, isSameMonth, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
 
 // Flo-style colors
 const CHART_COLORS = {
@@ -45,9 +47,16 @@ export default function StatsPage() {
   const { openUpdateSheet } = useUpdateSheet();
   const { cycleSettings, entries, userSettings } = useCycleData();
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
+  const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
+  const [historyMonth, setHistoryMonth] = useState(new Date());
   
   // Swipe navigation - tab arası geçiş için
   useSwipeNavigation({ threshold: 60 });
+
+  // Load cycle history
+  useEffect(() => {
+    getCycleHistory().then(setCycleHistory);
+  }, []);
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
     openUpdateSheet({ initialTab: tab || 'flow' });
@@ -233,11 +242,149 @@ export default function StatsPage() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-5"
             >
+              {/* Cycle History Calendar */}
+              <ChartCard
+                title={userSettings?.language === 'en' ? 'Cycle History' : 'Döngü Geçmişi'}
+                subtitle={userSettings?.language === 'en' ? 'View past period days' : 'Geçmiş regl günlerini görüntüle'}
+                icon={<Calendar className="w-5 h-5 text-primary" />}
+              >
+                {/* Month Navigation */}
+                <div className="flex items-center justify-between mb-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setHistoryMonth(prev => subMonths(prev, 1))}
+                    className="rounded-full"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {format(historyMonth, 'MMMM yyyy', { locale: tr })}
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setHistoryMonth(prev => addMonths(prev, 1))}
+                    disabled={isSameMonth(historyMonth, new Date())}
+                    className="rounded-full"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'].map((day) => (
+                    <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-1">
+                  {(() => {
+                    const monthStart = startOfMonth(historyMonth);
+                    const monthEnd = endOfMonth(historyMonth);
+                    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+                    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+                    const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+                    // Check if a day is a period day from entries or cycle history
+                    const isPeriodDay = (date: Date): boolean => {
+                      const dateStr = format(date, 'yyyy-MM-dd');
+                      
+                      // Check from day entries
+                      const entry = entries.find(e => e.date === dateStr);
+                      if (entry && entry.flowLevel !== 'none') {
+                        return true;
+                      }
+                      
+                      // Check from cycle history
+                      return cycleHistory.some(record => {
+                        const start = parseISO(record.startDate);
+                        const end = parseISO(record.endDate);
+                        return isWithinInterval(date, { start, end });
+                      });
+                    };
+
+                    return days.map((day) => {
+                      const isCurrentMonth = isSameMonth(day, historyMonth);
+                      const isToday = isSameDay(day, new Date());
+                      const isPeriod = isPeriodDay(day);
+
+                      return (
+                        <motion.div
+                          key={day.toISOString()}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`
+                            aspect-square flex items-center justify-center rounded-full text-sm
+                            ${!isCurrentMonth ? 'opacity-30' : ''}
+                            ${isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
+                            ${isPeriod ? 'bg-primary text-primary-foreground font-medium' : 'text-foreground'}
+                          `}
+                        >
+                          {format(day, 'd')}
+                        </motion.div>
+                      );
+                    });
+                  })()}
+                </div>
+
+                {/* Legend */}
+                <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-primary" />
+                    <span className="text-xs text-muted-foreground">
+                      {userSettings?.language === 'en' ? 'Period day' : 'Regl günü'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background" />
+                    <span className="text-xs text-muted-foreground">
+                      {userSettings?.language === 'en' ? 'Today' : 'Bugün'}
+                    </span>
+                  </div>
+                </div>
+              </ChartCard>
+
+              {/* Cycle Records List */}
+              {cycleHistory.length > 0 && (
+                <ChartCard
+                  title={userSettings?.language === 'en' ? 'Past Cycles' : 'Geçmiş Döngüler'}
+                  subtitle={userSettings?.language === 'en' ? `Last ${cycleHistory.length} cycles` : `Son ${cycleHistory.length} döngü`}
+                  icon={<Activity className="w-5 h-5 text-primary" />}
+                >
+                  <div className="space-y-3 max-h-48 overflow-y-auto">
+                    {[...cycleHistory].reverse().map((record, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-muted/50 rounded-xl"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                            <span className="text-primary text-sm font-medium">{cycleHistory.length - index}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">
+                              {format(parseISO(record.startDate), 'd MMM', { locale: tr })} - {format(parseISO(record.endDate), 'd MMM yyyy', { locale: tr })}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {record.length} {userSettings?.language === 'en' ? 'days' : 'gün'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ChartCard>
+              )}
+
               {/* Weekly Overview */}
               <ChartCard
                 title={userSettings?.language === 'en' ? 'Weekly Overview' : 'Haftalık Özet'}
                 subtitle={userSettings?.language === 'en' ? 'Last 4 weeks' : 'Son 4 hafta'}
-                icon={<Calendar className="w-5 h-5 text-primary" />}
+                icon={<BarChart3 className="w-5 h-5 text-primary" />}
               >
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
@@ -310,45 +457,6 @@ export default function StatsPage() {
                       {userSettings?.language === 'en' ? 'Symptom days' : 'Semptom günleri'}
                     </span>
                   </div>
-                </div>
-              </ChartCard>
-
-              {/* Monthly Logging Activity */}
-              <ChartCard
-                title={userSettings?.language === 'en' ? 'Logging Activity' : 'Kayıt Aktivitesi'}
-                subtitle={userSettings?.language === 'en' ? 'Days logged per week' : 'Haftalık kayıt günleri'}
-                icon={<Activity className="w-5 h-5 text-primary" />}
-              >
-                <div className="h-36">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={weeklyOverviewData}>
-                      <XAxis 
-                        dataKey="weekShort" 
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                      />
-                      <YAxis 
-                        domain={[0, 7]}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                      />
-                      <Tooltip 
-                        formatter={(value) => [`${value}/7 gün`, 'Kayıt']}
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '12px',
-                        }}
-                      />
-                      <Bar 
-                        dataKey="loggedDays" 
-                        radius={[8, 8, 0, 0]}
-                        fill={CHART_COLORS.accent}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
                 </div>
               </ChartCard>
 
