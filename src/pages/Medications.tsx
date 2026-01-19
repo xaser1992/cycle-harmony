@@ -351,44 +351,6 @@ export default function Medications() {
           </SheetHeader>
 
           <div className="space-y-4 overflow-y-auto h-[calc(100%-120px)] pb-4">
-            {/* Icon & Color Selection */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <Label className="text-sm font-medium mb-2 block">İkon</Label>
-                <div className="flex gap-2 flex-wrap">
-                  {MEDICATION_ICONS.map((icon) => (
-                    <button
-                      key={icon}
-                      onClick={() => setFormData(prev => ({ ...prev, icon }))}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-all ${
-                        formData.icon === icon
-                          ? 'ring-2 ring-violet-500 bg-violet-100 dark:bg-violet-900/30'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      {icon}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Renk</Label>
-              <div className="flex gap-2 flex-wrap">
-                {MEDICATION_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setFormData(prev => ({ ...prev, color }))}
-                    className={`w-8 h-8 rounded-full transition-all ${
-                      formData.color === color ? 'ring-2 ring-offset-2 ring-violet-500' : ''
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-            </div>
-
             {/* Name */}
             <div>
               <Label htmlFor="name">İlaç Adı</Label>
