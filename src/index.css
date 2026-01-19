@@ -21,120 +21,120 @@ html.light {
 
 @layer base {
   :root {
-    /* Soft & Feminine Color Palette */
+    /* Soft & Feminine Color Palette - Enhanced Contrast */
     --background: 340 30% 98%;
-    --foreground: 340 25% 15%;
+    --foreground: 340 30% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 340 25% 15%;
+    --card-foreground: 340 30% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 340 25% 15%;
+    --popover-foreground: 340 30% 10%;
 
     /* Primary: Soft Rose Pink */
-    --primary: 340 65% 65%;
+    --primary: 340 70% 55%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Lavender */
-    --secondary: 280 30% 94%;
-    --secondary-foreground: 280 25% 25%;
+    --secondary: 280 30% 92%;
+    --secondary-foreground: 280 35% 20%;
 
     /* Muted: Soft Gray with Pink Undertone */
-    --muted: 340 15% 95%;
-    --muted-foreground: 340 10% 45%;
+    --muted: 340 15% 93%;
+    --muted-foreground: 340 15% 40%;
 
     /* Accent: Soft Coral */
-    --accent: 15 65% 92%;
-    --accent-foreground: 15 50% 30%;
+    --accent: 15 65% 90%;
+    --accent-foreground: 15 60% 25%;
 
-    --destructive: 0 70% 55%;
+    --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 340 20% 90%;
-    --input: 340 20% 90%;
-    --ring: 340 65% 65%;
+    --border: 340 20% 88%;
+    --input: 340 20% 88%;
+    --ring: 340 70% 55%;
 
     --radius: 1rem;
 
     /* Period Tracker Specific Colors */
-    --period: 340 70% 60%;
+    --period: 340 75% 55%;
     --period-light: 340 60% 85%;
-    --fertile: 280 50% 70%;
+    --fertile: 280 55% 65%;
     --fertile-light: 280 40% 92%;
-    --ovulation: 320 60% 65%;
+    --ovulation: 320 65% 60%;
     --ovulation-light: 320 50% 90%;
-    --pms: 25 60% 70%;
+    --pms: 25 65% 65%;
     --pms-light: 25 50% 92%;
-    --safe: 160 40% 65%;
+    --safe: 160 45% 60%;
     --safe-light: 160 35% 92%;
 
     /* Flow Levels */
-    --flow-spotting: 340 40% 80%;
-    --flow-light: 340 55% 70%;
-    --flow-medium: 340 65% 60%;
-    --flow-heavy: 340 75% 50%;
+    --flow-spotting: 340 45% 78%;
+    --flow-light: 340 60% 68%;
+    --flow-medium: 340 70% 58%;
+    --flow-heavy: 340 80% 48%;
 
     /* Mood Colors */
-    --mood-happy: 45 80% 65%;
-    --mood-calm: 200 50% 70%;
-    --mood-sad: 220 40% 60%;
-    --mood-anxious: 30 60% 65%;
-    --mood-irritable: 0 55% 60%;
-    --mood-energetic: 160 55% 55%;
+    --mood-happy: 45 85% 60%;
+    --mood-calm: 200 55% 65%;
+    --mood-sad: 220 45% 55%;
+    --mood-anxious: 30 65% 60%;
+    --mood-irritable: 0 60% 55%;
+    --mood-energetic: 160 60% 50%;
   }
 
   .dark {
-    --background: 340 20% 8%;
-    --foreground: 340 15% 95%;
+    --background: 340 25% 6%;
+    --foreground: 340 20% 95%;
 
-    --card: 340 20% 12%;
-    --card-foreground: 340 15% 95%;
+    --card: 340 22% 10%;
+    --card-foreground: 340 20% 95%;
 
-    --popover: 340 20% 12%;
-    --popover-foreground: 340 15% 95%;
+    --popover: 340 22% 10%;
+    --popover-foreground: 340 20% 95%;
 
-    --primary: 340 55% 60%;
+    --primary: 340 60% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 280 20% 20%;
-    --secondary-foreground: 280 20% 90%;
+    --secondary: 280 22% 18%;
+    --secondary-foreground: 280 25% 88%;
 
-    --muted: 340 15% 18%;
-    --muted-foreground: 340 10% 65%;
+    --muted: 340 18% 15%;
+    --muted-foreground: 340 12% 68%;
 
-    --accent: 15 40% 20%;
-    --accent-foreground: 15 40% 90%;
+    --accent: 15 42% 18%;
+    --accent-foreground: 15 45% 88%;
 
-    --destructive: 0 60% 45%;
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 340 15% 20%;
-    --input: 340 15% 20%;
-    --ring: 340 55% 60%;
+    --border: 340 18% 18%;
+    --input: 340 18% 18%;
+    --ring: 340 60% 58%;
 
     /* Period Tracker Specific Colors - Dark Mode */
-    --period: 340 60% 55%;
-    --period-light: 340 40% 25%;
-    --fertile: 280 45% 55%;
-    --fertile-light: 280 30% 22%;
-    --ovulation: 320 50% 55%;
-    --ovulation-light: 320 35% 22%;
-    --pms: 25 50% 55%;
-    --pms-light: 25 35% 22%;
-    --safe: 160 35% 50%;
-    --safe-light: 160 25% 20%;
+    --period: 340 65% 52%;
+    --period-light: 340 42% 22%;
+    --fertile: 280 50% 52%;
+    --fertile-light: 280 32% 20%;
+    --ovulation: 320 55% 52%;
+    --ovulation-light: 320 38% 20%;
+    --pms: 25 55% 52%;
+    --pms-light: 25 38% 20%;
+    --safe: 160 40% 48%;
+    --safe-light: 160 28% 18%;
 
-    --flow-spotting: 340 30% 40%;
-    --flow-light: 340 40% 45%;
-    --flow-medium: 340 50% 50%;
-    --flow-heavy: 340 60% 45%;
+    --flow-spotting: 340 35% 38%;
+    --flow-light: 340 45% 43%;
+    --flow-medium: 340 55% 48%;
+    --flow-heavy: 340 65% 43%;
 
-    --mood-happy: 45 60% 50%;
-    --mood-calm: 200 40% 55%;
-    --mood-sad: 220 30% 50%;
-    --mood-anxious: 30 45% 50%;
-    --mood-irritable: 0 45% 50%;
-    --mood-energetic: 160 45% 45%;
+    --mood-happy: 45 65% 48%;
+    --mood-calm: 200 45% 52%;
+    --mood-sad: 220 35% 48%;
+    --mood-anxious: 30 50% 48%;
+    --mood-irritable: 0 50% 48%;
+    --mood-energetic: 160 50% 43%;
   }
 }
 

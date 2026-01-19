@@ -1,13 +1,26 @@
 // 🌸 Bottom Navigation Component - Flo Inspired Design
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 interface NavItem {
   icon: React.FC<{ className?: string; isActive?: boolean }>;
   label: string;
   path: string;
 }
+
+interface QuickAction {
+  icon: string;
+  label: string;
+  gradient: string;
+  tab: 'flow' | 'symptoms' | 'mood';
+}
+
+const quickActions: QuickAction[] = [
+  { icon: '🩸', label: 'Akış', gradient: 'from-rose-400 to-pink-500', tab: 'flow' },
+  { icon: '💊', label: 'Semptom', gradient: 'from-violet-400 to-purple-500', tab: 'symptoms' },
+  { icon: '😊', label: 'Ruh Hali', gradient: 'from-amber-400 to-orange-400', tab: 'mood' },
+];
 
 // Custom Flo-style icons with enhanced details
 const HomeIcon = ({ className, isActive }: { className?: string; isActive?: boolean }) => (
@@ -60,7 +73,7 @@ const rightNavItems: NavItem[] = [
 ];
 
 interface BottomNavProps {
-  onCenterPress?: () => void;
+  onCenterPress?: (tab?: 'flow' | 'symptoms' | 'mood') => void;
 }
 
 export function BottomNav({ onCenterPress }: BottomNavProps) {
@@ -68,6 +81,9 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
   const navigate = useNavigate();
   const [tappedItem, setTappedItem] = useState<string | null>(null);
   const [isCenterPressed, setIsCenterPressed] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const isLongPress = useRef(false);
 
   const handleTap = (path: string) => {
     setTappedItem(path);
@@ -76,9 +92,37 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
   };
 
   const handleCenterPress = () => {
+    if (isLongPress.current) {
+      isLongPress.current = false;
+      return;
+    }
     setIsCenterPressed(true);
     onCenterPress?.();
     setTimeout(() => setIsCenterPressed(false), 300);
+  };
+
+  const handleLongPressStart = useCallback(() => {
+    isLongPress.current = false;
+    longPressTimer.current = setTimeout(() => {
+      isLongPress.current = true;
+      setShowQuickActions(true);
+      // Haptic feedback simulation
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }, 500);
+  }, []);
+
+  const handleLongPressEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleQuickAction = (tab: 'flow' | 'symptoms' | 'mood') => {
+    setShowQuickActions(false);
+    onCenterPress?.(tab);
   };
 
   const renderNavItem = (item: NavItem) => {
@@ -214,8 +258,55 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
         
         {/* Center Plus Button */}
         <div className="relative -mt-6">
+          {/* Quick Actions Popup */}
+          <AnimatePresence>
+            {showQuickActions && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  className="fixed inset-0 z-40"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowQuickActions(false)}
+                />
+                
+                {/* Quick Action Buttons */}
+                <motion.div
+                  className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-3 z-50"
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                >
+                  {quickActions.map((action, index) => (
+                    <motion.button
+                      key={action.tab}
+                      onClick={() => handleQuickAction(action.tab)}
+                      className={`flex flex-col items-center gap-1 p-3 rounded-2xl bg-gradient-to-br ${action.gradient} shadow-lg`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="text-xl">{action.icon}</span>
+                      <span className="text-[10px] font-medium text-white">{action.label}</span>
+                    </motion.button>
+                  ))}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
           <motion.button
             onClick={handleCenterPress}
+            onTouchStart={handleLongPressStart}
+            onTouchEnd={handleLongPressEnd}
+            onTouchCancel={handleLongPressEnd}
+            onMouseDown={handleLongPressStart}
+            onMouseUp={handleLongPressEnd}
+            onMouseLeave={handleLongPressEnd}
             className="relative w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 shadow-lg shadow-rose-500/40 flex items-center justify-center"
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
@@ -252,7 +343,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
               strokeWidth={2.5}
               strokeLinecap="round"
               strokeLinejoin="round"
-              animate={isCenterPressed ? { rotate: 90 } : { rotate: 0 }}
+              animate={showQuickActions ? { rotate: 45 } : isCenterPressed ? { rotate: 90 } : { rotate: 0 }}
               transition={{ duration: 0.2 }}
             >
               <line x1="12" y1="5" x2="12" y2="19" />

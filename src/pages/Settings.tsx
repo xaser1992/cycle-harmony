@@ -24,6 +24,7 @@ import { TimePicker } from '@/components/TimePicker';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAppLock } from '@/components/AppLockProvider';
+import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useNavigate } from 'react-router-dom';
 import type { NotificationType, PrivacyMode } from '@/types/cycle';
 
@@ -48,6 +49,7 @@ const privacyModes: { value: PrivacyMode; label: string; description: string }[]
 
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const { openUpdateSheet } = useUpdateSheet();
   const { theme, setTheme } = useTheme();
   const { isEnabled: isLockEnabled, hasPin, enableLock, disableLock, removePin } = useAppLock();
   const { 
@@ -58,6 +60,10 @@ export default function SettingsPage() {
   } = useCycleData();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+  const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
+    openUpdateSheet({ initialTab: tab || 'flow' });
+  };
 
   const handleNotificationToggle = async (type: NotificationType, enabled: boolean) => {
     await updateNotificationPrefs({
@@ -489,7 +495,7 @@ export default function SettingsPage() {
         </motion.div>
       </main>
 
-      <BottomNav />
+      <BottomNav onCenterPress={handleCenterPress} />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
 } from 'recharts';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
+import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 
 // Flo-style colors
 const CHART_COLORS = {
@@ -36,8 +37,13 @@ const CYCLE_PHASE_COLORS = {
 };
 
 export default function StatsPage() {
+  const { openUpdateSheet } = useUpdateSheet();
   const { cycleSettings } = useCycleData();
   const [activeTab, setActiveTab] = useState<'stats' | 'charts'>('stats');
+
+  const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
+    openUpdateSheet({ initialTab: tab || 'flow' });
+  };
 
   // Mock data for cycle length trend (last 6 months)
   const cycleLengthData = useMemo(() => {
@@ -384,7 +390,7 @@ export default function StatsPage() {
         </AnimatePresence>
       </main>
 
-      <BottomNav />
+      <BottomNav onCenterPress={handleCenterPress} />
     </div>
   );
 }
