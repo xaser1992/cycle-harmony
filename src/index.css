@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent FOUC (Flash of Unstyled Content) */
+html {
+  color-scheme: light dark;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
+}
+
 /* 🌸 Döngü Takibi - Soft & Feminine Design System
    All colors MUST be HSL.
 */

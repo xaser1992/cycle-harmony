@@ -5,22 +5,27 @@ import {
   Bell, 
   Calendar, 
   Shield, 
-  Smartphone, 
   Moon, 
   Sun,
+  Monitor,
   ChevronRight,
   Download,
   Trash2,
   Bug,
-  Info
+  Clock,
+  VolumeX,
+  Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { BottomNav } from '@/components/BottomNav';
+import { TimePicker } from '@/components/TimePicker';
 import { useCycleData } from '@/hooks/useCycleData';
+import { useTheme } from '@/components/ThemeProvider';
+import { useAppLock } from '@/components/AppLockProvider';
 import { useNavigate } from 'react-router-dom';
-import type { NotificationType } from '@/types/cycle';
+import type { NotificationType, PrivacyMode } from '@/types/cycle';
 
 const notificationTypes: { key: NotificationType; label: string; emoji: string }[] = [
   { key: 'period_approaching', label: 'Regl Yaklaşıyor', emoji: '🌸' },
@@ -35,15 +40,21 @@ const notificationTypes: { key: NotificationType; label: string; emoji: string }
   { key: 'exercise_reminder', label: 'Egzersiz Hatırlatması', emoji: '🏃‍♀️' },
 ];
 
+const privacyModes: { value: PrivacyMode; label: string; description: string }[] = [
+  { value: 'off', label: 'Tam İçerik', description: 'Detaylı bildirim metni' },
+  { value: 'partial', label: 'Kısmi', description: 'Genel hatırlatma metni' },
+  { value: 'full', label: 'Tam Gizli', description: 'Sadece başlık' },
+];
+
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
+  const { isEnabled: isLockEnabled, hasPin, enableLock, disableLock, removePin } = useAppLock();
   const { 
     cycleSettings, 
     notificationPrefs, 
-    userSettings,
     updateCycleSettings,
     updateNotificationPrefs,
-    updateUserSettings
   } = useCycleData();
   
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -58,11 +69,9 @@ export default function SettingsPage() {
   };
 
   const handleExportData = async () => {
-    // Export data as JSON
     const data = {
       cycleSettings,
       notificationPrefs,
-      userSettings,
       exportDate: new Date().toISOString(),
     };
     
@@ -78,9 +87,43 @@ export default function SettingsPage() {
   const handleDeleteAllData = async () => {
     if (confirm('Tüm verileriniz silinecek. Bu işlem geri alınamaz. Emin misiniz?')) {
       localStorage.clear();
+      await removePin();
       window.location.reload();
     }
   };
+
+  const handleLockToggle = (checked: boolean) => {
+    if (checked) {
+      enableLock();
+    } else {
+      disableLock();
+    }
+  };
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'dark': return Moon;
+      case 'light': return Sun;
+      default: return Monitor;
+    }
+  };
+
+  const getThemeLabel = () => {
+    switch (theme) {
+      case 'dark': return 'Koyu';
+      case 'light': return 'Açık';
+      default: return 'Sistem';
+    }
+  };
+
+  const cycleTheme = () => {
+    const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+    const currentIndex = themes.indexOf(theme);
+    const nextTheme = themes[(currentIndex + 1) % themes.length];
+    setTheme(nextTheme);
+  };
+
+  const ThemeIcon = getThemeIcon();
 
   const SettingRow = ({ 
     icon: Icon, 
@@ -215,6 +258,7 @@ export default function SettingsPage() {
                 animate={{ height: 'auto', opacity: 1 }}
                 className="border-t border-border"
               >
+                {/* Notification Types */}
                 {notificationTypes.map((type) => (
                   <div 
                     key={type.key}
@@ -231,14 +275,66 @@ export default function SettingsPage() {
                   </div>
                 ))}
                 
-                <div className="px-4 py-3 border-t border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm">Bildirim Saati</span>
-                    <span className="text-sm font-medium">{notificationPrefs.preferredTime}</span>
-                  </div>
+                {/* Time Settings */}
+                <div className="px-4 py-4 border-t border-border space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Gizli Mod</span>
-                    <span className="text-sm font-medium capitalize">{notificationPrefs.privacyMode}</span>
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">Bildirim Saati</span>
+                    </div>
+                    <TimePicker
+                      value={notificationPrefs.preferredTime}
+                      onChange={(time) => updateNotificationPrefs({ preferredTime: time })}
+                      label="Bildirim Saati"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <VolumeX className="w-4 h-4 text-muted-foreground" />
+                      <div>
+                        <span className="text-sm">Sessiz Saatler</span>
+                        <p className="text-xs text-muted-foreground">Bu saatlerde bildirim gelmez</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TimePicker
+                        value={notificationPrefs.quietHoursStart}
+                        onChange={(time) => updateNotificationPrefs({ quietHoursStart: time })}
+                        label="Başlangıç"
+                      />
+                      <span className="text-muted-foreground">-</span>
+                      <TimePicker
+                        value={notificationPrefs.quietHoursEnd}
+                        onChange={(time) => updateNotificationPrefs({ quietHoursEnd: time })}
+                        label="Bitiş"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      <div>
+                        <span className="text-sm">Gizlilik Modu</span>
+                        <p className="text-xs text-muted-foreground">Bildirim içeriği gizliliği</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {privacyModes.map((mode) => (
+                      <button
+                        key={mode.value}
+                        onClick={() => updateNotificationPrefs({ privacyMode: mode.value })}
+                        className={`flex-1 p-2 rounded-xl text-center transition-all ${
+                          notificationPrefs.privacyMode === mode.value
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        }`}
+                      >
+                        <p className="text-sm font-medium">{mode.label}</p>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -255,15 +351,10 @@ export default function SettingsPage() {
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-1">Görünüm</h3>
           <Card className="overflow-hidden">
             <SettingRow
-              icon={userSettings.theme === 'dark' ? Moon : Sun}
+              icon={ThemeIcon}
               label="Tema"
-              value={userSettings.theme === 'dark' ? 'Koyu' : userSettings.theme === 'light' ? 'Açık' : 'Sistem'}
-              onClick={() => {
-                const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
-                const currentIndex = themes.indexOf(userSettings.theme);
-                const nextTheme = themes[(currentIndex + 1) % themes.length];
-                updateUserSettings({ theme: nextTheme });
-              }}
+              value={getThemeLabel()}
+              onClick={cycleTheme}
             />
           </Card>
         </motion.div>
@@ -279,11 +370,11 @@ export default function SettingsPage() {
             <SettingRow
               icon={Shield}
               label="Uygulama Kilidi"
-              value={userSettings.appLockEnabled ? 'Açık' : 'Kapalı'}
+              value={isLockEnabled ? (hasPin ? 'PIN ile korunuyor' : 'Açık') : 'Kapalı'}
               rightElement={
                 <Switch 
-                  checked={userSettings.appLockEnabled}
-                  onCheckedChange={(checked) => updateUserSettings({ appLockEnabled: checked })}
+                  checked={isLockEnabled}
+                  onCheckedChange={handleLockToggle}
                 />
               }
             />
