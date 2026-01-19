@@ -376,8 +376,13 @@ export default function Medications() {
         >
           {/* Custom Close Button */}
           <button
-            onClick={() => setIsAddSheetOpen(false)}
-            className="absolute right-4 top-4 z-10 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsAddSheetOpen(false);
+            }}
+            className="absolute right-4 top-4 z-50 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-90 transition-all"
           >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -534,8 +539,13 @@ export default function Medications() {
             <>
               {/* Custom Close Button */}
               <button
-                onClick={() => setSelectedMedication(null)}
-                className="absolute right-4 top-4 z-10 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedMedication(null);
+                }}
+                className="absolute right-4 top-4 z-50 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-90 transition-all"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
