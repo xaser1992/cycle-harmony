@@ -1,6 +1,7 @@
 // 🌸 Bottom Navigation Component - Flo Inspired Design
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 interface NavItem {
   icon: React.FC<{ className?: string; isActive?: boolean }>;
@@ -8,7 +9,7 @@ interface NavItem {
   path: string;
 }
 
-// Custom Flo-style icons
+// Custom Flo-style icons with enhanced details
 const HomeIcon = ({ className, isActive }: { className?: string; isActive?: boolean }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -22,11 +23,7 @@ const CalendarIcon = ({ className, isActive }: { className?: string; isActive?: 
     <line x1="16" y1="2" x2="16" y2="6" />
     <line x1="8" y1="2" x2="8" y2="6" />
     <line x1="3" y1="10" x2="21" y2="10" />
-    {isActive && (
-      <>
-        <circle cx="12" cy="15" r="2" fill="currentColor" stroke="none" />
-      </>
-    )}
+    {isActive && <circle cx="12" cy="15" r="2" fill="currentColor" stroke="none" />}
   </svg>
 );
 
@@ -62,44 +59,105 @@ const navItems: NavItem[] = [
 export function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [tappedItem, setTappedItem] = useState<string | null>(null);
+
+  const handleTap = (path: string) => {
+    setTappedItem(path);
+    navigate(path);
+    setTimeout(() => setTappedItem(null), 600);
+  };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/50 safe-area-bottom z-50">
-      <div className="flex items-center justify-around px-2 py-1">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom z-50">
+      <div className="flex items-center justify-around px-2 py-1.5">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
+          const isTapped = tappedItem === item.path;
           const IconComponent = item.icon;
           
           return (
             <motion.button
               key={item.path}
-              onClick={() => navigate(item.path)}
-              className="relative flex flex-col items-center py-2 px-5 rounded-2xl transition-all duration-300"
-              whileTap={{ scale: 0.92 }}
+              onClick={() => handleTap(item.path)}
+              className="relative flex flex-col items-center py-2 px-6 rounded-2xl transition-all duration-300 overflow-hidden"
+              whileTap={{ scale: 0.88 }}
             >
-              {/* Active background pill */}
+              {/* Ripple effect on tap */}
+              <AnimatePresence>
+                {isTapped && (
+                  <motion.div
+                    className="absolute inset-0 bg-primary/20 rounded-2xl"
+                    initial={{ scale: 0, opacity: 1 }}
+                    animate={{ scale: 2.5, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Active background pill with glow */}
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-primary/12 rounded-2xl"
+                  className="absolute inset-0 bg-gradient-to-br from-primary/15 to-primary/5 rounded-2xl"
                   initial={false}
                   transition={{
                     type: "spring",
-                    stiffness: 400,
-                    damping: 30
+                    stiffness: 380,
+                    damping: 28
                   }}
-                />
+                >
+                  {/* Subtle glow effect */}
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                      background: 'radial-gradient(circle at 50% 30%, hsl(var(--primary) / 0.2), transparent 70%)',
+                    }}
+                    animate={{ opacity: [0.5, 0.8, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                </motion.div>
               )}
               
-              {/* Icon container */}
+              {/* Icon container with bounce */}
               <motion.div 
                 className="relative z-10"
-                animate={{ 
-                  scale: isActive ? 1.1 : 1,
-                  y: isActive ? -2 : 0
+                animate={isActive ? { 
+                  scale: [1, 1.15, 1.05],
+                  y: [0, -3, -1],
+                  rotate: [0, -3, 3, 0],
+                } : { 
+                  scale: 1,
+                  y: 0,
+                  rotate: 0
                 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                transition={isActive ? { 
+                  duration: 0.5, 
+                  ease: "easeOut",
+                  times: [0, 0.4, 1]
+                } : {
+                  duration: 0.2
+                }}
               >
+                {/* Pulse ring for active state */}
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      className="absolute inset-0 -m-1 rounded-full border-2 border-primary/30"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ 
+                        scale: [1, 1.4, 1.6],
+                        opacity: [0.6, 0.3, 0]
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeOut"
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
+                
                 <IconComponent 
                   className={`w-6 h-6 transition-colors duration-300 ${
                     isActive ? 'text-primary' : 'text-muted-foreground'
@@ -108,18 +166,31 @@ export function BottomNav() {
                 />
               </motion.div>
               
-              {/* Label */}
+              {/* Label with fade effect */}
               <motion.span 
-                className={`text-[11px] font-medium mt-1 relative z-10 transition-colors duration-300 ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
+                className={`text-[11px] font-medium mt-1.5 relative z-10 transition-all duration-300 ${
+                  isActive ? 'text-primary' : 'text-muted-foreground/70'
                 }`}
                 animate={{ 
                   opacity: isActive ? 1 : 0.7,
-                  fontWeight: isActive ? 600 : 500
+                  y: isActive ? 0 : 1
                 }}
               >
                 {item.label}
               </motion.span>
+
+              {/* Active dot indicator */}
+              <AnimatePresence>
+                {isActive && (
+                  <motion.div
+                    className="absolute -bottom-0.5 left-1/2 w-1 h-1 rounded-full bg-primary"
+                    initial={{ scale: 0, x: "-50%" }}
+                    animate={{ scale: 1, x: "-50%" }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+              </AnimatePresence>
             </motion.button>
           );
         })}
