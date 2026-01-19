@@ -129,13 +129,17 @@ export function UpdateSheet({
             />
 
             {/* Close button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={onClose}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center z-50 active:scale-90 transition-transform"
             >
               <X className="w-5 h-5 text-white" />
-            </motion.button>
+            </button>
 
             {/* Date */}
             <div className="relative">
