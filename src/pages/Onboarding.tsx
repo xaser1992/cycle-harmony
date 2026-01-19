@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Bell, Calendar, Heart } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Bell, Calendar, Heart, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCycleData } from '@/hooks/useCycleData';
 import { format, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { requestNotificationPermissions, checkNotificationPermissions } from '@/lib/notifications';
 
 const STEPS = ['welcome', 'lastPeriod', 'cycleInfo', 'notifications', 'complete'] as const;
 type Step = typeof STEPS[number];
@@ -18,6 +19,8 @@ export default function Onboarding() {
   const [lastPeriodDate, setLastPeriodDate] = useState(format(subDays(new Date(), 14), 'yyyy-MM-dd'));
   const [cycleLength, setCycleLength] = useState(28);
   const [periodLength, setPeriodLength] = useState(5);
+  const [notificationPermission, setNotificationPermission] = useState<'pending' | 'granted' | 'denied'>('pending');
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   const currentIndex = STEPS.indexOf(step);
   const progress = ((currentIndex + 1) / STEPS.length) * 100;
@@ -154,18 +157,80 @@ export default function Onboarding() {
                 <div className="mb-8">
                   <Bell className="w-12 h-12 text-primary mb-4" />
                   <h2 className="text-2xl font-bold text-foreground mb-2">Bildirimler</h2>
-                  <p className="text-muted-foreground">Döngün hakkında zamanında hatırlatmalar al.</p>
+                  <p className="text-muted-foreground">
+                    Döngün hakkında zamanında hatırlatmalar almak için bildirim iznine ihtiyacımız var.
+                  </p>
                 </div>
-                <Card className="p-6 bg-period-light border-0">
+                
+                <Card className="p-6 bg-period-light border-0 mb-6">
                   <div className="space-y-3 text-sm">
                     <p>✓ Regl yaklaşıyor bildirimi</p>
                     <p>✓ Yumurtlama günü hatırlatması</p>
                     <p>✓ PMS dönemi uyarısı</p>
-                    <p>✓ Günlük check-in</p>
+                    <p>✓ İlaç hatırlatmaları</p>
                   </div>
                 </Card>
+
+                {/* Permission Request Button */}
+                {notificationPermission === 'pending' && (
+                  <Button
+                    size="lg"
+                    onClick={async () => {
+                      setIsRequestingPermission(true);
+                      try {
+                        const granted = await requestNotificationPermissions();
+                        setNotificationPermission(granted ? 'granted' : 'denied');
+                      } catch (error) {
+                        console.error('Permission request error:', error);
+                        setNotificationPermission('denied');
+                      } finally {
+                        setIsRequestingPermission(false);
+                      }
+                    }}
+                    disabled={isRequestingPermission}
+                    className="w-full rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    {isRequestingPermission ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                      />
+                    ) : (
+                      <>
+                        <Bell className="w-5 h-5 mr-2" />
+                        Bildirimlere İzin Ver
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {notificationPermission === 'granted' && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex items-center justify-center gap-2 p-4 bg-green-100 dark:bg-green-900/30 rounded-2xl text-green-700 dark:text-green-300"
+                  >
+                    <CheckCircle2 className="w-6 h-6" />
+                    <span className="font-medium">Bildirimler açık!</span>
+                  </motion.div>
+                )}
+
+                {notificationPermission === 'denied' && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="p-4 bg-amber-100 dark:bg-amber-900/30 rounded-2xl text-amber-700 dark:text-amber-300 text-center"
+                  >
+                    <p className="font-medium mb-1">Bildirimler kapalı</p>
+                    <p className="text-xs opacity-80">
+                      Ayarlardan bildirimleri açabilirsin.
+                    </p>
+                  </motion.div>
+                )}
+
                 <p className="mt-4 text-xs text-muted-foreground text-center">
-                  Tüm bildirimler varsayılan olarak açıktır. Ayarlardan değiştirebilirsin.
+                  İstediğin zaman ayarlardan değiştirebilirsin.
                 </p>
               </div>
             )}
