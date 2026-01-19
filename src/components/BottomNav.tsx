@@ -55,10 +55,16 @@ const ChartIcon = ({ className, isActive }: { className?: string; isActive?: boo
   </svg>
 );
 
-const SettingsIcon = ({ className, isActive }: { className?: string; isActive?: boolean }) => (
+const PillIcon = ({ className, isActive }: { className?: string; isActive?: boolean }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3" fill={isActive ? "currentColor" : "none"} />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    <path d="M10.5 20.5L3.5 13.5C2.1 12.1 2.1 9.9 3.5 8.5L8.5 3.5C9.9 2.1 12.1 2.1 13.5 3.5L20.5 10.5C21.9 11.9 21.9 14.1 20.5 15.5L15.5 20.5C14.1 21.9 11.9 21.9 10.5 20.5Z" />
+    <line x1="8.5" y1="8.5" x2="15.5" y2="15.5" />
+    {isActive && (
+      <>
+        <circle cx="6" cy="11" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="18" cy="13" r="1.5" fill="currentColor" stroke="none" />
+      </>
+    )}
   </svg>
 );
 
@@ -66,6 +72,7 @@ const navItems: NavItem[] = [
   { icon: HomeIcon, label: 'Bugün', path: '/' },
   { icon: CalendarIcon, label: 'Takvim', path: '/calendar' },
   { icon: ChartIcon, label: 'İstatistik', path: '/stats' },
+  { icon: PillIcon, label: 'İlaçlar', path: '/medications' },
 ];
 
 interface BottomNavProps {
@@ -383,9 +390,10 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
           </motion.span>
         </div>
         
-        {/* Middle and Right nav items */}
+        {/* Other nav items */}
         {renderNavItem(navItems[1])}
         {renderNavItem(navItems[2])}
+        {renderNavItem(navItems[3])}
       </div>
     </nav>
   );
