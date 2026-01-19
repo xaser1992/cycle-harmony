@@ -62,14 +62,10 @@ const SettingsIcon = ({ className, isActive }: { className?: string; isActive?: 
   </svg>
 );
 
-const leftNavItems: NavItem[] = [
+const navItems: NavItem[] = [
   { icon: HomeIcon, label: 'Bugün', path: '/' },
   { icon: CalendarIcon, label: 'Takvim', path: '/calendar' },
-];
-
-const rightNavItems: NavItem[] = [
   { icon: ChartIcon, label: 'İstatistik', path: '/stats' },
-  { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
 ];
 
 interface BottomNavProps {
@@ -253,48 +249,76 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/40 safe-area-bottom z-50">
       <div className="flex items-center justify-around px-2 py-1.5">
-        {/* Left nav items */}
-        {leftNavItems.map(renderNavItem)}
+        {/* Left nav item */}
+        {renderNavItem(navItems[0])}
         
-        {/* Center Plus Button */}
+        {/* Center Plus Button with Circular Quick Actions */}
         <div className="relative -mt-6">
-          {/* Quick Actions Popup */}
+          {/* Quick Actions Popup - Circular Layout */}
           <AnimatePresence>
             {showQuickActions && (
               <>
                 {/* Backdrop */}
                 <motion.div
-                  className="fixed inset-0 z-40"
+                  className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setShowQuickActions(false)}
                 />
                 
-                {/* Quick Action Buttons */}
-                <motion.div
-                  className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-3 z-50"
-                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                >
-                  {quickActions.map((action, index) => (
+                {/* Circular Quick Action Buttons */}
+                {quickActions.map((action, index) => {
+                  // Calculate position in a semi-circle above the + button
+                  const totalActions = quickActions.length;
+                  const angleRange = 140; // Degrees of the arc
+                  const startAngle = -90 - (angleRange / 2); // Start from top-left
+                  const angleStep = angleRange / (totalActions - 1);
+                  const angle = startAngle + (index * angleStep);
+                  const radius = 85; // Distance from center
+                  const x = Math.cos((angle * Math.PI) / 180) * radius;
+                  const y = Math.sin((angle * Math.PI) / 180) * radius;
+                  
+                  return (
                     <motion.button
                       key={action.tab}
                       onClick={() => handleQuickAction(action.tab)}
-                      className={`flex flex-col items-center gap-1 p-3 rounded-2xl bg-gradient-to-br ${action.gradient} shadow-lg`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ delay: index * 0.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      className={`absolute z-50 flex flex-col items-center gap-1 p-3 rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl`}
+                      style={{ 
+                        left: '50%',
+                        top: '50%',
+                      }}
+                      initial={{ 
+                        opacity: 0, 
+                        scale: 0,
+                        x: '-50%',
+                        y: '-50%'
+                      }}
+                      animate={{ 
+                        opacity: 1, 
+                        scale: 1,
+                        x: `calc(-50% + ${x}px)`,
+                        y: `calc(-50% + ${y}px)`
+                      }}
+                      exit={{ 
+                        opacity: 0, 
+                        scale: 0,
+                        x: '-50%',
+                        y: '-50%'
+                      }}
+                      transition={{ 
+                        type: 'spring', 
+                        stiffness: 400, 
+                        damping: 20,
+                        delay: index * 0.05 
+                      }}
+                      whileTap={{ scale: 0.9 }}
                     >
                       <span className="text-xl">{action.icon}</span>
-                      <span className="text-[10px] font-medium text-white">{action.label}</span>
+                      <span className="text-[10px] font-medium text-white whitespace-nowrap">{action.label}</span>
                     </motion.button>
-                  ))}
-                </motion.div>
+                  );
+                })}
               </>
             )}
           </AnimatePresence>
@@ -359,8 +383,9 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
           </motion.span>
         </div>
         
-        {/* Right nav items */}
-        {rightNavItems.map(renderNavItem)}
+        {/* Middle and Right nav items */}
+        {renderNavItem(navItems[1])}
+        {renderNavItem(navItems[2])}
       </div>
     </nav>
   );
