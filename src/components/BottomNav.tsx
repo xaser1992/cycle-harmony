@@ -1,116 +1,54 @@
-// 🌸 Bottom Navigation Component - Premium Animated Version
-import { useState, useRef, useCallback } from 'react';
+// 🌸 Bottom Navigation Component - Ruh Halim Style Animated Icons
+import { useState, useRef, useCallback, memo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface QuickAction {
   icon: string;
   label: string;
+  labelEn: string;
   gradient: string;
   tab: 'flow' | 'symptoms' | 'mood';
 }
 
 const quickActions: QuickAction[] = [
-  { icon: '🩸', label: 'Akış', gradient: 'from-rose-400 to-pink-500', tab: 'flow' },
-  { icon: '💊', label: 'Semptom', gradient: 'from-violet-400 to-purple-500', tab: 'symptoms' },
-  { icon: '😊', label: 'Ruh Hali', gradient: 'from-amber-400 to-orange-400', tab: 'mood' },
+  { icon: '🩸', label: 'Akış', labelEn: 'Flow', gradient: 'from-rose-400 to-pink-500', tab: 'flow' },
+  { icon: '💊', label: 'Semptom', labelEn: 'Symptoms', gradient: 'from-violet-400 to-purple-500', tab: 'symptoms' },
+  { icon: '😊', label: 'Ruh Hali', labelEn: 'Mood', gradient: 'from-amber-400 to-orange-400', tab: 'mood' },
 ];
-
-// Icon components with enhanced active states
-const HomeIcon = ({ isActive }: { isActive?: boolean }) => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill={isActive ? "currentColor" : "none"} stroke="currentColor" strokeWidth={isActive ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
-  </svg>
-);
-
-const CalendarIcon = ({ isActive }: { isActive?: boolean }) => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-    <rect x="3" y="5" width="18" height="17" rx="2.5" fill={isActive ? "hsl(var(--primary))" : "hsl(var(--muted))"} fillOpacity={isActive ? 0.15 : 0.5} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1.5} />
-    <rect x="3" y="5" width="18" height="4" rx="2.5" fill={isActive ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))"} fillOpacity={isActive ? 1 : 0.4} />
-    <line x1="8" y1="3" x2="8" y2="7" stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={2} strokeLinecap="round" />
-    <line x1="16" y1="3" x2="16" y2="7" stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={2} strokeLinecap="round" />
-    <text x="12" y="17" textAnchor="middle" fontSize={isActive ? "8" : "7"} fontWeight="bold" fill={isActive ? "hsl(var(--primary))" : "currentColor"}>
-      {new Date().getDate()}
-    </text>
-  </svg>
-);
-
-const ChartIcon = ({ isActive }: { isActive?: boolean }) => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-    <rect x="4" y="14" width="4" height="7" rx="1" fill={isActive ? "hsl(var(--primary))" : "currentColor"} fillOpacity={isActive ? 0.5 : 0.3} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1} />
-    <rect x="10" y="10" width="4" height="11" rx="1" fill={isActive ? "hsl(var(--primary))" : "currentColor"} fillOpacity={isActive ? 0.7 : 0.5} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1} />
-    <rect x="16" y="5" width="4" height="16" rx="1" fill={isActive ? "hsl(var(--primary))" : "currentColor"} fillOpacity={isActive ? 1 : 0.7} stroke={isActive ? "hsl(var(--primary))" : "currentColor"} strokeWidth={1} />
-    {isActive && (
-      <path d="M6 13 L12 9 L18 4" stroke="hsl(var(--primary))" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-    )}
-  </svg>
-);
-
-const PillIcon = ({ isActive }: { isActive?: boolean }) => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10.5 20.5L3.5 13.5C2.1 12.1 2.1 9.9 3.5 8.5L8.5 3.5C9.9 2.1 12.1 2.1 13.5 3.5L20.5 10.5C21.9 11.9 21.9 14.1 20.5 15.5L15.5 20.5C14.1 21.9 11.9 21.9 10.5 20.5Z" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.15 : 0} />
-    <line x1="8.5" y1="8.5" x2="15.5" y2="15.5" />
-  </svg>
-);
 
 // Tab configuration
 interface TabConfig {
-  icon: 'home' | 'calendar' | 'chart' | 'pill';
+  id: 'home' | 'calendar' | 'stats' | 'medications';
   label: string;
+  labelEn: string;
   path: string;
 }
 
 const tabConfig: TabConfig[] = [
-  { icon: 'home', label: 'Bugün', path: '/' },
-  { icon: 'calendar', label: 'Takvim', path: '/calendar' },
-  { icon: 'chart', label: 'İstatistik', path: '/stats' },
-  { icon: 'pill', label: 'İlaçlar', path: '/medications' },
+  { id: 'home', label: 'Bugün', labelEn: 'Today', path: '/' },
+  { id: 'calendar', label: 'Takvim', labelEn: 'Calendar', path: '/calendar' },
+  { id: 'stats', label: 'İstatistik', labelEn: 'Stats', path: '/stats' },
+  { id: 'medications', label: 'İlaçlar', labelEn: 'Meds', path: '/medications' },
 ];
 
-// Spring animation config - smooth but lively
+// Spring animation config
 const springConfig = {
   type: "spring" as const,
   stiffness: 400,
   damping: 30,
 };
 
-// Render icon component
-function TabIcon({ type, isActive }: { type: string; isActive: boolean }) {
-  const iconProps = { isActive };
-  switch (type) {
-    case 'home': return <HomeIcon {...iconProps} />;
-    case 'calendar': return <CalendarIcon {...iconProps} />;
-    case 'chart': return <ChartIcon {...iconProps} />;
-    case 'pill': return <PillIcon {...iconProps} />;
-    default: return null;
-  }
-}
-
 interface BottomNavProps {
   onCenterPress?: (tab?: 'flow' | 'symptoms' | 'mood') => void;
 }
 
-export function BottomNav({ onCenterPress }: BottomNavProps) {
+export const BottomNav = memo(function BottomNav({ onCenterPress }: BottomNavProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showQuickActions, setShowQuickActions] = useState(false);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isLongPress = useRef(false);
-
-  // Get active tab index for positioning
-  const getActiveIndex = () => {
-    const leftTabs = tabConfig.slice(0, 2);
-    const rightTabs = tabConfig.slice(2);
-    
-    const leftIndex = leftTabs.findIndex(t => t.path === location.pathname);
-    if (leftIndex !== -1) return { side: 'left', index: leftIndex };
-    
-    const rightIndex = rightTabs.findIndex(t => t.path === location.pathname);
-    if (rightIndex !== -1) return { side: 'right', index: rightIndex };
-    
-    return { side: 'left', index: 0 };
-  };
 
   const handleTap = useCallback((path: string) => {
     navigate(path);
@@ -150,87 +88,6 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
   const leftTabs = tabConfig.slice(0, 2);
   const rightTabs = tabConfig.slice(2);
 
-  // Tab item component with animations
-  const TabItem = ({ tab, isActive }: { tab: TabConfig; isActive: boolean }) => (
-    <motion.button
-      onClick={() => handleTap(tab.path)}
-      className="relative flex flex-col items-center justify-center py-2 px-3 min-w-[72px]"
-      whileTap={{ scale: 0.92 }}
-      transition={springConfig}
-    >
-      {/* Animated pill highlight behind active tab */}
-      {isActive && (
-        <motion.div
-          layoutId="activeTabPill"
-          className="absolute inset-0 rounded-2xl"
-          style={{
-            background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.15) 0%, transparent 70%)',
-          }}
-          transition={springConfig}
-        />
-      )}
-      
-      {/* Icon container with scale animation */}
-      <motion.div
-        className="relative z-10"
-        animate={{
-          scale: isActive ? 1.12 : 1,
-          y: isActive ? -2 : 0,
-        }}
-        transition={springConfig}
-      >
-        {/* Soft radial gradient glow behind active icon */}
-        {isActive && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute inset-0 -m-2 rounded-full blur-md"
-            style={{
-              background: 'radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 70%)',
-            }}
-          />
-        )}
-        
-        <div className={`relative transition-colors duration-200 ${
-          isActive ? 'text-primary' : 'text-muted-foreground/60'
-        }`}>
-          <TabIcon type={tab.icon} isActive={isActive} />
-        </div>
-      </motion.div>
-      
-      {/* Label with opacity animation */}
-      <motion.span
-        className={`text-[10px] font-semibold mt-1.5 z-10 ${
-          isActive ? 'text-primary' : 'text-muted-foreground/50'
-        }`}
-        animate={{
-          opacity: isActive ? 1 : 0.6,
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        {tab.label}
-      </motion.span>
-      
-      {/* Bottom glow line for active tab */}
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={{ scaleX: 1, opacity: 1 }}
-            exit={{ scaleX: 0, opacity: 0 }}
-            transition={springConfig}
-            className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full"
-            style={{
-              background: 'linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)',
-              boxShadow: '0 0 8px 2px hsl(var(--primary) / 0.4)',
-            }}
-          />
-        )}
-      </AnimatePresence>
-    </motion.button>
-  );
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Glass background */}
@@ -244,6 +101,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
               key={tab.path}
               tab={tab}
               isActive={location.pathname === tab.path}
+              onTap={handleTap}
             />
           ))}
         </div>
@@ -348,10 +206,296 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
               key={tab.path}
               tab={tab}
               isActive={location.pathname === tab.path}
+              onTap={handleTap}
             />
           ))}
         </div>
       </div>
     </nav>
   );
-}
+});
+
+// ============================================
+// Animated Tab Icons (Ruh Halim Style)
+// ============================================
+
+// Home Icon - Active: House with glow, Inactive: Simple outline
+const HomeIcon = memo(function HomeIcon({ isActive }: { isActive: boolean }) {
+  if (isActive) {
+    return (
+      <div className="relative w-8 h-8 flex items-center justify-center">
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="relative"
+        >
+          {/* Glow effect */}
+          <div className="absolute inset-0 rounded-full blur-md opacity-60 bg-primary" />
+          <span className="relative text-2xl drop-shadow-lg">🏠</span>
+        </motion.div>
+        {/* Floating sparkles */}
+        {['✨', '💫'].map((emoji, i) => (
+          <motion.span
+            key={i}
+            initial={{ scale: 0, opacity: 0, y: 0 }}
+            animate={{ 
+              scale: [0, 0.8, 0.6],
+              opacity: [0, 1, 0],
+              y: [0, -10, -15],
+            }}
+            transition={{
+              duration: 0.8,
+              delay: 0.2 + i * 0.15,
+              ease: "easeOut",
+            }}
+            className="absolute text-xs pointer-events-none"
+            style={{
+              left: i === 0 ? '-2px' : 'auto',
+              right: i === 1 ? '-2px' : 'auto',
+              top: '0px',
+            }}
+          >
+            {emoji}
+          </motion.span>
+        ))}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="relative w-6 h-6 flex items-center justify-center">
+      <span className="text-xl opacity-60 grayscale-[30%]">🏠</span>
+    </div>
+  );
+});
+
+// Calendar Icon - Active: Animated calendar with date, Inactive: Simple outline
+const CalendarIcon = memo(function CalendarIcon({ isActive }: { isActive: boolean }) {
+  const todayDate = new Date().getDate();
+  
+  if (isActive) {
+    return (
+      <div className="relative w-7 h-8 flex flex-col items-center">
+        <motion.div
+          initial={{ scale: 0.8, y: 5 }}
+          animate={{ scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="relative w-full h-full flex flex-col overflow-hidden rounded-sm border-2 border-primary bg-card shadow-lg"
+        >
+          {/* Calendar header with rings */}
+          <div className="relative w-full h-2.5 bg-primary">
+            {/* Calendar rings */}
+            <motion.div
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
+              transition={{ delay: 0.1, duration: 0.2 }}
+              className="absolute -top-1 left-1.5 w-1 h-2 rounded-full bg-primary-foreground/80"
+            />
+            <motion.div
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
+              transition={{ delay: 0.15, duration: 0.2 }}
+              className="absolute -top-1 right-1.5 w-1 h-2 rounded-full bg-primary-foreground/80"
+            />
+          </div>
+          {/* Calendar body */}
+          <div className="w-full flex-1 flex items-center justify-center bg-background">
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 400 }}
+              className="text-sm font-bold text-primary"
+            >
+              {todayDate}
+            </motion.span>
+          </div>
+        </motion.div>
+        {/* Notification dot */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: [0, 1.2, 1] }}
+          transition={{ delay: 0.3, duration: 0.3 }}
+          className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-destructive shadow-sm"
+        />
+      </div>
+    );
+  }
+  
+  return (
+    <div className="relative w-6 h-7 flex flex-col items-center">
+      <div className="relative w-full h-full flex flex-col overflow-hidden rounded-sm border-2 border-muted-foreground/40 bg-muted/20">
+        <div className="w-full h-2 bg-muted-foreground/40" />
+        <div className="w-full flex-1 flex items-center justify-center">
+          <div className="flex flex-col gap-0.5">
+            <div className="w-3 h-0.5 rounded-full bg-muted-foreground/30" />
+            <div className="w-3 h-0.5 rounded-full bg-muted-foreground/30" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// Stats/Chart Icon - Active: Animated bars with trend line, Inactive: Static bars
+const StatsIcon = memo(function StatsIcon({ isActive }: { isActive: boolean }) {
+  if (isActive) {
+    return (
+      <div className="relative w-8 h-6 flex items-end justify-center gap-0.5 pb-0.5">
+        {[0.4, 0.7, 0.5, 0.9].map((height, i) => (
+          <motion.div
+            key={i}
+            initial={{ height: 0 }}
+            animate={{ height: `${height * 100}%` }}
+            transition={{ duration: 0.5, delay: i * 0.1, type: "spring", stiffness: 200, damping: 15 }}
+            className={`w-1.5 rounded-t-sm ${
+              i % 2 === 0 
+                ? 'bg-gradient-to-t from-primary to-primary/70' 
+                : 'bg-gradient-to-t from-pink-500 to-pink-400'
+            } shadow-sm`}
+          />
+        ))}
+        {/* Trend line */}
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          transition={{ delay: 0.5 }} 
+          className="absolute inset-0 pointer-events-none"
+        >
+          <svg className="w-full h-full" viewBox="0 0 32 24" fill="none">
+            <motion.path 
+              d="M 4 18 Q 10 14, 16 10 T 28 4" 
+              stroke="hsl(var(--primary))" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              fill="none" 
+              initial={{ pathLength: 0 }} 
+              animate={{ pathLength: 1 }} 
+              transition={{ delay: 0.6, duration: 0.6 }} 
+            />
+          </svg>
+        </motion.div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="relative w-7 h-5 flex items-end justify-center gap-0.5 pb-0.5">
+      {[0.3, 0.6, 0.4, 0.8].map((height, i) => (
+        <div 
+          key={i} 
+          className="w-1 rounded-t-sm bg-muted-foreground/40" 
+          style={{ height: `${height * 100}%` }} 
+        />
+      ))}
+    </div>
+  );
+});
+
+// Medications/Pill Icon - Active: Animated open book style, Inactive: Closed pill
+const MedicationsIcon = memo(function MedicationsIcon({ isActive }: { isActive: boolean }) {
+  if (isActive) {
+    return (
+      <div className="relative w-9 h-7 flex items-center justify-center">
+        {/* Open pill capsule with animation */}
+        <div className="relative w-full h-full flex shadow-lg rounded-full">
+          {/* Left half */}
+          <motion.div 
+            initial={{ x: 5, opacity: 0.5 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="w-1/2 h-full rounded-l-full bg-gradient-to-br from-primary to-primary/80 border-2 border-primary"
+          />
+          {/* Right half */}
+          <motion.div 
+            initial={{ x: -5, opacity: 0.5 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
+            className="w-1/2 h-full rounded-r-full bg-gradient-to-bl from-pink-200 to-pink-100 border-2 border-primary/50"
+          />
+          {/* Center glow */}
+          <motion.div 
+            initial={{ scaleY: 0, opacity: 0 }}
+            animate={{ scaleY: 1, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+            className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-white/60 via-white to-white/60 shadow-lg"
+          />
+          {/* Heart icon */}
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <span className="text-xs">💊</span>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="relative w-6 h-5 flex items-center justify-center">
+      <div className="relative w-full h-4 rounded-full bg-gradient-to-r from-muted-foreground/40 to-muted/30 border border-muted-foreground/30">
+        <div className="absolute left-0 top-0 bottom-0 w-1/2 rounded-l-full bg-muted-foreground/50" />
+      </div>
+    </div>
+  );
+});
+
+// Tab Item Component
+const TabItem = memo(function TabItem({ 
+  tab, 
+  isActive, 
+  onTap 
+}: { 
+  tab: TabConfig; 
+  isActive: boolean;
+  onTap: (path: string) => void;
+}) {
+  const renderIcon = () => {
+    switch (tab.id) {
+      case 'home': return <HomeIcon isActive={isActive} />;
+      case 'calendar': return <CalendarIcon isActive={isActive} />;
+      case 'stats': return <StatsIcon isActive={isActive} />;
+      case 'medications': return <MedicationsIcon isActive={isActive} />;
+      default: return null;
+    }
+  };
+
+  return (
+    <motion.button
+      onClick={() => onTap(tab.path)}
+      className={`relative flex flex-col items-center justify-center py-1.5 px-3 min-w-[72px] rounded-lg transition-colors duration-200 ${
+        isActive 
+          ? 'text-primary bg-primary/10' 
+          : 'text-muted-foreground/50 hover:text-muted-foreground/70'
+      }`}
+      whileTap={{ scale: 0.92 }}
+      transition={springConfig}
+    >
+      {/* Icon container */}
+      <motion.div
+        className="relative z-10"
+        animate={{
+          scale: isActive ? 1 : 0.95,
+          y: isActive ? -1 : 0,
+        }}
+        transition={springConfig}
+      >
+        {renderIcon()}
+      </motion.div>
+      
+      {/* Label */}
+      <motion.span
+        className={`text-[10px] font-medium truncate w-full leading-tight transition-all duration-200 mt-0.5 ${
+          isActive ? 'opacity-100' : 'opacity-70'
+        }`}
+        animate={{ opacity: isActive ? 1 : 0.7 }}
+        transition={{ duration: 0.2 }}
+      >
+        {tab.label}
+      </motion.span>
+    </motion.button>
+  );
+});
