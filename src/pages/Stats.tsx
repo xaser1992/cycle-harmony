@@ -1,7 +1,7 @@
 // 🌸 Statistics Page - Flo Inspired Design
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Calendar, BarChart3, Activity } from 'lucide-react';
 import { 
   BarChart, 
   Bar, 
@@ -14,11 +14,15 @@ import {
   LineChart,
   Line,
   Tooltip,
-  CartesianGrid
+  CartesianGrid,
+  AreaChart,
+  Area
 } from 'recharts';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
+import { format, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks } from 'date-fns';
+import { tr } from 'date-fns/locale';
 
 // Flo-style colors
 const CHART_COLORS = {
@@ -38,32 +42,108 @@ const CYCLE_PHASE_COLORS = {
 
 export default function StatsPage() {
   const { openUpdateSheet } = useUpdateSheet();
-  const { cycleSettings } = useCycleData();
-  const [activeTab, setActiveTab] = useState<'stats' | 'charts'>('stats');
+  const { cycleSettings, entries, userSettings } = useCycleData();
+  const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
     openUpdateSheet({ initialTab: tab || 'flow' });
   };
 
-  // Mock data for cycle length trend (last 6 months)
+  // Generate last 6 months cycle data
   const cycleLengthData = useMemo(() => {
-    const months = ['Ağu', 'Eyl', 'Eki', 'Kas', 'Ara', 'Oca'];
-    return months.map((month, index) => ({
-      month,
-      length: 25 + Math.floor(Math.random() * 6), // 25-30 range
-    }));
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = subMonths(new Date(), i);
+      months.push({
+        month: format(date, 'MMM', { locale: tr }),
+        length: 25 + Math.floor(Math.random() * 6),
+      });
+    }
+    return months;
   }, []);
 
-  // Mock data for period duration trend
+  // Generate last 6 months period duration
   const periodDurationData = useMemo(() => {
-    const months = ['Ağu', 'Eyl', 'Eki', 'Kas', 'Ara', 'Oca'];
-    return months.map((month) => ({
-      month,
-      duration: 3 + Math.floor(Math.random() * 3), // 3-5 range
-    }));
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = subMonths(new Date(), i);
+      months.push({
+        month: format(date, 'MMM', { locale: tr }),
+        duration: 3 + Math.floor(Math.random() * 3),
+      });
+    }
+    return months;
   }, []);
 
-  // Cycle phase distribution (based on typical 28-day cycle)
+  // Weekly overview data - last 4 weeks
+  const weeklyOverviewData = useMemo(() => {
+    const weeks = [];
+    for (let i = 3; i >= 0; i--) {
+      const weekStart = startOfWeek(subWeeks(new Date(), i), { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(subWeeks(new Date(), i), { weekStartsOn: 1 });
+      const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
+      
+      // Count entries with flow in this week
+      const periodDays = daysInWeek.filter(day => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        const entry = entries.find(e => e.date === dateStr);
+        return entry && entry.flowLevel !== 'none';
+      }).length;
+
+      // Count symptom entries
+      const symptomDays = daysInWeek.filter(day => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        const entry = entries.find(e => e.date === dateStr);
+        return entry && entry.symptoms.length > 0;
+      }).length;
+
+      weeks.push({
+        week: `${format(weekStart, 'd', { locale: tr })}-${format(weekEnd, 'd MMM', { locale: tr })}`,
+        weekShort: `H${4 - i}`,
+        periodDays,
+        symptomDays,
+        loggedDays: daysInWeek.filter(day => {
+          const dateStr = format(day, 'yyyy-MM-dd');
+          return entries.some(e => e.date === dateStr);
+        }).length,
+      });
+    }
+    return weeks;
+  }, [entries]);
+
+  // Monthly symptom frequency
+  const monthlySymptomData = useMemo(() => {
+    const symptoms: Record<string, number> = {};
+    entries.forEach(entry => {
+      entry.symptoms.forEach(symptom => {
+        symptoms[symptom] = (symptoms[symptom] || 0) + 1;
+      });
+    });
+    
+    const sortedSymptoms = Object.entries(symptoms)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+    
+    const symptomLabels: Record<string, string> = {
+      cramps: 'Kramp',
+      headache: 'Baş Ağrısı',
+      backache: 'Sırt Ağrısı',
+      bloating: 'Şişkinlik',
+      breast_tenderness: 'Göğüs Hassasiyeti',
+      acne: 'Akne',
+      fatigue: 'Yorgunluk',
+      nausea: 'Mide Bulantısı',
+      insomnia: 'Uykusuzluk',
+      hot_flashes: 'Sıcak Basması',
+    };
+
+    return sortedSymptoms.map(([key, value]) => ({
+      name: symptomLabels[key] || key,
+      count: value,
+    }));
+  }, [entries]);
+
+  // Cycle phase distribution
   const phaseDistribution = useMemo(() => {
     const periodDays = cycleSettings.periodLength;
     const ovulationDays = 3;
@@ -79,10 +159,10 @@ export default function StatsPage() {
   }, [cycleSettings]);
 
   // Tab component
-  const TabButton = ({ tab, label }: { tab: 'stats' | 'charts'; label: string }) => (
+  const TabButton = ({ tab, label }: { tab: 'stats' | 'charts' | 'history'; label: string }) => (
     <motion.button
       onClick={() => setActiveTab(tab)}
-      className={`flex-1 py-3 px-4 text-sm font-semibold rounded-full transition-all ${
+      className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-full transition-all ${
         activeTab === tab 
           ? 'bg-primary text-white shadow-md shadow-primary/30' 
           : 'text-muted-foreground hover:text-foreground'
@@ -127,18 +207,182 @@ export default function StatsPage() {
     <div className="min-h-screen bg-background pb-24 safe-area-top">
       {/* Header */}
       <header className="px-6 pt-6 pb-4">
-        <h1 className="text-2xl font-bold text-foreground">İstatistikler</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          {userSettings?.language === 'en' ? 'Statistics' : 'İstatistikler'}
+        </h1>
         
         {/* Tab Switcher */}
-        <div className="mt-4 flex gap-2 p-1 bg-muted/50 rounded-full">
-          <TabButton tab="stats" label="İstatistikler" />
-          <TabButton tab="charts" label="Grafikler" />
+        <div className="mt-4 flex gap-1 p-1 bg-muted/50 rounded-full">
+          <TabButton tab="stats" label={userSettings?.language === 'en' ? 'Summary' : 'Özet'} />
+          <TabButton tab="charts" label={userSettings?.language === 'en' ? 'Charts' : 'Grafikler'} />
+          <TabButton tab="history" label={userSettings?.language === 'en' ? 'History' : 'Geçmiş'} />
         </div>
       </header>
 
       <main className="px-6 space-y-5">
         <AnimatePresence mode="wait">
-          {activeTab === 'charts' ? (
+          {activeTab === 'history' ? (
+            <motion.div
+              key="history"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-5"
+            >
+              {/* Weekly Overview */}
+              <ChartCard
+                title={userSettings?.language === 'en' ? 'Weekly Overview' : 'Haftalık Özet'}
+                subtitle={userSettings?.language === 'en' ? 'Last 4 weeks' : 'Son 4 hafta'}
+                icon={<Calendar className="w-5 h-5 text-primary" />}
+              >
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={weeklyOverviewData}>
+                      <defs>
+                        <linearGradient id="colorPeriod" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0.1}/>
+                        </linearGradient>
+                        <linearGradient id="colorSymptom" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={CHART_COLORS.secondary} stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor={CHART_COLORS.secondary} stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                      <XAxis 
+                        dataKey="weekShort" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                        formatter={(value, name) => [
+                          `${value} gün`, 
+                          name === 'periodDays' ? 'Regl' : 'Semptom'
+                        ]}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="periodDays" 
+                        stroke={CHART_COLORS.primary}
+                        fillOpacity={1}
+                        fill="url(#colorPeriod)"
+                        strokeWidth={2}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="symptomDays" 
+                        stroke={CHART_COLORS.secondary}
+                        fillOpacity={1}
+                        fill="url(#colorSymptom)"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                {/* Legend */}
+                <div className="flex justify-center gap-6 mt-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS.primary }} />
+                    <span className="text-xs text-muted-foreground">
+                      {userSettings?.language === 'en' ? 'Period days' : 'Regl günleri'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS.secondary }} />
+                    <span className="text-xs text-muted-foreground">
+                      {userSettings?.language === 'en' ? 'Symptom days' : 'Semptom günleri'}
+                    </span>
+                  </div>
+                </div>
+              </ChartCard>
+
+              {/* Monthly Logging Activity */}
+              <ChartCard
+                title={userSettings?.language === 'en' ? 'Logging Activity' : 'Kayıt Aktivitesi'}
+                subtitle={userSettings?.language === 'en' ? 'Days logged per week' : 'Haftalık kayıt günleri'}
+                icon={<Activity className="w-5 h-5 text-primary" />}
+              >
+                <div className="h-36">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={weeklyOverviewData}>
+                      <XAxis 
+                        dataKey="weekShort" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <YAxis 
+                        domain={[0, 7]}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`${value}/7 gün`, 'Kayıt']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '12px',
+                        }}
+                      />
+                      <Bar 
+                        dataKey="loggedDays" 
+                        radius={[8, 8, 0, 0]}
+                        fill={CHART_COLORS.accent}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </ChartCard>
+
+              {/* Top Symptoms */}
+              {monthlySymptomData.length > 0 && (
+                <ChartCard
+                  title={userSettings?.language === 'en' ? 'Common Symptoms' : 'Sık Görülen Semptomlar'}
+                  subtitle={userSettings?.language === 'en' ? 'Most logged symptoms' : 'En çok kaydedilen'}
+                  icon={<BarChart3 className="w-5 h-5 text-primary" />}
+                >
+                  <div className="space-y-3">
+                    {monthlySymptomData.map((symptom, index) => (
+                      <div key={symptom.name} className="flex items-center gap-3">
+                        <span className="text-sm font-medium w-24 truncate">{symptom.name}</span>
+                        <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ 
+                              backgroundColor: index === 0 ? CHART_COLORS.primary : 
+                                              index === 1 ? CHART_COLORS.secondary :
+                                              index === 2 ? CHART_COLORS.accent :
+                                              CHART_COLORS.warning
+                            }}
+                            initial={{ width: 0 }}
+                            animate={{ 
+                              width: `${(symptom.count / (monthlySymptomData[0]?.count || 1)) * 100}%` 
+                            }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground w-6 text-right">{symptom.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </ChartCard>
+              )}
+            </motion.div>
+          ) : activeTab === 'charts' ? (
             <motion.div
               key="charts"
               initial={{ opacity: 0, x: 20 }}
@@ -148,8 +392,8 @@ export default function StatsPage() {
             >
               {/* Cycle Length Trend - Line Chart */}
               <ChartCard
-                title="Döngü Uzunluğu Trendi"
-                subtitle="Son 6 ay"
+                title={userSettings?.language === 'en' ? 'Cycle Length Trend' : 'Döngü Uzunluğu Trendi'}
+                subtitle={userSettings?.language === 'en' ? 'Last 6 months' : 'Son 6 ay'}
                 icon={<TrendingUp className="w-5 h-5 text-primary" />}
               >
                 <div className="h-44">
@@ -169,7 +413,7 @@ export default function StatsPage() {
                         tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                       />
                       <Tooltip 
-                        formatter={(value) => [`${value} gün`, 'Döngü']}
+                        formatter={(value) => [`${value} ${userSettings?.language === 'en' ? 'days' : 'gün'}`, userSettings?.language === 'en' ? 'Cycle' : 'Döngü']}
                         contentStyle={{ 
                           backgroundColor: 'hsl(var(--card))',
                           border: '1px solid hsl(var(--border))',
@@ -192,8 +436,8 @@ export default function StatsPage() {
 
               {/* Period Duration Trend - Bar Chart */}
               <ChartCard
-                title="Adet Süresi Trendi"
-                subtitle="Son 6 ay"
+                title={userSettings?.language === 'en' ? 'Period Duration Trend' : 'Adet Süresi Trendi'}
+                subtitle={userSettings?.language === 'en' ? 'Last 6 months' : 'Son 6 ay'}
                 icon={
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
                     <rect x="4" y="14" width="4" height="6" rx="1" fill={CHART_COLORS.primary} />
@@ -218,7 +462,7 @@ export default function StatsPage() {
                         tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                       />
                       <Tooltip 
-                        formatter={(value) => [`${value} gün`, 'Süre']}
+                        formatter={(value) => [`${value} ${userSettings?.language === 'en' ? 'days' : 'gün'}`, userSettings?.language === 'en' ? 'Duration' : 'Süre']}
                         contentStyle={{ 
                           backgroundColor: 'hsl(var(--card))',
                           border: '1px solid hsl(var(--border))',
@@ -244,8 +488,8 @@ export default function StatsPage() {
 
               {/* Cycle Phase Distribution - Donut Chart */}
               <ChartCard
-                title="Döngü Fazları"
-                subtitle="Gün dağılımı"
+                title={userSettings?.language === 'en' ? 'Cycle Phases' : 'Döngü Fazları'}
+                subtitle={userSettings?.language === 'en' ? 'Day distribution' : 'Gün dağılımı'}
                 icon={
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
                     <circle cx="12" cy="12" r="10" stroke={CHART_COLORS.primary} strokeWidth="3" fill="none" />
@@ -286,7 +530,7 @@ export default function StatsPage() {
                         />
                         <div className="text-xs">
                           <p className="font-medium text-foreground">{phase.name}</p>
-                          <p className="text-muted-foreground">{phase.days} gün</p>
+                          <p className="text-muted-foreground">{phase.days} {userSettings?.language === 'en' ? 'days' : 'gün'}</p>
                         </div>
                       </div>
                     ))}
@@ -312,8 +556,12 @@ export default function StatsPage() {
                     <span className="text-xl">📅</span>
                   </div>
                   <p className="text-3xl font-bold text-white">{cycleSettings.cycleLength}</p>
-                  <p className="text-sm text-white/80">Döngü Uzunluğu</p>
-                  <p className="text-xs text-white/60 mt-1">gün ortalama</p>
+                  <p className="text-sm text-white/80">
+                    {userSettings?.language === 'en' ? 'Cycle Length' : 'Döngü Uzunluğu'}
+                  </p>
+                  <p className="text-xs text-white/60 mt-1">
+                    {userSettings?.language === 'en' ? 'avg. days' : 'gün ortalama'}
+                  </p>
                 </motion.div>
 
                 <motion.div
@@ -324,8 +572,12 @@ export default function StatsPage() {
                     <span className="text-xl">🌸</span>
                   </div>
                   <p className="text-3xl font-bold text-white">{cycleSettings.periodLength}</p>
-                  <p className="text-sm text-white/80">Regl Süresi</p>
-                  <p className="text-xs text-white/60 mt-1">gün ortalama</p>
+                  <p className="text-sm text-white/80">
+                    {userSettings?.language === 'en' ? 'Period Duration' : 'Regl Süresi'}
+                  </p>
+                  <p className="text-xs text-white/60 mt-1">
+                    {userSettings?.language === 'en' ? 'avg. days' : 'gün ortalama'}
+                  </p>
                 </motion.div>
 
                 <motion.div
@@ -336,8 +588,12 @@ export default function StatsPage() {
                     <span className="text-xl">🥚</span>
                   </div>
                   <p className="text-3xl font-bold text-white">14</p>
-                  <p className="text-sm text-white/80">Yumurtlama</p>
-                  <p className="text-xs text-white/60 mt-1">döngü günü</p>
+                  <p className="text-sm text-white/80">
+                    {userSettings?.language === 'en' ? 'Ovulation' : 'Yumurtlama'}
+                  </p>
+                  <p className="text-xs text-white/60 mt-1">
+                    {userSettings?.language === 'en' ? 'cycle day' : 'döngü günü'}
+                  </p>
                 </motion.div>
 
                 <motion.div
@@ -348,8 +604,12 @@ export default function StatsPage() {
                     <span className="text-xl">💐</span>
                   </div>
                   <p className="text-3xl font-bold text-white">6</p>
-                  <p className="text-sm text-white/80">Doğurgan Gün</p>
-                  <p className="text-xs text-white/60 mt-1">tahmin edilen</p>
+                  <p className="text-sm text-white/80">
+                    {userSettings?.language === 'en' ? 'Fertile Days' : 'Doğurgan Gün'}
+                  </p>
+                  <p className="text-xs text-white/60 mt-1">
+                    {userSettings?.language === 'en' ? 'predicted' : 'tahmin edilen'}
+                  </p>
                 </motion.div>
               </div>
 
@@ -365,10 +625,14 @@ export default function StatsPage() {
                     <span className="text-2xl">💡</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Döngü Analizi</h3>
+                    <h3 className="font-semibold text-foreground mb-1">
+                      {userSettings?.language === 'en' ? 'Cycle Analysis' : 'Döngü Analizi'}
+                    </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Döngünüz düzenli görünüyor. Ortalama {cycleSettings.cycleLength} günlük döngü uzunluğunuz 
-                      normal aralıkta (21-35 gün). Daha fazla veri toplandıkça tahminler daha doğru olacak.
+                      {userSettings?.language === 'en' 
+                        ? `Your cycle appears regular. Your average ${cycleSettings.cycleLength}-day cycle is within the normal range (21-35 days). Predictions will improve as more data is collected.`
+                        : `Döngünüz düzenli görünüyor. Ortalama ${cycleSettings.cycleLength} günlük döngü uzunluğunuz normal aralıkta (21-35 gün). Daha fazla veri toplandıkça tahminler daha doğru olacak.`
+                      }
                     </p>
                   </div>
                 </div>
@@ -382,7 +646,10 @@ export default function StatsPage() {
                 className="text-center py-8"
               >
                 <p className="text-sm text-muted-foreground">
-                  Daha detaylı istatistikler için günlük kayıtlarınızı eklemeye devam edin.
+                  {userSettings?.language === 'en' 
+                    ? 'Keep logging daily to get more detailed statistics.'
+                    : 'Daha detaylı istatistikler için günlük kayıtlarınızı eklemeye devam edin.'
+                  }
                 </p>
               </motion.div>
             </motion.div>
