@@ -1,5 +1,5 @@
 // 🌸 Bottom Navigation Component - Ruh Halim Style Animated Icons
-import { useState, useRef, useCallback, memo } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -43,7 +43,7 @@ interface BottomNavProps {
   onCenterPress?: (tab?: 'flow' | 'symptoms' | 'mood') => void;
 }
 
-export const BottomNav = memo(function BottomNav({ onCenterPress }: BottomNavProps) {
+export function BottomNav({ onCenterPress }: BottomNavProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -213,14 +213,14 @@ export const BottomNav = memo(function BottomNav({ onCenterPress }: BottomNavPro
       </div>
     </nav>
   );
-});
+}
 
 // ============================================
 // Animated Tab Icons (Ruh Halim Style)
 // ============================================
 
 // Home Icon - Active: House with glow, Inactive: Simple outline
-const HomeIcon = memo(function HomeIcon({ isActive }: { isActive: boolean }) {
+function HomeIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
       <div className="relative w-8 h-8 flex items-center justify-center">
@@ -268,10 +268,10 @@ const HomeIcon = memo(function HomeIcon({ isActive }: { isActive: boolean }) {
       <span className="text-xl opacity-60 grayscale-[30%]">🏠</span>
     </div>
   );
-});
+}
 
 // Calendar Icon - Active: Animated calendar with date, Inactive: Simple outline
-const CalendarIcon = memo(function CalendarIcon({ isActive }: { isActive: boolean }) {
+function CalendarIcon({ isActive }: { isActive: boolean }) {
   const todayDate = new Date().getDate();
   
   if (isActive) {
@@ -335,10 +335,10 @@ const CalendarIcon = memo(function CalendarIcon({ isActive }: { isActive: boolea
       </div>
     </div>
   );
-});
+}
 
 // Stats/Chart Icon - Active: Animated bars with trend line, Inactive: Static bars
-const StatsIcon = memo(function StatsIcon({ isActive }: { isActive: boolean }) {
+function StatsIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
       <div className="relative w-8 h-6 flex items-end justify-center gap-0.5 pb-0.5">
@@ -390,10 +390,10 @@ const StatsIcon = memo(function StatsIcon({ isActive }: { isActive: boolean }) {
       ))}
     </div>
   );
-});
+}
 
 // Medications/Pill Icon - Active: Animated open book style, Inactive: Closed pill
-const MedicationsIcon = memo(function MedicationsIcon({ isActive }: { isActive: boolean }) {
+function MedicationsIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
       <div className="relative w-9 h-7 flex items-center justify-center">
@@ -441,10 +441,10 @@ const MedicationsIcon = memo(function MedicationsIcon({ isActive }: { isActive: 
       </div>
     </div>
   );
-});
+}
 
 // Tab Item Component
-const TabItem = memo(function TabItem({ 
+function TabItem({ 
   tab, 
   isActive, 
   onTap 
@@ -498,4 +498,4 @@ const TabItem = memo(function TabItem({
       </motion.span>
     </motion.button>
   );
-});
+}
