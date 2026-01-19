@@ -1,7 +1,7 @@
-// 🌸 Statistics Page
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { TrendingUp, Activity, Heart, Calendar } from 'lucide-react';
+// 🌸 Statistics Page - Flo Inspired Design
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp } from 'lucide-react';
 import { 
   BarChart, 
   Bar, 
@@ -13,109 +13,107 @@ import {
   Cell,
   LineChart,
   Line,
-  Tooltip
+  Tooltip,
+  CartesianGrid
 } from 'recharts';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
-import { SYMPTOM_LABELS, MOOD_LABELS } from '@/types/cycle';
-import { format, subDays, parseISO } from 'date-fns';
-import { tr } from 'date-fns/locale';
 
-const COLORS = ['#F472B6', '#A78BFA', '#FB923C', '#34D399', '#60A5FA', '#FBBF24'];
+// Flo-style colors
+const CHART_COLORS = {
+  primary: '#F472B6',
+  secondary: '#A78BFA',
+  accent: '#34D399',
+  warning: '#FBBF24',
+  line: '#EC4899',
+};
+
+const CYCLE_PHASE_COLORS = {
+  period: '#F472B6',
+  follicular: '#60A5FA',
+  ovulation: '#A78BFA',
+  luteal: '#FBBF24',
+};
 
 export default function StatsPage() {
-  const { entries, cycleSettings, userSettings } = useCycleData();
+  const { cycleSettings } = useCycleData();
+  const [activeTab, setActiveTab] = useState<'stats' | 'charts'>('stats');
 
-  // Calculate symptom frequency
-  const symptomStats = useMemo(() => {
-    const counts: Record<string, number> = {};
-    entries.forEach(entry => {
-      entry.symptoms.forEach(symptom => {
-        counts[symptom] = (counts[symptom] || 0) + 1;
-      });
-    });
-    
-    return Object.entries(counts)
-      .map(([symptom, count]) => ({
-        name: SYMPTOM_LABELS[symptom as keyof typeof SYMPTOM_LABELS]?.tr || symptom,
-        emoji: SYMPTOM_LABELS[symptom as keyof typeof SYMPTOM_LABELS]?.emoji || '•',
-        value: count,
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 6);
-  }, [entries]);
+  // Mock data for cycle length trend (last 6 months)
+  const cycleLengthData = useMemo(() => {
+    const months = ['Ağu', 'Eyl', 'Eki', 'Kas', 'Ara', 'Oca'];
+    return months.map((month, index) => ({
+      month,
+      length: 25 + Math.floor(Math.random() * 6), // 25-30 range
+    }));
+  }, []);
 
-  // Calculate mood distribution
-  const moodStats = useMemo(() => {
-    const counts: Record<string, number> = {};
-    entries.forEach(entry => {
-      if (entry.mood) {
-        counts[entry.mood] = (counts[entry.mood] || 0) + 1;
-      }
-    });
-    
-    return Object.entries(counts)
-      .map(([mood, count]) => ({
-        name: MOOD_LABELS[mood as keyof typeof MOOD_LABELS]?.tr || mood,
-        emoji: MOOD_LABELS[mood as keyof typeof MOOD_LABELS]?.emoji || '😐',
-        value: count,
-      }))
-      .sort((a, b) => b.value - a.value);
-  }, [entries]);
+  // Mock data for period duration trend
+  const periodDurationData = useMemo(() => {
+    const months = ['Ağu', 'Eyl', 'Eki', 'Kas', 'Ara', 'Oca'];
+    return months.map((month) => ({
+      month,
+      duration: 3 + Math.floor(Math.random() * 3), // 3-5 range
+    }));
+  }, []);
 
-  // Mood trend over last 14 days
-  const moodTrend = useMemo(() => {
-    const moodValues: Record<string, number> = {
-      happy: 5, energetic: 4, calm: 3, neutral: 2, tired: 1, sad: 0, anxious: -1, irritable: -2
-    };
+  // Cycle phase distribution (based on typical 28-day cycle)
+  const phaseDistribution = useMemo(() => {
+    const periodDays = cycleSettings.periodLength;
+    const ovulationDays = 3;
+    const follicularDays = 8;
+    const lutealDays = 28 - periodDays - ovulationDays - follicularDays;
     
-    const last14Days = Array.from({ length: 14 }, (_, i) => {
-      const date = subDays(new Date(), 13 - i);
-      const dateStr = format(date, 'yyyy-MM-dd');
-      const entry = entries.find(e => e.date === dateStr);
-      return {
-        date: format(date, 'd MMM', { locale: tr }),
-        value: entry?.mood ? moodValues[entry.mood] ?? 2 : null,
-        mood: entry?.mood,
-      };
-    });
-    
-    return last14Days;
-  }, [entries]);
+    return [
+      { name: 'Adet', days: periodDays, color: CYCLE_PHASE_COLORS.period },
+      { name: 'Foliküler', days: follicularDays, color: CYCLE_PHASE_COLORS.follicular },
+      { name: 'Ovülasyon', days: ovulationDays, color: CYCLE_PHASE_COLORS.ovulation },
+      { name: 'Luteal', days: lutealDays, color: CYCLE_PHASE_COLORS.luteal },
+    ];
+  }, [cycleSettings]);
 
-  // Calculate cycle stats
-  const cycleStats = useMemo(() => {
-    const periodDays = entries.filter(e => e.flowLevel !== 'none').length;
-    const loggedDays = entries.length;
-    const symptomsLogged = entries.reduce((sum, e) => sum + e.symptoms.length, 0);
-    
-    return {
-      avgCycleLength: cycleSettings.cycleLength,
-      avgPeriodLength: cycleSettings.periodLength,
-      periodDays,
-      loggedDays,
-      symptomsLogged,
-    };
-  }, [entries, cycleSettings]);
+  // Tab component
+  const TabButton = ({ tab, label }: { tab: 'stats' | 'charts'; label: string }) => (
+    <motion.button
+      onClick={() => setActiveTab(tab)}
+      className={`flex-1 py-3 px-4 text-sm font-semibold rounded-full transition-all ${
+        activeTab === tab 
+          ? 'bg-primary text-white shadow-md shadow-primary/30' 
+          : 'text-muted-foreground hover:text-foreground'
+      }`}
+      whileTap={{ scale: 0.97 }}
+    >
+      {label}
+    </motion.button>
+  );
 
-  const StatCard = ({ icon: Icon, title, value, subtitle, color }: {
-    icon: typeof TrendingUp;
-    title: string;
-    value: string | number;
+  // Chart Card component
+  const ChartCard = ({ 
+    title, 
+    subtitle, 
+    icon,
+    children 
+  }: { 
+    title: string; 
     subtitle: string;
-    color: string;
+    icon: React.ReactNode;
+    children: React.ReactNode;
   }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-2xl p-4 border border-border"
+      className="bg-card rounded-3xl p-5 border border-border/50 shadow-sm"
     >
-      <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center mb-3`}>
-        <Icon className="w-5 h-5 text-white" />
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+          {icon}
+        </div>
+        <div>
+          <h3 className="font-semibold text-foreground">{title}</h3>
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
+        </div>
       </div>
-      <p className="text-2xl font-bold text-foreground">{value}</p>
-      <p className="text-sm text-muted-foreground">{title}</p>
-      <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+      {children}
     </motion.div>
   );
 
@@ -124,183 +122,266 @@ export default function StatsPage() {
       {/* Header */}
       <header className="px-6 pt-6 pb-4">
         <h1 className="text-2xl font-bold text-foreground">İstatistikler</h1>
-        <p className="text-muted-foreground text-sm mt-1">Döngü verilerine genel bakış</p>
+        
+        {/* Tab Switcher */}
+        <div className="mt-4 flex gap-2 p-1 bg-muted/50 rounded-full">
+          <TabButton tab="stats" label="İstatistikler" />
+          <TabButton tab="charts" label="Grafikler" />
+        </div>
       </header>
 
-      <main className="px-6 space-y-6">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            icon={Calendar}
-            title="Döngü Uzunluğu"
-            value={`${cycleStats.avgCycleLength}`}
-            subtitle="gün ortalama"
-            color="bg-primary"
-          />
-          <StatCard
-            icon={Activity}
-            title="Regl Süresi"
-            value={`${cycleStats.avgPeriodLength}`}
-            subtitle="gün ortalama"
-            color="bg-period"
-          />
-          <StatCard
-            icon={Heart}
-            title="Kayıtlı Gün"
-            value={cycleStats.loggedDays}
-            subtitle="toplam giriş"
-            color="bg-accent"
-          />
-          <StatCard
-            icon={TrendingUp}
-            title="Semptom"
-            value={cycleStats.symptomsLogged}
-            subtitle="toplam kayıt"
-            color="bg-fertile"
-          />
-        </div>
+      <main className="px-6 space-y-5">
+        <AnimatePresence mode="wait">
+          {activeTab === 'charts' ? (
+            <motion.div
+              key="charts"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-5"
+            >
+              {/* Cycle Length Trend - Line Chart */}
+              <ChartCard
+                title="Döngü Uzunluğu Trendi"
+                subtitle="Son 6 ay"
+                icon={<TrendingUp className="w-5 h-5 text-primary" />}
+              >
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={cycleLengthData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <YAxis 
+                        domain={[20, 35]}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`${value} gün`, 'Döngü']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="length" 
+                        stroke={CHART_COLORS.line}
+                        strokeWidth={3}
+                        dot={{ fill: CHART_COLORS.line, strokeWidth: 0, r: 5 }}
+                        activeDot={{ r: 7, fill: CHART_COLORS.line }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </ChartCard>
 
-        {/* Symptom Frequency Chart */}
-        {symptomStats.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card rounded-2xl p-4 border border-border"
-          >
-            <h3 className="font-semibold text-foreground mb-4">En Sık Semptomlar</h3>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={symptomStats} layout="vertical">
-                  <XAxis type="number" hide />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    width={100}
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value, index) => `${symptomStats[index]?.emoji || ''} ${value}`}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`${value} gün`, 'Sıklık']}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {symptomStats.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-        )}
+              {/* Period Duration Trend - Bar Chart */}
+              <ChartCard
+                title="Adet Süresi Trendi"
+                subtitle="Son 6 ay"
+                icon={
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="14" width="4" height="6" rx="1" fill={CHART_COLORS.primary} />
+                    <rect x="10" y="10" width="4" height="10" rx="1" fill={CHART_COLORS.primary} opacity="0.7" />
+                    <rect x="16" y="6" width="4" height="14" rx="1" fill={CHART_COLORS.primary} opacity="0.5" />
+                  </svg>
+                }
+              >
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={periodDurationData}>
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <YAxis 
+                        domain={[0, 10]}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`${value} gün`, 'Süre']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="duration" 
+                        radius={[8, 8, 0, 0]}
+                      >
+                        {periodDurationData.map((_, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={index % 2 === 0 ? CHART_COLORS.primary : '#FDA4AF'} 
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </ChartCard>
 
-        {/* Mood Distribution */}
-        {moodStats.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-card rounded-2xl p-4 border border-border"
-          >
-            <h3 className="font-semibold text-foreground mb-4">Ruh Hali Dağılımı</h3>
-            <div className="flex items-center gap-4">
-              <div className="w-32 h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={moodStats}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={50}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {moodStats.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex-1 space-y-2">
-                {moodStats.slice(0, 4).map((mood, index) => (
-                  <div key={mood.name} className="flex items-center gap-2 text-sm">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    />
-                    <span>{mood.emoji}</span>
-                    <span className="text-muted-foreground">{mood.name}</span>
-                    <span className="ml-auto font-medium">{mood.value}</span>
+              {/* Cycle Phase Distribution - Donut Chart */}
+              <ChartCard
+                title="Döngü Fazları"
+                subtitle="Gün dağılımı"
+                icon={
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke={CHART_COLORS.primary} strokeWidth="3" fill="none" />
+                    <path d="M12 2 A10 10 0 0 1 22 12" stroke={CHART_COLORS.secondary} strokeWidth="3" fill="none" />
+                  </svg>
+                }
+              >
+                <div className="flex items-center gap-6">
+                  {/* Donut Chart */}
+                  <div className="w-28 h-28 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={phaseDistribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={35}
+                          outerRadius={50}
+                          paddingAngle={3}
+                          dataKey="days"
+                          strokeWidth={0}
+                        >
+                          {phaseDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
+
+                  {/* Legend */}
+                  <div className="flex-1 grid grid-cols-2 gap-3">
+                    {phaseDistribution.map((phase) => (
+                      <div key={phase.name} className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: phase.color }}
+                        />
+                        <div className="text-xs">
+                          <p className="font-medium text-foreground">{phase.name}</p>
+                          <p className="text-muted-foreground">{phase.days} gün</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </ChartCard>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="stats"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="space-y-5"
+            >
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 gap-4">
+                <motion.div
+                  className="bg-gradient-to-br from-rose-400 to-pink-500 rounded-3xl p-5 shadow-lg shadow-rose-500/20"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
+                    <span className="text-xl">📅</span>
+                  </div>
+                  <p className="text-3xl font-bold text-white">{cycleSettings.cycleLength}</p>
+                  <p className="text-sm text-white/80">Döngü Uzunluğu</p>
+                  <p className="text-xs text-white/60 mt-1">gün ortalama</p>
+                </motion.div>
+
+                <motion.div
+                  className="bg-gradient-to-br from-violet-400 to-purple-500 rounded-3xl p-5 shadow-lg shadow-violet-500/20"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
+                    <span className="text-xl">🌸</span>
+                  </div>
+                  <p className="text-3xl font-bold text-white">{cycleSettings.periodLength}</p>
+                  <p className="text-sm text-white/80">Regl Süresi</p>
+                  <p className="text-xs text-white/60 mt-1">gün ortalama</p>
+                </motion.div>
+
+                <motion.div
+                  className="bg-gradient-to-br from-cyan-400 to-teal-500 rounded-3xl p-5 shadow-lg shadow-teal-500/20"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
+                    <span className="text-xl">🥚</span>
+                  </div>
+                  <p className="text-3xl font-bold text-white">14</p>
+                  <p className="text-sm text-white/80">Yumurtlama</p>
+                  <p className="text-xs text-white/60 mt-1">döngü günü</p>
+                </motion.div>
+
+                <motion.div
+                  className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl p-5 shadow-lg shadow-orange-500/20"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
+                    <span className="text-xl">💐</span>
+                  </div>
+                  <p className="text-3xl font-bold text-white">6</p>
+                  <p className="text-sm text-white/80">Doğurgan Gün</p>
+                  <p className="text-xs text-white/60 mt-1">tahmin edilen</p>
+                </motion.div>
               </div>
-            </div>
-          </motion.div>
-        )}
 
-        {/* Mood Trend */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-card rounded-2xl p-4 border border-border"
-        >
-          <h3 className="font-semibold text-foreground mb-4">Son 14 Gün Ruh Hali</h3>
-          <div className="h-32">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={moodTrend}>
-                <XAxis 
-                  dataKey="date" 
-                  tick={{ fontSize: 10 }}
-                  interval={2}
-                />
-                <YAxis hide domain={[-3, 6]} />
-                <Tooltip 
-                  formatter={(value, _, props) => [
-                    props.payload.mood 
-                      ? MOOD_LABELS[props.payload.mood as keyof typeof MOOD_LABELS]?.tr 
-                      : 'Kayıt yok',
-                    'Ruh Hali'
-                  ]}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 3 }}
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
+              {/* Insight Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-card rounded-3xl p-5 border border-border/50"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-2xl">💡</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">Döngü Analizi</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Döngünüz düzenli görünüyor. Ortalama {cycleSettings.cycleLength} günlük döngü uzunluğunuz 
+                      normal aralıkta (21-35 gün). Daha fazla veri toplandıkça tahminler daha doğru olacak.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
 
-        {/* Empty State */}
-        {entries.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <span className="text-5xl">📊</span>
-            <p className="text-muted-foreground mt-4">
-              Henüz yeterli veri yok. Günlük kayıtlar ekledikçe istatistikler burada görünecek.
-            </p>
-          </motion.div>
-        )}
+              {/* Empty State Placeholder */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-center py-8"
+              >
+                <p className="text-sm text-muted-foreground">
+                  Daha detaylı istatistikler için günlük kayıtlarınızı eklemeye devam edin.
+                </p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <BottomNav />
