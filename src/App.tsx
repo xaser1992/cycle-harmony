@@ -14,6 +14,7 @@ import StatsPage from "./pages/Stats";
 import SettingsPage from "./pages/Settings";
 import DebugPage from "./pages/Debug";
 import ProfilePage from "./pages/Profile";
+import MedicationsPage from "./pages/Medications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ function AppContent() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/debug" element={<DebugPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/medications" element={<MedicationsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
