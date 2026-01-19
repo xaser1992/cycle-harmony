@@ -69,9 +69,10 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin }:
   };
 
   const handleBiometric = async () => {
-    // In a real app, this would use capacitor biometric plugin
-    // For now, we'll just unlock
-    onUnlock();
+    // Biometric authentication - requires actual biometric verification
+    // TODO: Integrate with @capacitor-community/biometric plugin
+    // For now, show a message that biometric is not yet configured
+    setError('Parmak izi henüz yapılandırılmadı');
   };
 
   return (
