@@ -11,6 +11,7 @@ import CalendarPage from "./pages/Calendar";
 import StatsPage from "./pages/Stats";
 import SettingsPage from "./pages/Settings";
 import DebugPage from "./pages/Debug";
+import ProfilePage from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/stats" element={<StatsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/debug" element={<DebugPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
