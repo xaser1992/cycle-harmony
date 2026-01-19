@@ -1,8 +1,8 @@
-// 🌸 Today Status Card Component
+// 🌸 Today Status Card Component - Flo Inspired Design
 import { motion } from 'framer-motion';
 import { getPhaseInfo } from '@/lib/predictions';
 import type { CyclePhase, CyclePrediction } from '@/types/cycle';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 interface TodayCardProps {
@@ -11,30 +11,31 @@ interface TodayCardProps {
   language?: 'tr' | 'en';
 }
 
-const phaseColors = {
-  period: 'from-period to-period-dark',
-  follicular: 'from-safe to-green-400',
-  fertile: 'from-fertile to-amber-400',
-  ovulation: 'from-ovulation to-purple-500',
-  luteal: 'from-slate-400 to-slate-500',
-  pms: 'from-pms to-orange-400',
+const phaseGradients = {
+  period: 'from-rose-400 via-pink-500 to-rose-600',
+  follicular: 'from-emerald-400 via-teal-500 to-cyan-500',
+  fertile: 'from-amber-400 via-orange-400 to-yellow-500',
+  ovulation: 'from-violet-400 via-purple-500 to-fuchsia-500',
+  luteal: 'from-slate-400 via-slate-500 to-gray-500',
+  pms: 'from-orange-400 via-amber-500 to-yellow-600',
 };
 
-const phaseBackgrounds = {
-  period: 'bg-period-light',
-  follicular: 'bg-green-50 dark:bg-green-950/30',
-  fertile: 'bg-fertile-light',
-  ovulation: 'bg-purple-50 dark:bg-purple-950/30',
-  luteal: 'bg-slate-50 dark:bg-slate-900/30',
-  pms: 'bg-orange-50 dark:bg-orange-950/30',
+const phaseAccentColors = {
+  period: 'text-rose-100',
+  follicular: 'text-emerald-100',
+  fertile: 'text-amber-100',
+  ovulation: 'text-violet-100',
+  luteal: 'text-slate-200',
+  pms: 'text-orange-100',
 };
 
 export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps) {
   if (!phase || !prediction) {
     return (
-      <div className="rounded-3xl bg-card p-6 animate-pulse">
-        <div className="h-8 bg-muted rounded w-1/2 mb-2" />
-        <div className="h-4 bg-muted rounded w-1/3" />
+      <div className="rounded-[2rem] bg-gradient-to-br from-muted to-muted/50 p-6 animate-pulse">
+        <div className="h-32 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-muted-foreground/20" />
+        </div>
       </div>
     );
   }
@@ -42,97 +43,253 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
   const phaseInfo = getPhaseInfo(phase, language);
   const nextPeriod = parseISO(prediction.nextPeriodStart);
   const ovulationDate = parseISO(prediction.ovulationDate);
+  const daysUntilPeriod = differenceInDays(nextPeriod, new Date());
+  const cycleLength = 28; // Default cycle length
+  const progress = (phase.dayNumber / cycleLength) * 100;
+
+  // Calculate stroke dasharray for circular progress
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDasharray = `${(progress / 100) * circumference} ${circumference}`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`rounded-3xl p-6 ${phaseBackgrounds[phase.type]}`}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={`relative rounded-[2rem] bg-gradient-to-br ${phaseGradients[phase.type]} p-6 overflow-hidden shadow-xl`}
     >
-      {/* Main Status */}
-      <div className="flex items-center gap-4 mb-6">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className={`w-16 h-16 rounded-full bg-gradient-to-br ${phaseColors[phase.type]} flex items-center justify-center shadow-lg`}
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ repeat: Infinity, duration: 3 }}
-        >
-          <span className="text-3xl">{phaseInfo.emoji}</span>
-        </motion.div>
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-foreground">{phaseInfo.title}</h2>
-          <p className="text-muted-foreground">{phaseInfo.subtitle}</p>
-        </div>
+          className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-white/10 blur-2xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/10 blur-xl"
+          animate={{ 
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.4, 0.2]
+          }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        />
+        {/* Floating particles */}
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 rounded-full bg-white/20"
+            style={{
+              left: `${20 + i * 15}%`,
+              top: `${30 + (i % 3) * 20}%`,
+            }}
+            animate={{
+              y: [0, -10, 0],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 2 + i * 0.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.3,
+            }}
+          />
+        ))}
       </div>
 
-      {/* Cycle Day Ring */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="relative w-14 h-14">
-            <svg className="w-14 h-14 transform -rotate-90">
+      {/* Main Content */}
+      <div className="relative z-10">
+        {/* Top Row - Phase Info */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <motion.p 
+              className={`text-sm font-medium ${phaseAccentColors[phase.type]} opacity-80 mb-1`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 0.8, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              {language === 'tr' ? 'Şu an' : 'Currently'}
+            </motion.p>
+            <motion.h2 
+              className="text-2xl font-bold text-white mb-1"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              {phaseInfo.title}
+            </motion.h2>
+            <motion.p 
+              className={`text-sm ${phaseAccentColors[phase.type]}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              {phaseInfo.subtitle}
+            </motion.p>
+          </div>
+          
+          {/* Emoji with glow */}
+          <motion.div
+            className="relative"
+            animate={{ 
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="absolute inset-0 blur-lg bg-white/30 rounded-full" />
+            <span className="relative text-4xl">{phaseInfo.emoji}</span>
+          </motion.div>
+        </div>
+
+        {/* Circular Progress Section */}
+        <div className="flex items-center gap-6 mt-6">
+          {/* Large Circular Progress */}
+          <div className="relative w-32 h-32">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+              {/* Background circle */}
               <circle
-                cx="28"
-                cy="28"
-                r="24"
-                stroke="currentColor"
-                strokeWidth="4"
+                cx="60"
+                cy="60"
+                r={radius}
+                stroke="rgba(255,255,255,0.2)"
+                strokeWidth="8"
                 fill="none"
-                className="text-muted/30"
               />
+              {/* Progress circle */}
               <motion.circle
-                cx="28"
-                cy="28"
-                r="24"
-                stroke="url(#cycleGradient)"
-                strokeWidth="4"
+                cx="60"
+                cy="60"
+                r={radius}
+                stroke="rgba(255,255,255,0.9)"
+                strokeWidth="8"
                 fill="none"
                 strokeLinecap="round"
-                initial={{ strokeDasharray: '0 150' }}
-                animate={{ 
-                  strokeDasharray: `${(phase.dayNumber / 28) * 150} 150` 
-                }}
-                transition={{ duration: 1, ease: 'easeOut' }}
+                initial={{ strokeDasharray: `0 ${circumference}` }}
+                animate={{ strokeDasharray }}
+                transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
               />
-              <defs>
-                <linearGradient id="cycleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" />
-                  <stop offset="100%" stopColor="hsl(var(--accent))" />
-                </linearGradient>
-              </defs>
+              {/* Glow effect on progress end */}
+              <motion.circle
+                cx="60"
+                cy="60"
+                r={radius}
+                stroke="white"
+                strokeWidth="12"
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray={strokeDasharray}
+                style={{ filter: 'blur(4px)' }}
+                opacity={0.4}
+                initial={{ strokeDasharray: `0 ${circumference}` }}
+                animate={{ strokeDasharray }}
+                transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+              />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-foreground">
-              {phase.dayNumber}
-            </span>
+            
+            {/* Center content */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <motion.span 
+                className="text-4xl font-bold text-white"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.7, type: "spring", stiffness: 200 }}
+              >
+                {phase.dayNumber}
+              </motion.span>
+              <span className={`text-xs ${phaseAccentColors[phase.type]}`}>
+                {language === 'tr' ? 'gün' : 'day'}
+              </span>
+            </div>
+
+            {/* Animated ring pulse */}
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-white/20"
+              animate={{ 
+                scale: [1, 1.1, 1],
+                opacity: [0.3, 0.1, 0.3]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground">
-              {language === 'tr' ? 'Döngü Günü' : 'Cycle Day'}
-            </p>
+
+          {/* Info Cards */}
+          <div className="flex-1 space-y-3">
+            {phase.type !== 'period' && !phase.isLate && daysUntilPeriod > 0 && (
+              <motion.div 
+                className="bg-white/15 backdrop-blur-sm rounded-2xl p-3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
+                  {language === 'tr' ? 'Sonraki Regl' : 'Next Period'}
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xl font-bold text-white">{daysUntilPeriod}</span>
+                  <span className={`text-sm ${phaseAccentColors[phase.type]}`}>
+                    {language === 'tr' ? 'gün' : 'days'}
+                  </span>
+                </div>
+                <p className={`text-xs ${phaseAccentColors[phase.type]} opacity-70`}>
+                  {format(nextPeriod, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
+                </p>
+              </motion.div>
+            )}
+
+            {(phase.type === 'fertile' || phase.type === 'follicular') && (
+              <motion.div 
+                className="bg-white/15 backdrop-blur-sm rounded-2xl p-3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
+                  {language === 'tr' ? 'Yumurtlama' : 'Ovulation'}
+                </p>
+                <p className="text-sm font-semibold text-white">
+                  {format(ovulationDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
+                </p>
+              </motion.div>
+            )}
+
+            {phase.type === 'period' && (
+              <motion.div 
+                className="bg-white/15 backdrop-blur-sm rounded-2xl p-3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
+                  {language === 'tr' ? 'Regl Dönemi' : 'Period'}
+                </p>
+                <p className="text-sm font-semibold text-white">
+                  {language === 'tr' ? `${phase.dayNumber}. gün` : `Day ${phase.dayNumber}`}
+                </p>
+              </motion.div>
+            )}
           </div>
         </div>
 
-        {/* Quick Info Pills */}
-        <div className="flex flex-col gap-2 text-right text-sm">
-          {phase.type !== 'period' && !phase.isLate && (
-            <div className="flex items-center justify-end gap-2">
-              <span className="text-muted-foreground">
-                {language === 'tr' ? 'Sonraki Regl' : 'Next Period'}
-              </span>
-              <span className="font-medium text-foreground">
-                {format(nextPeriod, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
-              </span>
-            </div>
-          )}
-          {phase.type === 'fertile' || phase.type === 'follicular' ? (
-            <div className="flex items-center justify-end gap-2">
-              <span className="text-muted-foreground">
-                {language === 'tr' ? 'Yumurtlama' : 'Ovulation'}
-              </span>
-              <span className="font-medium text-foreground">
-                {format(ovulationDate, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
-              </span>
-            </div>
-          ) : null}
-        </div>
+        {/* Bottom tip */}
+        <motion.div 
+          className="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <span className="text-lg">💡</span>
+          </div>
+          <p className={`text-xs ${phaseAccentColors[phase.type]} flex-1`}>
+            {language === 'tr' 
+              ? 'Bugün kendinize iyi bakın ve bol su için.' 
+              : 'Take care of yourself today and drink plenty of water.'}
+          </p>
+        </motion.div>
       </div>
     </motion.div>
   );
