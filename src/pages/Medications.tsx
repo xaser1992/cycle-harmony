@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { App } from '@capacitor/app';
+import { scheduleMedicationNotifications } from '@/lib/medicationNotifications';
 import {
   getMedications,
   saveMedication,
@@ -138,6 +139,11 @@ export default function Medications() {
     };
 
     await saveMedication(medication);
+    
+    // Schedule notifications for all active medications
+    const allMeds = await getMedications();
+    await scheduleMedicationNotifications(allMeds.filter(m => m.isActive));
+    
     await loadData();
     setIsAddSheetOpen(false);
     setEditingMedication(null);
