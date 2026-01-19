@@ -20,6 +20,7 @@ import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { getMedicationLogsForDate, getMedications } from '@/lib/medicationStorage';
 import type { DayEntry } from '@/types/cycle';
 import type { Medication, MedicationLog } from '@/types/medication';
@@ -35,6 +36,9 @@ export default function CalendarPage() {
     saveDayEntry,
     userSettings 
   } = useCycleData();
+  
+  // Swipe navigation - tab arası geçiş için
+  useSwipeNavigation({ threshold: 60 });
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);

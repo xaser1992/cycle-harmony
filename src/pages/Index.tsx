@@ -9,6 +9,7 @@ import { PhaseTimeline } from '@/components/PhaseTimeline';
 import { BottomNav } from '@/components/BottomNav';
 import { GlobalHeader } from '@/components/GlobalHeader';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import type { DayEntry } from '@/types/cycle';
 
 const Index = () => {
@@ -23,6 +24,9 @@ const Index = () => {
     saveDayEntry,
     isLoading 
   } = useCycleData();
+
+  // Swipe navigation - tab arası geçiş için
+  useSwipeNavigation({ threshold: 60 });
 
   // Redirect to onboarding if not completed
   useEffect(() => {
