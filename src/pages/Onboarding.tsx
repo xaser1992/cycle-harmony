@@ -171,8 +171,8 @@ export default function Onboarding() {
                   </div>
                 </Card>
 
-                {/* Permission Request Button */}
-                {notificationPermission === 'pending' && (
+                {/* Permission Request Button - Always visible if not granted */}
+                {notificationPermission !== 'granted' && (
                   <Button
                     size="lg"
                     onClick={async () => {
@@ -199,7 +199,9 @@ export default function Onboarding() {
                     ) : (
                       <>
                         <Bell className="w-5 h-5 mr-2" />
-                        Bildirimlere İzin Ver
+                        {notificationPermission === 'denied' 
+                          ? 'Tekrar Dene' 
+                          : 'Bildirimlere İzin Ver'}
                       </>
                     )}
                   </Button>
@@ -220,11 +222,10 @@ export default function Onboarding() {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="p-4 bg-amber-100 dark:bg-amber-900/30 rounded-2xl text-amber-700 dark:text-amber-300 text-center"
+                    className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-700 dark:text-amber-300 text-center mt-2"
                   >
-                    <p className="font-medium mb-1">Bildirimler kapalı</p>
                     <p className="text-xs opacity-80">
-                      Ayarlardan bildirimleri açabilirsin.
+                      Bildirimlere izin verilmedi. Yukarıdaki butona tıklayarak tekrar deneyebilirsin.
                     </p>
                   </motion.div>
                 )}
