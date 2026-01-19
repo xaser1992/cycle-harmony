@@ -2,6 +2,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 
 interface QuickAction {
   icon: string;
@@ -41,6 +42,11 @@ const springConfig = {
 
 interface BottomNavProps {
   onCenterPress?: (tab?: 'flow' | 'symptoms' | 'mood') => void;
+}
+
+function renderInBody(node: React.ReactNode) {
+  if (typeof document === 'undefined') return null;
+  return createPortal(node, document.body);
 }
 
 export function BottomNav({ onCenterPress }: BottomNavProps) {
@@ -92,7 +98,66 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Glass background */}
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/30" />
-      
+
+      {/* Quick Actions (portal) - avoids iOS hitbox bugs with backdrop-filter/stacking contexts */}
+      {renderInBody(
+        <AnimatePresence>
+          {showQuickActions && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[9000] bg-black/30 backdrop-blur-sm"
+                onClick={() => setShowQuickActions(false)}
+              />
+
+              {quickActions.map((action, index) => {
+                const buttonSize = 60;
+                const spacing = 70;
+
+                const xOffsets = [-spacing, 0, spacing];
+                const yOffsets = [80, 100, 80];
+
+                return (
+                  <motion.button
+                    key={action.tab}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                    transition={{ ...springConfig, delay: index * 0.05 }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleQuickAction(action.tab);
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickAction(action.tab);
+                    }}
+                    className={`fixed z-[9001] flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl cursor-pointer select-none`}
+                    style={{
+                      width: `${buttonSize}px`,
+                      height: `${buttonSize}px`,
+                      left: `calc(50% - ${buttonSize / 2}px + ${xOffsets[index]}px)`,
+                      bottom: `calc(${yOffsets[index]}px + env(safe-area-inset-bottom))`,
+                      touchAction: 'manipulation',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <span className="text-xl pointer-events-none select-none">{action.icon}</span>
+                    <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none select-none">
+                      {action.label}
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </>
+          )}
+        </AnimatePresence>
+      )}
+
       <div className="relative flex items-center justify-around h-[68px] px-1">
         {/* Left tabs */}
         <div className="flex items-center justify-center flex-1 gap-0">
@@ -105,66 +170,9 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
             />
           ))}
         </div>
-        
+
         {/* Center FAB Button */}
         <div className="relative -mt-8 mx-2">
-          {/* Quick Actions Popup */}
-          <AnimatePresence>
-            {showQuickActions && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
-                  onClick={() => setShowQuickActions(false)}
-                />
-                
-                {quickActions.map((action, index) => {
-                  // Calculate fixed pixel positions from center
-                  const buttonSize = 60;
-                  const spacing = 70;
-                  
-                  // Left button: -spacing, Center: 0, Right: +spacing
-                  const xOffsets = [-spacing, 0, spacing];
-                  const yOffsets = [80, 100, 80]; // heights from bottom
-                  
-                  return (
-                    <motion.button
-                      key={action.tab}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      transition={{ ...springConfig, delay: index * 0.05 }}
-                      onTouchEnd={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleQuickAction(action.tab);
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleQuickAction(action.tab);
-                      }}
-                      className={`fixed z-[9999] flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl cursor-pointer select-none`}
-                      style={{ 
-                        width: `${buttonSize}px`,
-                        height: `${buttonSize}px`,
-                        left: `calc(50% - ${buttonSize / 2}px + ${xOffsets[index]}px)`,
-                        bottom: `calc(${yOffsets[index]}px + env(safe-area-inset-bottom))`,
-                        touchAction: 'manipulation',
-                        WebkitTapHighlightColor: 'transparent',
-                      }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <span className="text-xl pointer-events-none select-none">{action.icon}</span>
-                      <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none select-none">{action.label}</span>
-                    </motion.button>
-                  );
-                })}
-              </>
-            )}
-          </AnimatePresence>
-
           {/* FAB Button */}
           <motion.button
             onClick={handleCenterPress}
@@ -189,7 +197,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
               animate={showQuickActions ? { scale: [1, 1.3], opacity: [0.5, 0] } : {}}
               transition={{ duration: 0.6, repeat: showQuickActions ? Infinity : 0 }}
             />
-            
+
             <svg
               className="w-7 h-7 text-white"
               viewBox="0 0 24 24"
@@ -204,7 +212,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
             </svg>
           </motion.button>
         </div>
-        
+
         {/* Right tabs */}
         <div className="flex items-center justify-center flex-1 gap-0">
           {rightTabs.map((tab) => (
