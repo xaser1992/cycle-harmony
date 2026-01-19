@@ -219,7 +219,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
 // Animated Tab Icons (Ruh Halim Style)
 // ============================================
 
-// Home Icon - Active: House with glow, Inactive: Simple outline
+// Home Icon - Active: Animated flower/lotus, Inactive: Simple flower outline
 function HomeIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
@@ -232,7 +232,40 @@ function HomeIcon({ isActive }: { isActive: boolean }) {
         >
           {/* Glow effect */}
           <div className="absolute inset-0 rounded-full blur-md opacity-60 bg-primary" />
-          <span className="relative text-2xl drop-shadow-lg">🏠</span>
+          <svg className="relative w-7 h-7 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
+            {/* Lotus/flower petals */}
+            <motion.path
+              d="M12 3C12 3 8 7 8 11C8 15 12 17 12 17C12 17 16 15 16 11C16 7 12 3 12 3Z"
+              fill="hsl(var(--primary))"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring" }}
+            />
+            <motion.path
+              d="M6 8C6 8 4 12 5 15C6 18 10 19 10 19C10 19 8 15 8 12C8 9 6 8 6 8Z"
+              fill="hsl(var(--primary) / 0.7)"
+              initial={{ scale: 0, x: 5 }}
+              animate={{ scale: 1, x: 0 }}
+              transition={{ delay: 0.2, type: "spring" }}
+            />
+            <motion.path
+              d="M18 8C18 8 20 12 19 15C18 18 14 19 14 19C14 19 16 15 16 12C16 9 18 8 18 8Z"
+              fill="hsl(var(--primary) / 0.7)"
+              initial={{ scale: 0, x: -5 }}
+              animate={{ scale: 1, x: 0 }}
+              transition={{ delay: 0.2, type: "spring" }}
+            />
+            {/* Center */}
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="2"
+              fill="hsl(var(--primary-foreground))"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring" }}
+            />
+          </svg>
         </motion.div>
         {/* Floating sparkles */}
         {['✨', '💫'].map((emoji, i) => (
@@ -264,8 +297,12 @@ function HomeIcon({ isActive }: { isActive: boolean }) {
   }
   
   return (
-    <div className="relative w-6 h-6 flex items-center justify-center">
-      <span className="text-xl opacity-60 grayscale-[30%]">🏠</span>
+    <div className="relative w-6 h-6 flex items-center justify-center opacity-60">
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 4C12 4 8 8 8 11.5C8 15 12 17 12 17C12 17 16 15 16 11.5C16 8 12 4 12 4Z" />
+        <path d="M6 9C6 9 4 12 5 15C6 18 10 19 10 19" strokeLinecap="round" />
+        <path d="M18 9C18 9 20 12 19 15C18 18 14 19 14 19" strokeLinecap="round" />
+      </svg>
     </div>
   );
 }
