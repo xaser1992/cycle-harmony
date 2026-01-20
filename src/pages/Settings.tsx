@@ -15,6 +15,8 @@ import {
   Plus,
   ArrowLeft,
   Bell,
+  Droplets,
+  Scale,
   type LucideIcon
 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
@@ -33,6 +35,8 @@ export default function SettingsPage() {
   const { 
     cycleSettings, 
     updateCycleSettings,
+    userSettings,
+    updateUserSettings,
   } = useCycleData();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -286,6 +290,94 @@ export default function SettingsPage() {
                   <Plus className="w-4 h-4" />
                 </motion.button>
               </div>
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* Wellness Goals */}
+        <SectionCard
+          title="Wellness Hedefleri"
+          icon={Scale}
+          gradient="from-emerald-400 to-teal-500"
+          id="wellness"
+          collapsible
+        >
+          <div className="space-y-3">
+            {/* Target Weight */}
+            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
+              <div className="flex items-center gap-3">
+                <Scale className="w-5 h-5 text-emerald-500" />
+                <div>
+                  <p className="text-sm font-medium">Hedef Ağırlık</p>
+                  <p className="text-xs text-muted-foreground">{userSettings?.targetWeight || 60} kg</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => updateUserSettings({ targetWeight: Math.max(30, (userSettings?.targetWeight || 60) - 1) })}
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                >
+                  <Minus className="w-4 h-4" />
+                </motion.button>
+                <span className="w-10 text-center font-bold text-lg">{userSettings?.targetWeight || 60}</span>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => updateUserSettings({ targetWeight: Math.min(150, (userSettings?.targetWeight || 60) + 1) })}
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                >
+                  <Plus className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
+            
+            {/* Daily Water Goal */}
+            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
+              <div className="flex items-center gap-3">
+                <Droplets className="w-5 h-5 text-blue-500" />
+                <div>
+                  <p className="text-sm font-medium">Günlük Su Hedefi</p>
+                  <p className="text-xs text-muted-foreground">
+                    {userSettings?.dailyWaterGoal || 9} bardak (~{((userSettings?.dailyWaterGoal || 9) * 0.25).toFixed(2)}L)
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => updateUserSettings({ dailyWaterGoal: Math.max(4, (userSettings?.dailyWaterGoal || 9) - 1) })}
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                >
+                  <Minus className="w-4 h-4" />
+                </motion.button>
+                <span className="w-8 text-center font-bold text-lg">{userSettings?.dailyWaterGoal || 9}</span>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => updateUserSettings({ dailyWaterGoal: Math.min(20, (userSettings?.dailyWaterGoal || 9) + 1) })}
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                >
+                  <Plus className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Water Reminder Toggle */}
+            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
+              <div className="flex items-center gap-3">
+                <Bell className="w-5 h-5 text-blue-500" />
+                <div>
+                  <p className="text-sm font-medium">Su Hatırlatıcısı</p>
+                  <p className="text-xs text-muted-foreground">Günde 3 kez hatırlat</p>
+                </div>
+              </div>
+              <AnimatedSwitch 
+                checked={notificationGranted === true}
+                onChange={() => {
+                  if (notificationGranted !== true) {
+                    handleRequestNotification();
+                  }
+                }}
+              />
             </div>
           </div>
         </SectionCard>
