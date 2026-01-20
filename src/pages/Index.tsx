@@ -114,11 +114,15 @@ const Index = () => {
         <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
           <button
             onClick={handleLogPeriod}
-            className="w-full relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30 transition-transform duration-150 active:scale-[0.98]"
+            className={`w-full relative overflow-hidden rounded-2xl p-4 transition-transform duration-150 active:scale-[0.98] ${
+              isOnPeriod 
+                ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/30'
+                : 'bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30'
+            }`}
           >
             <div className="flex items-center justify-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <span className="text-xl">🩸</span>
+                <span className="text-xl">{isOnPeriod ? '✓' : '🩸'}</span>
               </div>
               <span className="text-base font-semibold text-white">
                 {isOnPeriod 
