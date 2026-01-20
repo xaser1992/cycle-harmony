@@ -405,22 +405,28 @@ export function UpdateSheet({
           <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Su' : 'Water'}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <motion.button
+          <button
             type="button"
-            onClick={() => setWaterGlasses(prev => Math.max(0, prev - 1))}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setWaterGlasses(prev => Math.max(0, prev - 1));
+            }}
             className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-            whileTap={{ scale: 0.9 }}
           >
             <Minus className="w-4 h-4 text-foreground/70" />
-          </motion.button>
-          <motion.button
+          </button>
+          <button
             type="button"
-            onClick={() => setWaterGlasses(prev => prev + 1)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setWaterGlasses(prev => prev + 1);
+            }}
             className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-            whileTap={{ scale: 0.9 }}
           >
             <Plus className="w-4 h-4 text-foreground/70" />
-          </motion.button>
+          </button>
         </div>
       </div>
       <div className="flex items-baseline gap-1">
@@ -440,11 +446,15 @@ export function UpdateSheet({
 
   // Weight Card - with +/- controls like water
   const WeightCard = () => {
-    const incrementWeight = () => {
+    const incrementWeight = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       setWeight(prev => (prev ?? 60) + 0.1);
     };
     
-    const decrementWeight = () => {
+    const decrementWeight = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       setWeight(prev => Math.max(30, (prev ?? 60) - 0.1));
     };
 
