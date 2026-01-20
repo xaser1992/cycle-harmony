@@ -351,19 +351,19 @@ export function UpdateSheet({
 
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
+        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
       >
-        <h3 className="font-semibold text-foreground mb-3 text-base">
+        <h3 className="font-medium text-foreground mb-2 text-sm">
           {language === 'tr' ? category.title.tr : category.title.en}
         </h3>
         {'subtitle' in category && category.subtitle && (
-          <p className="text-sm text-muted-foreground mb-3 -mt-2">
+          <p className="text-xs text-muted-foreground mb-2 -mt-1">
             {language === 'tr' ? (category.subtitle as {tr: string; en: string}).tr : (category.subtitle as {tr: string; en: string}).en}
           </p>
         )}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {filteredItems.map((item) => {
             const isSelected = selected.includes(item.id);
             return (
@@ -371,10 +371,10 @@ export function UpdateSheet({
                 key={item.id}
                 type="button"
                 onClick={() => toggleSelection(item.id, selected, setSelected, singleSelect)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all border ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${
                   isSelected
-                    ? `${category.chipSelected} border-transparent shadow-md`
-                    : `${category.chipBase} border-transparent hover:opacity-80`
+                    ? `${category.chipSelected} shadow-sm`
+                    : `${category.chipBase} hover:opacity-80`
                 }`}
                 style={{
                   touchAction: 'manipulation',
@@ -382,7 +382,7 @@ export function UpdateSheet({
                 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span className="text-lg">{item.emoji}</span>
+                <span className="text-sm">{item.emoji}</span>
                 <span className="whitespace-nowrap">{language === 'tr' ? item.tr : item.en}</span>
               </motion.button>
             );
@@ -395,39 +395,39 @@ export function UpdateSheet({
   // Water Tracking Card
   const WaterCard = () => (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
+      className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">💧</span>
-          <span className="font-semibold text-foreground">{language === 'tr' ? 'Su' : 'Water'}</span>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-lg">💧</span>
+          <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Su' : 'Water'}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <motion.button
             type="button"
             onClick={() => setWaterGlasses(prev => Math.max(0, prev - 1))}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
             whileTap={{ scale: 0.9 }}
           >
-            <Minus className="w-5 h-5 text-foreground/70" />
+            <Minus className="w-4 h-4 text-foreground/70" />
           </motion.button>
           <motion.button
             type="button"
             onClick={() => setWaterGlasses(prev => prev + 1)}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
             whileTap={{ scale: 0.9 }}
           >
-            <Plus className="w-5 h-5 text-foreground/70" />
+            <Plus className="w-4 h-4 text-foreground/70" />
           </motion.button>
         </div>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-4xl font-bold text-foreground">{(waterGlasses * 0.25).toFixed(2).replace('.', ',')}</span>
-        <span className="text-muted-foreground">/ {waterGoal.toFixed(2).replace('.', ',')} L</span>
+        <span className="text-2xl font-bold text-foreground">{(waterGlasses * 0.25).toFixed(2).replace('.', ',')}</span>
+        <span className="text-sm text-muted-foreground">/ {waterGoal.toFixed(2).replace('.', ',')} L</span>
       </div>
-      <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+      <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
         <motion.div 
           className="h-full bg-sky-400 rounded-full"
           initial={{ width: 0 }}
@@ -441,34 +441,34 @@ export function UpdateSheet({
   // Weight Card
   const WeightCard = () => (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
+      className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">⚖️</span>
-          <span className="font-semibold text-foreground">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-lg">⚖️</span>
+          <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <motion.button
             type="button"
             onClick={() => setWeight(null)}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
             whileTap={{ scale: 0.9 }}
           >
-            <Trash2 className="w-4 h-4 text-foreground/70" />
+            <Trash2 className="w-3.5 h-3.5 text-foreground/70" />
           </motion.button>
           <motion.button
             type="button"
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
             whileTap={{ scale: 0.9 }}
           >
-            <Edit3 className="w-4 h-4 text-foreground/70" />
+            <Edit3 className="w-3.5 h-3.5 text-foreground/70" />
           </motion.button>
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div className="flex-1">
           <div className="flex items-baseline gap-1">
             <Input
@@ -476,15 +476,15 @@ export function UpdateSheet({
               value={weight ?? ''}
               onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : null)}
               placeholder="60"
-              className="text-4xl font-bold h-auto py-1 px-0 border-0 bg-transparent w-24 focus-visible:ring-0"
+              className="text-2xl font-bold h-auto py-0.5 px-0 border-0 bg-transparent w-16 focus-visible:ring-0"
             />
-            <span className="text-xl text-muted-foreground">kg</span>
+            <span className="text-base text-muted-foreground">kg</span>
           </div>
         </div>
       </div>
-      <button className="flex items-center justify-between w-full mt-3 pt-3 border-t border-border/50 text-muted-foreground hover:text-foreground transition-colors">
-        <span className="text-sm">{language === 'tr' ? 'Grafiği görüntüle' : 'View graph'}</span>
-        <ChevronRight className="w-4 h-4" />
+      <button className="flex items-center justify-between w-full mt-2 pt-2 border-t border-border/40 text-muted-foreground hover:text-foreground transition-colors">
+        <span className="text-xs">{language === 'tr' ? 'Grafiği görüntüle' : 'View graph'}</span>
+        <ChevronRight className="w-3.5 h-3.5" />
       </button>
     </motion.div>
   );
@@ -551,20 +551,20 @@ export function UpdateSheet({
 
             {/* Search Bar */}
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={language === 'tr' ? 'Arama' : 'Search'}
-                className="pl-12 h-12 rounded-2xl bg-muted/50 border-0 text-base"
+                className="pl-9 h-10 rounded-xl bg-muted/50 border-0 text-sm"
               />
             </div>
           </div>
 
           {/* Scrollable Content */}
-          <ScrollArea className="flex-1 px-4">
-            <div className="py-4 space-y-4 pb-28">
+          <ScrollArea className="flex-1 px-3">
+            <div className="py-3 space-y-2.5 pb-24">
               {/* Flow Category */}
               {categoryHasMatches(CATEGORIES.flow) && (
                 <CategoryCard 
@@ -670,13 +670,13 @@ export function UpdateSheet({
               {/* Notes Section */}
               {!searchQuery && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
+                  className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
                 >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg">📝</span>
-                    <h3 className="font-semibold text-foreground text-base">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-sm">📝</span>
+                    <h3 className="font-medium text-foreground text-sm">
                       {language === 'tr' ? 'Notlar' : 'Notes'}
                     </h3>
                   </div>
@@ -684,8 +684,8 @@ export function UpdateSheet({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder={language === 'tr' ? 'Bugün hakkında bir şeyler yaz...' : 'Write something about today...'}
-                    className="rounded-xl resize-none border-border/50 focus:border-primary min-h-[100px] bg-muted/30"
-                    rows={4}
+                    className="rounded-lg resize-none border-border/40 focus:border-primary min-h-[70px] bg-muted/30 text-sm"
+                    rows={3}
                   />
                 </motion.div>
               )}
@@ -693,14 +693,14 @@ export function UpdateSheet({
           </ScrollArea>
 
           {/* Fixed Save Button */}
-          <div className="absolute bottom-0 left-0 right-0 px-4 py-4 bg-gradient-to-t from-card via-card to-transparent safe-area-bottom">
+          <div className="absolute bottom-0 left-0 right-0 px-3 py-3 bg-gradient-to-t from-card via-card to-transparent safe-area-bottom">
             <motion.div whileTap={{ scale: 0.98 }}>
               <Button
                 onClick={handleSave}
                 size="lg"
-                className="w-full rounded-2xl h-14 text-white font-semibold shadow-lg bg-gradient-to-r from-rose-400 to-pink-500"
+                className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose-400 to-pink-500"
               >
-                <Check className="w-5 h-5 mr-2" />
+                <Check className="w-4 h-4 mr-2" />
                 {language === 'tr' ? 'Kaydet' : 'Save'}
               </Button>
             </motion.div>
