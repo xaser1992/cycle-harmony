@@ -494,7 +494,7 @@ export default function CalendarPage() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className={`fixed inset-x-4 top-1/2 -translate-y-1/2 z-[101] rounded-3xl p-6 shadow-2xl overflow-hidden ${
+                className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 shadow-2xl overflow-y-auto ${
                   activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose-400 to-pink-500' :
                   activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet-400 to-purple-500' :
                   'bg-gradient-to-br from-cyan-400 to-teal-400'
