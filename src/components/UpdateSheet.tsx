@@ -1,7 +1,7 @@
 // 🌸 Update Bottom Sheet Component - Flo Inspired Categorized Design
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { X, Check, ChevronLeft, ChevronRight, Search, Plus, Minus, Trash2, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -25,23 +25,30 @@ interface UpdateSheetProps {
   initialTab?: 'flow' | 'symptoms' | 'mood';
 }
 
-// Extended types for more categories
-type VaginalDischarge = 'none' | 'slippery' | 'watery' | 'sticky' | 'egg_white' | 'spotting' | 'unusual' | 'white_clumpy' | 'gray';
-type Digestion = 'nausea' | 'bloating' | 'constipation' | 'diarrhea';
-type Activity = 'none' | 'yoga' | 'weights' | 'aerobics' | 'swimming' | 'team_sports' | 'running' | 'cycling' | 'walking';
-
-// Category data structures
+// Category data structures with proper colors
 const CATEGORIES = {
+  flow: {
+    title: { tr: 'Adet akışı', en: 'Period flow' },
+    bgClass: 'bg-rose-50 dark:bg-rose-950/30',
+    chipBase: 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-200',
+    chipSelected: 'bg-rose-500 text-white',
+    items: [
+      { id: 'none', emoji: '⚪', tr: 'Yok', en: 'None' },
+      { id: 'spotting', emoji: '🩸', tr: 'Lekelenme', en: 'Spotting' },
+      { id: 'light', emoji: '💧', tr: 'Hafif', en: 'Light' },
+      { id: 'medium', emoji: '💧💧', tr: 'Orta', en: 'Medium' },
+      { id: 'heavy', emoji: '💧💧💧', tr: 'Yoğun', en: 'Heavy' },
+    ]
+  },
   mood: {
     title: { tr: 'Ruh hali', en: 'Mood' },
-    color: 'amber',
-    bgColor: 'bg-amber-50',
-    chipBg: 'bg-amber-100',
-    chipSelected: 'bg-amber-400',
+    bgClass: 'bg-amber-50 dark:bg-amber-950/30',
+    chipBase: 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200',
+    chipSelected: 'bg-amber-500 text-white',
     items: [
       { id: 'calm', emoji: '😌', tr: 'Sakinim', en: 'Calm' },
       { id: 'happy', emoji: '🙂', tr: 'Mutluyum', en: 'Happy' },
-      { id: 'energetic', emoji: '🤩', tr: 'Enerjiğim', en: 'Energetic' },
+      { id: 'energetic', emoji: '🤩', tr: 'Enerjİğim', en: 'Energetic' },
       { id: 'playful', emoji: '😋', tr: 'Cıvıl cıvılım', en: 'Playful' },
       { id: 'moody', emoji: '🥺', tr: 'Ruh halim dengesiz', en: 'Moody' },
       { id: 'irritable', emoji: '😣', tr: 'Rahatsız hissediyorum', en: 'Irritable' },
@@ -56,18 +63,37 @@ const CATEGORIES = {
       { id: 'self_critical', emoji: '🤦', tr: 'Kendimi çok eleştiriyorum', en: 'Self-critical' },
     ]
   },
+  sexual: {
+    title: { tr: 'Cinsel ilişki ve cinsel ilişki isteği', en: 'Sex & sex drive' },
+    bgClass: 'bg-pink-50 dark:bg-pink-950/30',
+    chipBase: 'bg-pink-100 dark:bg-pink-900/50 text-pink-800 dark:text-pink-200',
+    chipSelected: 'bg-pink-500 text-white',
+    items: [
+      { id: 'no_sex', emoji: '💔', tr: 'Yapmadım', en: 'Did not have sex' },
+      { id: 'protected', emoji: '❤️', tr: 'Korunmalı cinsel ilişki', en: 'Protected sex' },
+      { id: 'unprotected', emoji: '💗', tr: 'Korunmasız cinsel ilişki', en: 'Unprotected sex' },
+      { id: 'oral', emoji: '💋', tr: 'Oral seks', en: 'Oral sex' },
+      { id: 'anal', emoji: '❣️', tr: 'Anal seks', en: 'Anal sex' },
+      { id: 'masturbation', emoji: '💕', tr: 'Mastürbasyon', en: 'Masturbation' },
+      { id: 'touching', emoji: '💞', tr: 'Haz veren dokunma', en: 'Intimate touching' },
+      { id: 'toys', emoji: '💝', tr: 'Seks oyuncakları', en: 'Sex toys' },
+      { id: 'orgasm', emoji: '✨', tr: 'Orgazm', en: 'Orgasm' },
+      { id: 'high_drive', emoji: '❤️', tr: 'Yüksek cinsel istek', en: 'High sex drive' },
+      { id: 'neutral_drive', emoji: '🧡', tr: 'Nötr seviyede cinsel istek', en: 'Neutral sex drive' },
+      { id: 'low_drive', emoji: '💛', tr: 'Düşük seviyede cinsel istek', en: 'Low sex drive' },
+    ]
+  },
   symptoms: {
     title: { tr: 'Belirtiler', en: 'Symptoms' },
-    color: 'pink',
-    bgColor: 'bg-pink-50',
-    chipBg: 'bg-pink-100',
-    chipSelected: 'bg-pink-400',
+    bgClass: 'bg-pink-50 dark:bg-pink-950/30',
+    chipBase: 'bg-pink-100 dark:bg-pink-900/50 text-pink-800 dark:text-pink-200',
+    chipSelected: 'bg-pink-400 text-white',
     items: [
       { id: 'all_good', emoji: '👍', tr: 'Her şey yolunda', en: 'All good' },
       { id: 'cramps', emoji: '🎯', tr: 'Kramp', en: 'Cramps' },
       { id: 'breast_tenderness', emoji: '🎯', tr: 'Göğüs Hassasiyeti', en: 'Breast tenderness' },
-      { id: 'headache', emoji: '👩🏽', tr: 'Baş Ağrısı', en: 'Headache' },
-      { id: 'acne', emoji: '👋🏼', tr: 'Akne', en: 'Acne' },
+      { id: 'headache', emoji: '🤕', tr: 'Baş Ağrısı', en: 'Headache' },
+      { id: 'acne', emoji: '😖', tr: 'Akne', en: 'Acne' },
       { id: 'backache', emoji: '🎯', tr: 'Bel Ağrısı', en: 'Back pain' },
       { id: 'fatigue', emoji: '🔋', tr: 'Halsizlik', en: 'Fatigue' },
       { id: 'cravings', emoji: '🧁', tr: 'Aşermeler', en: 'Cravings' },
@@ -79,10 +105,9 @@ const CATEGORIES = {
   },
   discharge: {
     title: { tr: 'Vajinal akıntı', en: 'Vaginal discharge' },
-    color: 'purple',
-    bgColor: 'bg-purple-50',
-    chipBg: 'bg-purple-100',
-    chipSelected: 'bg-purple-400',
+    bgClass: 'bg-purple-50 dark:bg-purple-950/30',
+    chipBase: 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200',
+    chipSelected: 'bg-purple-500 text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Akıntı yok', en: 'No discharge' },
       { id: 'slippery', emoji: '💧', tr: 'Kaygan', en: 'Slippery' },
@@ -97,10 +122,9 @@ const CATEGORIES = {
   },
   digestion: {
     title: { tr: 'Sindirim ve dışkı', en: 'Digestion' },
-    color: 'rose',
-    bgColor: 'bg-rose-50',
-    chipBg: 'bg-rose-100',
-    chipSelected: 'bg-rose-400',
+    bgClass: 'bg-rose-50 dark:bg-rose-950/30',
+    chipBase: 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-200',
+    chipSelected: 'bg-rose-400 text-white',
     items: [
       { id: 'nausea', emoji: '🤢', tr: 'Bulantı', en: 'Nausea' },
       { id: 'bloating', emoji: '🎈', tr: 'Şişkinlik', en: 'Bloating' },
@@ -108,12 +132,36 @@ const CATEGORIES = {
       { id: 'diarrhea', emoji: '💧', tr: 'İshal', en: 'Diarrhea' },
     ]
   },
+  pregnancy_test: {
+    title: { tr: 'Gebelik testi', en: 'Pregnancy test' },
+    bgClass: 'bg-orange-50 dark:bg-orange-950/30',
+    chipBase: 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200',
+    chipSelected: 'bg-orange-400 text-white',
+    items: [
+      { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
+      { id: 'positive', emoji: '➕', tr: 'Pozitif', en: 'Positive' },
+      { id: 'negative', emoji: '➖', tr: 'Negatif', en: 'Negative' },
+      { id: 'faint_line', emoji: '〰️', tr: 'Soluk çizgi', en: 'Faint line' },
+    ]
+  },
+  ovulation_test: {
+    title: { tr: 'Ovülasyon testi', en: 'Ovulation test' },
+    subtitle: { tr: 'Ovülasyon zamanınızı öğrenmek için kaydedin', en: 'Track to learn your ovulation time' },
+    bgClass: 'bg-teal-50 dark:bg-teal-950/30',
+    chipBase: 'bg-teal-100 dark:bg-teal-900/50 text-teal-800 dark:text-teal-200',
+    chipSelected: 'bg-teal-500 text-white',
+    items: [
+      { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
+      { id: 'positive', emoji: '➕', tr: 'Test: pozitif', en: 'Test: positive' },
+      { id: 'negative', emoji: '➖', tr: 'Test: negatif', en: 'Test: negative' },
+      { id: 'own_method', emoji: '📊', tr: 'Ovülasyon: kendi yöntemim', en: 'Ovulation: my own method' },
+    ]
+  },
   activity: {
     title: { tr: 'Fiziksel aktivite', en: 'Physical activity' },
-    color: 'green',
-    bgColor: 'bg-green-50',
-    chipBg: 'bg-green-100',
-    chipSelected: 'bg-green-500',
+    bgClass: 'bg-green-50 dark:bg-green-950/30',
+    chipBase: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200',
+    chipSelected: 'bg-green-500 text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Egzersiz yapmadım', en: 'No exercise' },
       { id: 'yoga', emoji: '🧘', tr: 'Yoga', en: 'Yoga' },
@@ -128,10 +176,9 @@ const CATEGORIES = {
   },
   other: {
     title: { tr: 'Diğer', en: 'Other' },
-    color: 'orange',
-    bgColor: 'bg-orange-50',
-    chipBg: 'bg-orange-100',
-    chipSelected: 'bg-orange-400',
+    bgClass: 'bg-orange-50 dark:bg-orange-950/30',
+    chipBase: 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200',
+    chipSelected: 'bg-orange-400 text-white',
     items: [
       { id: 'travel', emoji: '📍', tr: 'Seyahat', en: 'Travel' },
       { id: 'stress', emoji: '⚡', tr: 'Stres', en: 'Stress' },
@@ -143,20 +190,6 @@ const CATEGORIES = {
       { id: 'alcohol', emoji: '🍷', tr: 'Alkol', en: 'Alcohol' },
     ]
   },
-  flow: {
-    title: { tr: 'Adet akışı', en: 'Period flow' },
-    color: 'rose',
-    bgColor: 'bg-rose-50',
-    chipBg: 'bg-rose-100',
-    chipSelected: 'bg-rose-500',
-    items: [
-      { id: 'none', emoji: '⚪', tr: 'Yok', en: 'None' },
-      { id: 'spotting', emoji: '🩸', tr: 'Lekelenme', en: 'Spotting' },
-      { id: 'light', emoji: '💧', tr: 'Hafif', en: 'Light' },
-      { id: 'medium', emoji: '💧💧', tr: 'Orta', en: 'Medium' },
-      { id: 'heavy', emoji: '💧💧💧', tr: 'Yoğun', en: 'Heavy' },
-    ]
-  }
 };
 
 export function UpdateSheet({ 
@@ -174,12 +207,20 @@ export function UpdateSheet({
   // Selection states
   const [flowLevel, setFlowLevel] = useState<FlowLevel>('none');
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [selectedSexual, setSelectedSexual] = useState<string[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedDischarge, setSelectedDischarge] = useState<string[]>([]);
   const [selectedDigestion, setSelectedDigestion] = useState<string[]>([]);
+  const [selectedPregnancyTest, setSelectedPregnancyTest] = useState<string[]>([]);
+  const [selectedOvulationTest, setSelectedOvulationTest] = useState<string[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<string[]>([]);
   const [selectedOther, setSelectedOther] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
+  
+  // Water and Weight tracking
+  const [waterGlasses, setWaterGlasses] = useState(0);
+  const [weight, setWeight] = useState<number | null>(null);
+  const waterGoal = 2.25; // Liters
 
   // Reset form when opened
   useEffect(() => {
@@ -191,21 +232,22 @@ export function UpdateSheet({
         setSelectedSymptoms(existingEntry.symptoms);
         setSelectedMoods(existingEntry.mood ? [existingEntry.mood] : []);
         setNotes(existingEntry.notes || '');
-        // Reset extended categories
-        setSelectedDischarge([]);
-        setSelectedDigestion([]);
-        setSelectedActivity([]);
-        setSelectedOther([]);
       } else {
         setFlowLevel('none');
         setSelectedSymptoms([]);
         setSelectedMoods([]);
-        setSelectedDischarge([]);
-        setSelectedDigestion([]);
-        setSelectedActivity([]);
-        setSelectedOther([]);
         setNotes('');
       }
+      // Reset extended categories
+      setSelectedSexual([]);
+      setSelectedDischarge([]);
+      setSelectedDigestion([]);
+      setSelectedPregnancyTest([]);
+      setSelectedOvulationTest([]);
+      setSelectedActivity([]);
+      setSelectedOther([]);
+      setWaterGlasses(0);
+      setWeight(null);
     }
   }, [isOpen, existingEntry, initialDate]);
 
@@ -229,7 +271,7 @@ export function UpdateSheet({
     singleSelect = false
   ) => {
     if (singleSelect) {
-      setSelected([id]);
+      setSelected(prev => prev.includes(id) ? [] : [id]);
     } else {
       setSelected(prev => 
         prev.includes(id) 
@@ -246,6 +288,10 @@ export function UpdateSheet({
       symptoms: selectedSymptoms as Symptom[],
       mood: selectedMoods[0] as Mood | undefined,
       notes: notes.trim() || undefined,
+      intimacy: selectedSexual.length > 0,
+      protection: selectedSexual.includes('protected'),
+      testResult: selectedPregnancyTest.includes('positive') ? 'positive' : 
+                  selectedPregnancyTest.includes('negative') ? 'negative' : null,
     };
     onSave(entry);
     onClose();
@@ -262,6 +308,11 @@ export function UpdateSheet({
       item.tr.toLowerCase().includes(query) || 
       item.en.toLowerCase().includes(query)
     );
+  };
+
+  // Check if category has matching items
+  const categoryHasMatches = (category: typeof CATEGORIES.mood) => {
+    return filterItems(category.items).length > 0;
   };
 
   // Category Card Component
@@ -283,11 +334,16 @@ export function UpdateSheet({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl p-4 shadow-sm border border-border/30"
+        className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
       >
         <h3 className="font-semibold text-foreground mb-3 text-base">
           {language === 'tr' ? category.title.tr : category.title.en}
         </h3>
+        {'subtitle' in category && category.subtitle && (
+          <p className="text-sm text-muted-foreground mb-3 -mt-2">
+            {language === 'tr' ? (category.subtitle as {tr: string; en: string}).tr : (category.subtitle as {tr: string; en: string}).en}
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
           {filteredItems.map((item) => {
             const isSelected = selected.includes(item.id);
@@ -296,10 +352,10 @@ export function UpdateSheet({
                 key={item.id}
                 type="button"
                 onClick={() => toggleSelection(item.id, selected, setSelected, singleSelect)}
-                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all border ${
                   isSelected
-                    ? `${category.chipSelected} text-white shadow-md`
-                    : `${category.chipBg} text-foreground/80 hover:opacity-80`
+                    ? `${category.chipSelected} border-transparent shadow-md`
+                    : `${category.chipBase} border-transparent hover:opacity-80`
                 }`}
                 style={{
                   touchAction: 'manipulation',
@@ -307,8 +363,8 @@ export function UpdateSheet({
                 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span className="text-base">{item.emoji}</span>
-                <span>{language === 'tr' ? item.tr : item.en}</span>
+                <span className="text-lg">{item.emoji}</span>
+                <span className="whitespace-nowrap">{language === 'tr' ? item.tr : item.en}</span>
               </motion.button>
             );
           })}
@@ -316,6 +372,103 @@ export function UpdateSheet({
       </motion.div>
     );
   };
+
+  // Water Tracking Card
+  const WaterCard = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">💧</span>
+          <span className="font-semibold text-foreground">{language === 'tr' ? 'Su' : 'Water'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <motion.button
+            type="button"
+            onClick={() => setWaterGlasses(prev => Math.max(0, prev - 1))}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            whileTap={{ scale: 0.9 }}
+          >
+            <Minus className="w-5 h-5 text-foreground/70" />
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={() => setWaterGlasses(prev => prev + 1)}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            whileTap={{ scale: 0.9 }}
+          >
+            <Plus className="w-5 h-5 text-foreground/70" />
+          </motion.button>
+        </div>
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-4xl font-bold text-foreground">{(waterGlasses * 0.25).toFixed(2).replace('.', ',')}</span>
+        <span className="text-muted-foreground">/ {waterGoal.toFixed(2).replace('.', ',')} L</span>
+      </div>
+      <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+        <motion.div 
+          className="h-full bg-sky-400 rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
+    </motion.div>
+  );
+
+  // Weight Card
+  const WeightCard = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">⚖️</span>
+          <span className="font-semibold text-foreground">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <motion.button
+            type="button"
+            onClick={() => setWeight(null)}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            whileTap={{ scale: 0.9 }}
+          >
+            <Trash2 className="w-4 h-4 text-foreground/70" />
+          </motion.button>
+          <motion.button
+            type="button"
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+            whileTap={{ scale: 0.9 }}
+          >
+            <Edit3 className="w-4 h-4 text-foreground/70" />
+          </motion.button>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <div className="flex items-baseline gap-1">
+            <Input
+              type="number"
+              value={weight ?? ''}
+              onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : null)}
+              placeholder="60"
+              className="text-4xl font-bold h-auto py-1 px-0 border-0 bg-transparent w-24 focus-visible:ring-0"
+            />
+            <span className="text-xl text-muted-foreground">kg</span>
+          </div>
+        </div>
+      </div>
+      <button className="flex items-center justify-between w-full mt-3 pt-3 border-t border-border/50 text-muted-foreground hover:text-foreground transition-colors">
+        <span className="text-sm">{language === 'tr' ? 'Grafiği görüntüle' : 'View graph'}</span>
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    </motion.div>
+  );
 
   return (
     <Sheet open={isOpen} onOpenChange={() => {}}>
@@ -392,80 +545,131 @@ export function UpdateSheet({
 
           {/* Scrollable Content */}
           <ScrollArea className="flex-1 px-4">
-            <div className="py-4 space-y-4 pb-24">
+            <div className="py-4 space-y-4 pb-28">
               {/* Flow Category */}
-              <CategoryCard 
-                category={CATEGORIES.flow}
-                selected={[flowLevel]}
-                setSelected={(val) => {
-                  const newVal = typeof val === 'function' ? val([flowLevel]) : val;
-                  setFlowLevel(newVal[0] as FlowLevel || 'none');
-                }}
-                singleSelect
-              />
+              {categoryHasMatches(CATEGORIES.flow) && (
+                <CategoryCard 
+                  category={CATEGORIES.flow}
+                  selected={[flowLevel]}
+                  setSelected={(val) => {
+                    const newVal = typeof val === 'function' ? val([flowLevel]) : val;
+                    setFlowLevel((newVal[0] as FlowLevel) || 'none');
+                  }}
+                  singleSelect
+                />
+              )}
 
               {/* Mood Category */}
-              <CategoryCard 
-                category={CATEGORIES.mood}
-                selected={selectedMoods}
-                setSelected={setSelectedMoods}
-              />
+              {categoryHasMatches(CATEGORIES.mood) && (
+                <CategoryCard 
+                  category={CATEGORIES.mood}
+                  selected={selectedMoods}
+                  setSelected={setSelectedMoods}
+                />
+              )}
+
+              {/* Sexual Activity Category */}
+              {categoryHasMatches(CATEGORIES.sexual) && (
+                <CategoryCard 
+                  category={CATEGORIES.sexual}
+                  selected={selectedSexual}
+                  setSelected={setSelectedSexual}
+                />
+              )}
 
               {/* Symptoms Category */}
-              <CategoryCard 
-                category={CATEGORIES.symptoms}
-                selected={selectedSymptoms}
-                setSelected={setSelectedSymptoms}
-              />
+              {categoryHasMatches(CATEGORIES.symptoms) && (
+                <CategoryCard 
+                  category={CATEGORIES.symptoms}
+                  selected={selectedSymptoms}
+                  setSelected={setSelectedSymptoms}
+                />
+              )}
 
               {/* Discharge Category */}
-              <CategoryCard 
-                category={CATEGORIES.discharge}
-                selected={selectedDischarge}
-                setSelected={setSelectedDischarge}
-              />
+              {categoryHasMatches(CATEGORIES.discharge) && (
+                <CategoryCard 
+                  category={CATEGORIES.discharge}
+                  selected={selectedDischarge}
+                  setSelected={setSelectedDischarge}
+                />
+              )}
 
               {/* Digestion Category */}
-              <CategoryCard 
-                category={CATEGORIES.digestion}
-                selected={selectedDigestion}
-                setSelected={setSelectedDigestion}
-              />
+              {categoryHasMatches(CATEGORIES.digestion) && (
+                <CategoryCard 
+                  category={CATEGORIES.digestion}
+                  selected={selectedDigestion}
+                  setSelected={setSelectedDigestion}
+                />
+              )}
+
+              {/* Pregnancy Test Category */}
+              {categoryHasMatches(CATEGORIES.pregnancy_test) && (
+                <CategoryCard 
+                  category={CATEGORIES.pregnancy_test}
+                  selected={selectedPregnancyTest}
+                  setSelected={setSelectedPregnancyTest}
+                  singleSelect
+                />
+              )}
+
+              {/* Ovulation Test Category */}
+              {categoryHasMatches(CATEGORIES.ovulation_test) && (
+                <CategoryCard 
+                  category={CATEGORIES.ovulation_test}
+                  selected={selectedOvulationTest}
+                  setSelected={setSelectedOvulationTest}
+                  singleSelect
+                />
+              )}
 
               {/* Activity Category */}
-              <CategoryCard 
-                category={CATEGORIES.activity}
-                selected={selectedActivity}
-                setSelected={setSelectedActivity}
-              />
+              {categoryHasMatches(CATEGORIES.activity) && (
+                <CategoryCard 
+                  category={CATEGORIES.activity}
+                  selected={selectedActivity}
+                  setSelected={setSelectedActivity}
+                />
+              )}
 
               {/* Other Category */}
-              <CategoryCard 
-                category={CATEGORIES.other}
-                selected={selectedOther}
-                setSelected={setSelectedOther}
-              />
+              {categoryHasMatches(CATEGORIES.other) && (
+                <CategoryCard 
+                  category={CATEGORIES.other}
+                  selected={selectedOther}
+                  setSelected={setSelectedOther}
+                />
+              )}
+
+              {/* Water Tracking */}
+              {!searchQuery && <WaterCard />}
+
+              {/* Weight Tracking */}
+              {!searchQuery && <WeightCard />}
 
               {/* Notes Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-card rounded-2xl p-4 shadow-sm border border-border/30"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-lg">📝</span>
-                  <h3 className="font-semibold text-foreground text-base">
-                    {language === 'tr' ? 'Notlar' : 'Notes'}
-                  </h3>
-                </div>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder={language === 'tr' ? 'Bugün hakkında bir şeyler yaz...' : 'Write something about today...'}
-                  className="rounded-xl resize-none border-border/50 focus:border-primary min-h-[100px] bg-muted/30"
-                  rows={4}
-                />
-              </motion.div>
+              {!searchQuery && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-card rounded-2xl p-4 shadow-sm border border-border/50"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">📝</span>
+                    <h3 className="font-semibold text-foreground text-base">
+                      {language === 'tr' ? 'Notlar' : 'Notes'}
+                    </h3>
+                  </div>
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder={language === 'tr' ? 'Bugün hakkında bir şeyler yaz...' : 'Write something about today...'}
+                    className="rounded-xl resize-none border-border/50 focus:border-primary min-h-[100px] bg-muted/30"
+                    rows={4}
+                  />
+                </motion.div>
+              )}
             </div>
           </ScrollArea>
 
