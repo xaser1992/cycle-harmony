@@ -500,17 +500,21 @@ export default function CalendarPage() {
                   'bg-gradient-to-br from-cyan-400 to-teal-400'
                 }`}
               >
-                {/* Close Button */}
+                {/* Close Button - Fixed position with high z-index */}
                 <button
-                  onClick={() => setActiveInfoCard(null)}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveInfoCard(null);
+                  }}
+                  className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>
 
                 {/* Period Info */}
                 {activeInfoCard === 'period' && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
                       <motion.span 
                         className="text-5xl"
@@ -579,7 +583,7 @@ export default function CalendarPage() {
 
                 {/* Ovulation Info */}
                 {activeInfoCard === 'ovulation' && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
                       <motion.div
                         animate={{ scale: [1, 1.15, 1] }}
@@ -658,7 +662,7 @@ export default function CalendarPage() {
                   const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
                   
                   return (
-                    <div className="space-y-4">
+                    <div className="space-y-4 pt-2">
                       <div className="flex items-center gap-4">
                         <motion.div
                           animate={{ y: [0, -5, 0] }}
