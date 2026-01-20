@@ -104,7 +104,7 @@ export default function StatsPage() {
       }));
   }, [entries]);
 
-  // Weight stats for summary with target
+  // Weight stats for summary with target from user settings
   const weightStats = useMemo(() => {
     const weightsWithData = entries.filter(e => e.weight);
     if (weightsWithData.length === 0) return null;
@@ -128,8 +128,8 @@ export default function StatsPage() {
       ? Math.round(monthlyWeights.reduce((sum, e) => sum + (e.weight || 0), 0) / monthlyWeights.length * 10) / 10
       : latestWeight;
     
-    // Target weight (could be stored in settings, for now use a default calculation)
-    const targetWeight = 60; // Default target, can be made configurable
+    // Target weight from user settings
+    const targetWeight = userSettings?.targetWeight || 60;
     
     return {
       current: latestWeight,

@@ -83,6 +83,9 @@ export interface UserSettings {
   birthDate?: string; // ISO date
   healthConditions?: HealthCondition[];
   contraceptiveMethod?: ContraceptiveMethod;
+  // Wellness goals
+  targetWeight?: number; // kg
+  dailyWaterGoal?: number; // glasses (default: 9 = 2.25L)
 }
 
 export type HealthCondition = 
@@ -163,6 +166,8 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   birthDate: undefined,
   healthConditions: [],
   contraceptiveMethod: 'none',
+  targetWeight: 60,
+  dailyWaterGoal: 9,
 };
 
 // Symptom labels
