@@ -134,7 +134,7 @@ export const DEFAULT_CYCLE_SETTINGS: CycleSettings = {
   cycleLength: 28,
   periodLength: 5,
   lutealPhase: 14,
-  lastPeriodStart: new Date().toISOString().split('T')[0],
+  lastPeriodStart: '', // Empty by default - must be set during onboarding
 };
 
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
