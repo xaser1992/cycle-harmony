@@ -62,6 +62,36 @@ export default function StatsPage() {
     openUpdateSheet({ initialTab: tab || 'flow' });
   };
 
+// Water intake data - last 7 days
+  const waterData = useMemo(() => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = subWeeks(new Date(), 0);
+      const dayDate = new Date(date);
+      dayDate.setDate(dayDate.getDate() - i);
+      const dateStr = format(dayDate, 'yyyy-MM-dd');
+      const entry = entries.find(e => e.date === dateStr);
+      days.push({
+        day: format(dayDate, 'EEE', { locale: tr }),
+        glasses: entry?.waterGlasses || 0,
+        goal: 9, // ~2.25L = 9 glasses of 250ml
+      });
+    }
+    return days;
+  }, [entries]);
+
+  // Weight data - last 30 days (only days with weight entries)
+  const weightData = useMemo(() => {
+    const thirtyDaysAgo = subMonths(new Date(), 1);
+    return entries
+      .filter(e => e.weight && parseISO(e.date) >= thirtyDaysAgo)
+      .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime())
+      .map(e => ({
+        date: format(parseISO(e.date), 'd MMM', { locale: tr }),
+        weight: e.weight,
+      }));
+  }, [entries]);
+
   // Generate last 6 months cycle data
   const cycleLengthData = useMemo(() => {
     const months = [];
@@ -545,6 +575,98 @@ export default function StatsPage() {
                   </ResponsiveContainer>
                 </div>
               </ChartCard>
+
+              {/* Water Intake Chart */}
+              <ChartCard
+                title={userSettings?.language === 'en' ? 'Water Intake' : 'Su Tüketimi'}
+                subtitle={userSettings?.language === 'en' ? 'Last 7 days' : 'Son 7 gün'}
+                icon={<span className="text-lg">💧</span>}
+              >
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={waterData}>
+                      <XAxis 
+                        dataKey="day" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <YAxis 
+                        domain={[0, 12]}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`${value} ${userSettings?.language === 'en' ? 'glasses' : 'bardak'}`, userSettings?.language === 'en' ? 'Water' : 'Su']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="glasses" 
+                        radius={[6, 6, 0, 0]}
+                        fill="#60A5FA"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </ChartCard>
+
+              {/* Weight Trend Chart */}
+              {weightData.length > 0 && (
+                <ChartCard
+                  title={userSettings?.language === 'en' ? 'Weight Trend' : 'Ağırlık Trendi'}
+                  subtitle={userSettings?.language === 'en' ? 'Last 30 days' : 'Son 30 gün'}
+                  icon={<span className="text-lg">⚖️</span>}
+                >
+                  <div className="h-44">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={weightData}>
+                        <defs>
+                          <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={CHART_COLORS.accent} stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor={CHART_COLORS.accent} stopOpacity={0.1}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                        <XAxis 
+                          dataKey="date" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        />
+                        <YAxis 
+                          domain={['dataMin - 2', 'dataMax + 2']}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`${value} kg`, userSettings?.language === 'en' ? 'Weight' : 'Ağırlık']}
+                          contentStyle={{ 
+                            backgroundColor: 'hsl(var(--card))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="weight" 
+                          stroke={CHART_COLORS.accent}
+                          fillOpacity={1}
+                          fill="url(#colorWeight)"
+                          strokeWidth={2}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </ChartCard>
+              )}
 
               {/* Period Duration Trend - Bar Chart */}
               <ChartCard
