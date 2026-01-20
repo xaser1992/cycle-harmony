@@ -500,13 +500,28 @@ export function UpdateSheet({
       >
         <div className="flex flex-col h-full bg-muted/30">
           {/* Header with Date Navigation - Pull to dismiss */}
-          <motion.div 
-            className="bg-card border-b border-border/30 px-4 pt-4 pb-3 rounded-t-[2rem] cursor-grab active:cursor-grabbing"
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.3 }}
-            onDragEnd={(_, info) => {
-              if (info.offset.y > 80) {
+          <div 
+            className="bg-card border-b border-border/30 px-4 pt-4 pb-3 rounded-t-[2rem] cursor-grab active:cursor-grabbing touch-pan-y"
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              (e.currentTarget as HTMLElement).dataset.startY = String(touch.clientY);
+            }}
+            onTouchMove={(e) => {
+              const touch = e.touches[0];
+              const startY = Number((e.currentTarget as HTMLElement).dataset.startY || 0);
+              const deltaY = touch.clientY - startY;
+              if (deltaY > 0) {
+                (e.currentTarget as HTMLElement).style.transform = `translateY(${Math.min(deltaY * 0.5, 60)}px)`;
+                (e.currentTarget as HTMLElement).style.opacity = String(1 - deltaY / 300);
+              }
+            }}
+            onTouchEnd={(e) => {
+              const startY = Number((e.currentTarget as HTMLElement).dataset.startY || 0);
+              const endY = e.changedTouches[0].clientY;
+              const deltaY = endY - startY;
+              (e.currentTarget as HTMLElement).style.transform = '';
+              (e.currentTarget as HTMLElement).style.opacity = '';
+              if (deltaY > 80) {
                 onClose();
               }
             }}
@@ -570,7 +585,7 @@ export function UpdateSheet({
                 className="pl-9 h-10 rounded-xl bg-muted/50 border-0 text-sm"
               />
             </div>
-          </motion.div>
+          </div>
 
           {/* Scrollable Content */}
           <ScrollArea className="flex-1 px-3">

@@ -16,7 +16,8 @@ import {
   Tooltip,
   CartesianGrid,
   AreaChart,
-  Area
+  Area,
+  ReferenceLine
 } from 'recharts';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
@@ -80,6 +81,17 @@ export default function StatsPage() {
     return days;
   }, [entries]);
 
+  // Water stats for summary
+  const waterStats = useMemo(() => {
+    const totalGlasses = waterData.reduce((sum, d) => sum + d.glasses, 0);
+    const daysWithData = waterData.filter(d => d.glasses > 0).length;
+    return {
+      todayGlasses: waterData[waterData.length - 1]?.glasses || 0,
+      weeklyAvg: daysWithData > 0 ? Math.round(totalGlasses / daysWithData * 10) / 10 : 0,
+      totalWeek: totalGlasses,
+    };
+  }, [waterData]);
+
   // Weight data - last 30 days (only days with weight entries)
   const weightData = useMemo(() => {
     const thirtyDaysAgo = subMonths(new Date(), 1);
@@ -90,6 +102,42 @@ export default function StatsPage() {
         date: format(parseISO(e.date), 'd MMM', { locale: tr }),
         weight: e.weight,
       }));
+  }, [entries]);
+
+  // Weight stats for summary with target
+  const weightStats = useMemo(() => {
+    const weightsWithData = entries.filter(e => e.weight);
+    if (weightsWithData.length === 0) return null;
+    
+    const sortedByDate = weightsWithData.sort((a, b) => 
+      parseISO(b.date).getTime() - parseISO(a.date).getTime()
+    );
+    const latestWeight = sortedByDate[0]?.weight || 0;
+    
+    // Calculate weekly average (last 7 days)
+    const oneWeekAgo = subWeeks(new Date(), 1);
+    const weeklyWeights = weightsWithData.filter(e => parseISO(e.date) >= oneWeekAgo);
+    const weeklyAvg = weeklyWeights.length > 0 
+      ? Math.round(weeklyWeights.reduce((sum, e) => sum + (e.weight || 0), 0) / weeklyWeights.length * 10) / 10
+      : latestWeight;
+    
+    // Calculate monthly average
+    const oneMonthAgo = subMonths(new Date(), 1);
+    const monthlyWeights = weightsWithData.filter(e => parseISO(e.date) >= oneMonthAgo);
+    const monthlyAvg = monthlyWeights.length > 0 
+      ? Math.round(monthlyWeights.reduce((sum, e) => sum + (e.weight || 0), 0) / monthlyWeights.length * 10) / 10
+      : latestWeight;
+    
+    // Target weight (could be stored in settings, for now use a default calculation)
+    const targetWeight = 60; // Default target, can be made configurable
+    
+    return {
+      current: latestWeight,
+      weeklyAvg,
+      monthlyAvg,
+      target: targetWeight,
+      diff: Math.round((latestWeight - targetWeight) * 10) / 10,
+    };
   }, [entries]);
 
   // Generate last 6 months cycle data
@@ -616,13 +664,28 @@ export default function StatsPage() {
                 </div>
               </ChartCard>
 
-              {/* Weight Trend Chart */}
-              {weightData.length > 0 && (
+              {/* Weight Trend Chart with Target Line */}
+              {weightData.length > 0 && weightStats && (
                 <ChartCard
                   title={userSettings?.language === 'en' ? 'Weight Trend' : 'Ağırlık Trendi'}
                   subtitle={userSettings?.language === 'en' ? 'Last 30 days' : 'Son 30 gün'}
                   icon={<span className="text-lg">⚖️</span>}
                 >
+                  {/* Stats row */}
+                  <div className="flex gap-4 mb-3 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: CHART_COLORS.accent }} />
+                      <span className="text-muted-foreground">
+                        {userSettings?.language === 'en' ? 'Weekly' : 'Haftalık'}: <span className="font-medium text-foreground">{weightStats.weeklyAvg} kg</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-violet-400" />
+                      <span className="text-muted-foreground">
+                        {userSettings?.language === 'en' ? 'Monthly' : 'Aylık'}: <span className="font-medium text-foreground">{weightStats.monthlyAvg} kg</span>
+                      </span>
+                    </div>
+                  </div>
                   <div className="h-44">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={weightData}>
@@ -652,6 +715,19 @@ export default function StatsPage() {
                             border: '1px solid hsl(var(--border))',
                             borderRadius: '12px',
                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                          }}
+                        />
+                        {/* Target weight reference line */}
+                        <ReferenceLine 
+                          y={weightStats.target} 
+                          stroke="#F472B6" 
+                          strokeDasharray="5 5" 
+                          strokeWidth={2}
+                          label={{ 
+                            value: `${userSettings?.language === 'en' ? 'Target' : 'Hedef'}: ${weightStats.target} kg`, 
+                            position: 'insideTopRight',
+                            fill: '#F472B6',
+                            fontSize: 10
                           }}
                         />
                         <Area 
@@ -846,6 +922,64 @@ export default function StatsPage() {
                   </p>
                 </motion.div>
               </div>
+
+              {/* Water Summary Card */}
+              <motion.div
+                className="bg-gradient-to-br from-sky-400 to-blue-500 rounded-3xl p-5 shadow-lg shadow-blue-500/20"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
+                      <span className="text-xl">💧</span>
+                    </div>
+                    <p className="text-3xl font-bold text-white">{waterStats.todayGlasses}</p>
+                    <p className="text-sm text-white/80">
+                      {userSettings?.language === 'en' ? 'Glasses Today' : 'Bugün Bardak'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-white/60">
+                      {userSettings?.language === 'en' ? 'Weekly avg' : 'Haftalık ort.'}
+                    </p>
+                    <p className="text-lg font-semibold text-white">{waterStats.weeklyAvg}</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Weight Summary Card */}
+              {weightStats && (
+                <motion.div
+                  className="bg-gradient-to-br from-emerald-400 to-teal-500 rounded-3xl p-5 shadow-lg shadow-teal-500/20"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
+                        <span className="text-xl">⚖️</span>
+                      </div>
+                      <p className="text-3xl font-bold text-white">{weightStats.current}</p>
+                      <p className="text-sm text-white/80">kg</p>
+                    </div>
+                    <div className="text-right space-y-1">
+                      <div>
+                        <p className="text-xs text-white/60">
+                          {userSettings?.language === 'en' ? 'Target' : 'Hedef'}
+                        </p>
+                        <p className="text-sm font-semibold text-white">{weightStats.target} kg</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/60">
+                          {userSettings?.language === 'en' ? 'Diff' : 'Fark'}
+                        </p>
+                        <p className={`text-sm font-semibold ${weightStats.diff > 0 ? 'text-rose-200' : 'text-emerald-200'}`}>
+                          {weightStats.diff > 0 ? '+' : ''}{weightStats.diff} kg
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
 
               {/* Insight Card */}
               <motion.div
