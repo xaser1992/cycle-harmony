@@ -1,5 +1,5 @@
 // 🌸 Today Status Card Component - Performance Optimized
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPhaseInfo } from '@/lib/predictions';
@@ -9,6 +9,7 @@ import { format, parseISO, differenceInDays, addDays, eachDayOfInterval } from '
 import { tr } from 'date-fns/locale';
 import { X, ChevronRight, CalendarDays, Bell, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { App } from '@capacitor/app';
 
 // Fertility chance by days relative to ovulation
 const getFertilityChance = (daysFromOvulation: number): number => {
@@ -119,6 +120,24 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
   const [activeInfoCard, setActiveInfoCard] = useState<'period' | 'ovulation' | 'fertile' | null>(null);
+
+  // Android back button support for modals
+  useEffect(() => {
+    const isAnyModalOpen = showDetails || activeInfoCard !== null;
+    if (!isAnyModalOpen) return;
+
+    const backHandler = App.addListener('backButton', () => {
+      if (activeInfoCard) {
+        setActiveInfoCard(null);
+      } else if (showDetails) {
+        setShowDetails(false);
+      }
+    });
+
+    return () => {
+      backHandler.then(h => h.remove());
+    };
+  }, [showDetails, activeInfoCard]);
 
   const handleNavigateToCalendar = (dateStr: string) => {
     setActiveInfoCard(null);
@@ -302,7 +321,7 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
               </div>
 
-              {/* Close button */}
+              {/* Close button - Fixed position */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -310,7 +329,7 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
                   e.stopPropagation();
                   setShowDetails(false);
                 }}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center z-50 active:scale-90 transition-transform"
+                className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
@@ -391,23 +410,27 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className={`fixed inset-x-4 top-1/2 -translate-y-1/2 z-[101] rounded-3xl p-6 shadow-2xl overflow-hidden ${
+              className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 shadow-2xl overflow-y-auto ${
                 activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose-400 to-pink-500' :
                 activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet-400 to-purple-500' :
                 'bg-gradient-to-br from-cyan-400 to-teal-400'
               }`}
             >
-              {/* Close Button */}
+              {/* Close Button - Fixed position with high z-index */}
               <button
-                onClick={() => setActiveInfoCard(null)}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center z-10"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveInfoCard(null);
+                }}
+                className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
 
               {/* Period Info */}
               {activeInfoCard === 'period' && (
-                <div className="space-y-4">
+                <div className="space-y-4 pt-2">
                   <div className="flex items-center gap-4">
                     <motion.span 
                       className="text-5xl"
@@ -472,7 +495,7 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
 
               {/* Ovulation Info */}
               {activeInfoCard === 'ovulation' && (
-                <div className="space-y-4">
+                <div className="space-y-4 pt-2">
                   <div className="flex items-center gap-4">
                     <motion.div
                       animate={{ scale: [1, 1.15, 1] }}
@@ -545,8 +568,8 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
                 const fertileEnd = parseISO(prediction.fertileWindowEnd);
                 const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
                 
-                return (
-                  <div className="space-y-4">
+                  return (
+                    <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
                       <motion.div
                         animate={{ y: [0, -5, 0] }}
