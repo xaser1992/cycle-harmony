@@ -396,7 +396,13 @@ export default function CalendarPage() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <span className="text-2xl">🌸</span>
+                    <motion.span 
+                      className="text-2xl"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    >
+                      🌸
+                    </motion.span>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white">Sonraki Regl</p>
@@ -418,11 +424,16 @@ export default function CalendarPage() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
-                      <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
-                      <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
-                    </svg>
+                    <motion.div
+                      animate={{ scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
+                        <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
+                        <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
+                      </svg>
+                    </motion.div>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white">Yumurtlama</p>
@@ -444,11 +455,16 @@ export default function CalendarPage() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 21c-1.5-1.5-6-5-6-10a6 6 0 1 1 12 0c0 5-4.5 8.5-6 10z" fill="white" opacity="0.9" />
-                      <path d="M12 18c-1-1-4-3.5-4-7a4 4 0 1 1 8 0c0 3.5-3 6-4 7z" fill="#14b8a6" opacity="0.5" />
-                      <circle cx="10" cy="10" r="1.5" fill="white" opacity="0.8" />
-                    </svg>
+                    <motion.div
+                      animate={{ y: [0, -3, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 21c-1.5-1.5-6-5-6-10a6 6 0 1 1 12 0c0 5-4.5 8.5-6 10z" fill="white" opacity="0.9" />
+                        <path d="M12 18c-1-1-4-3.5-4-7a4 4 0 1 1 8 0c0 3.5-3 6-4 7z" fill="#14b8a6" opacity="0.5" />
+                        <circle cx="10" cy="10" r="1.5" fill="white" opacity="0.8" />
+                      </svg>
+                    </motion.div>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white">Doğurgan Dönem</p>
@@ -500,7 +516,13 @@ export default function CalendarPage() {
                 {activeInfoCard === 'period' && (
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
-                      <span className="text-5xl">🌸</span>
+                      <motion.span 
+                        className="text-5xl"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      >
+                        🌸
+                      </motion.span>
                       <div>
                         <h3 className="text-2xl font-bold text-white">Sonraki Regl</h3>
                         <p className="text-white/80">{format(parseISO(prediction!.nextPeriodStart), 'd MMMM EEEE', { locale: tr })}</p>
@@ -563,11 +585,16 @@ export default function CalendarPage() {
                 {activeInfoCard === 'ovulation' && (
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
-                      <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
-                        <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
-                        <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
-                      </svg>
+                      <motion.div
+                        animate={{ scale: [1, 1.15, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
+                          <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
+                          <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
+                        </svg>
+                      </motion.div>
                       <div>
                         <h3 className="text-2xl font-bold text-white">Yumurtlama Günü</h3>
                         <p className="text-white/80">{format(parseISO(prediction!.ovulationDate), 'd MMMM EEEE', { locale: tr })}</p>
@@ -637,11 +664,16 @@ export default function CalendarPage() {
                   return (
                     <div className="space-y-4 pt-2">
                       <div className="flex items-center gap-4">
-                        <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
-                          <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
-                          <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
-                        </svg>
+                        <motion.div
+                          animate={{ y: [0, -5, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
+                            <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
+                            <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
+                          </svg>
+                        </motion.div>
                         <div>
                           <h3 className="text-2xl font-bold text-white">Doğurgan Dönem</h3>
                           <p className="text-white/80">
