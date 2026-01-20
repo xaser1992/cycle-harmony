@@ -1,7 +1,7 @@
 // 🌸 Bottom Navigation Component - Ruh Halim Style Animated Icons
 import { useState, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 interface QuickAction {
@@ -99,69 +99,56 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
       {/* Glass background */}
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/30" />
 
-      {/* Quick Actions (portal) - avoids iOS hitbox bugs with backdrop-filter/stacking contexts */}
+      {/* Quick Actions (portal) - CSS-only animations for native performance */}
       {renderInBody(
-        <AnimatePresence>
-          {showQuickActions && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[9000] bg-black/30 backdrop-blur-sm"
-                onClick={() => setShowQuickActions(false)}
-              />
+        showQuickActions ? (
+          <>
+            <div
+              className="fixed inset-0 z-[9000] bg-black/30 backdrop-blur-sm animate-fade-in"
+              onClick={() => setShowQuickActions(false)}
+            />
 
-              {quickActions.map((action, index) => {
-                // Responsive button sizing based on viewport
-                const buttonSize = Math.min(60, window.innerWidth * 0.16);
-                // Responsive spacing: 20% of viewport width, clamped between 60-80px
-                const spacing = Math.max(60, Math.min(80, window.innerWidth * 0.2));
+            {quickActions.map((action, index) => {
+              const buttonSize = Math.min(60, window.innerWidth * 0.16);
+              const spacing = Math.max(60, Math.min(80, window.innerWidth * 0.2));
+              const positions = [
+                { x: window.innerWidth * 0.5 - spacing - buttonSize / 2, y: 85 },
+                { x: window.innerWidth * 0.5 - buttonSize / 2, y: 105 },
+                { x: window.innerWidth * 0.5 + spacing - buttonSize / 2, y: 85 },
+              ];
 
-                // Arc layout: left, center, right with equal distribution
-                const positions = [
-                  { x: window.innerWidth * 0.5 - spacing - buttonSize / 2, y: 85 },
-                  { x: window.innerWidth * 0.5 - buttonSize / 2, y: 105 },
-                  { x: window.innerWidth * 0.5 + spacing - buttonSize / 2, y: 85 },
-                ];
-
-                return (
-                  <motion.button
-                    key={action.tab}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0 }}
-                    transition={{ ...springConfig, delay: index * 0.05 }}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleQuickAction(action.tab);
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleQuickAction(action.tab);
-                    }}
-                    className={`fixed z-[9001] flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl cursor-pointer select-none`}
-                    style={{
-                      width: `${buttonSize}px`,
-                      height: `${buttonSize}px`,
-                      left: `${positions[index].x}px`,
-                      bottom: `calc(${positions[index].y}px + env(safe-area-inset-bottom))`,
-                      touchAction: 'manipulation',
-                      WebkitTapHighlightColor: 'transparent',
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <span className="text-xl pointer-events-none select-none">{action.icon}</span>
-                    <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none select-none">
-                      {action.label}
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </>
-          )}
-        </AnimatePresence>
+              return (
+                <button
+                  key={action.tab}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleQuickAction(action.tab);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleQuickAction(action.tab);
+                  }}
+                  className={`fixed z-[9001] flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl cursor-pointer select-none animate-scale-in active:scale-90 transition-transform`}
+                  style={{
+                    width: `${buttonSize}px`,
+                    height: `${buttonSize}px`,
+                    left: `${positions[index].x}px`,
+                    bottom: `calc(${positions[index].y}px + env(safe-area-inset-bottom))`,
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent',
+                    animationDelay: `${index * 50}ms`,
+                  }}
+                >
+                  <span className="text-xl pointer-events-none select-none">{action.icon}</span>
+                  <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none select-none">
+                    {action.label}
+                  </span>
+                </button>
+              );
+            })}
+          </>
+        ) : null
       )}
 
       <div className="relative flex items-center justify-around h-[68px] px-1">
@@ -177,10 +164,9 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
           ))}
         </div>
 
-        {/* Center FAB Button */}
+        {/* Center FAB Button - CSS-only for native performance */}
         <div className="relative -mt-8 mx-2">
-          {/* FAB Button */}
-          <motion.button
+          <button
             onClick={handleCenterPress}
             onTouchStart={handleLongPressStart}
             onTouchEnd={handleLongPressEnd}
@@ -188,24 +174,13 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
             onMouseDown={handleLongPressStart}
             onMouseUp={handleLongPressEnd}
             onMouseLeave={handleLongPressEnd}
-            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 flex items-center justify-center"
+            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 flex items-center justify-center active:scale-90 transition-transform duration-150"
             style={{
               boxShadow: '0 4px 20px -2px hsl(var(--primary) / 0.5), 0 0 30px -5px hsl(var(--primary) / 0.3)',
             }}
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.05 }}
-            animate={{ rotate: showQuickActions ? 45 : 0 }}
-            transition={springConfig}
           >
-            {/* Ripple effect ring */}
-            <motion.div
-              className="absolute inset-0 rounded-full border-2 border-white/30"
-              animate={showQuickActions ? { scale: [1, 1.3], opacity: [0.5, 0] } : {}}
-              transition={{ duration: 0.6, repeat: showQuickActions ? Infinity : 0 }}
-            />
-
             <svg
-              className="w-7 h-7 text-white"
+              className={`w-7 h-7 text-white transition-transform duration-200 ${showQuickActions ? 'rotate-45' : ''}`}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -216,7 +191,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-          </motion.button>
+          </button>
         </div>
 
         {/* Right tabs */}
