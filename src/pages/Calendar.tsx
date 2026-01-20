@@ -573,6 +573,117 @@ export default function CalendarPage() {
                         </div>
                       )}
 
+                      {/* Sexual Activity */}
+                      {entry?.sexualActivity && entry.sexualActivity.length > 0 && (
+                        <div className="p-3 rounded-2xl bg-pink-50 dark:bg-pink-950/30">
+                          <p className="text-xs text-muted-foreground mb-2">Cinsel Aktivite</p>
+                          <div className="flex flex-wrap gap-2">
+                            {entry.sexualActivity.map(item => (
+                              <span
+                                key={item}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-100 dark:bg-pink-900/50 text-xs font-medium text-pink-700 dark:text-pink-300"
+                              >
+                                💕 {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Discharge */}
+                      {entry?.discharge && entry.discharge.length > 0 && (
+                        <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/30">
+                          <p className="text-xs text-muted-foreground mb-2">Vajinal Akıntı</p>
+                          <div className="flex flex-wrap gap-2">
+                            {entry.discharge.map(item => (
+                              <span
+                                key={item}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/50 text-xs font-medium text-purple-700 dark:text-purple-300"
+                              >
+                                💧 {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Activity */}
+                      {entry?.activity && entry.activity.length > 0 && (
+                        <div className="p-3 rounded-2xl bg-green-50 dark:bg-green-950/30">
+                          <p className="text-xs text-muted-foreground mb-2">Fiziksel Aktivite</p>
+                          <div className="flex flex-wrap gap-2">
+                            {entry.activity.map(item => (
+                              <span
+                                key={item}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/50 text-xs font-medium text-green-700 dark:text-green-300"
+                              >
+                                🏃 {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Water Intake */}
+                      {entry?.waterGlasses && entry.waterGlasses > 0 && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-sky-50 dark:bg-sky-950/30">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center">
+                            <span className="text-lg">💧</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Su Tüketimi</p>
+                            <p className="font-semibold text-foreground">{(entry.waterGlasses * 0.25).toFixed(2)} L</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Weight */}
+                      {entry?.weight && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/30">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-400 to-gray-500 flex items-center justify-center">
+                            <span className="text-lg">⚖️</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Ağırlık</p>
+                            <p className="font-semibold text-foreground">{entry.weight} kg</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Pregnancy Test */}
+                      {entry?.pregnancyTest && entry.pregnancyTest !== 'not_taken' && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-50 dark:bg-orange-950/30">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                            <span className="text-lg">🧪</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Gebelik Testi</p>
+                            <p className="font-semibold text-foreground">
+                              {entry.pregnancyTest === 'positive' ? 'Pozitif' : 
+                               entry.pregnancyTest === 'negative' ? 'Negatif' : 
+                               entry.pregnancyTest === 'faint_line' ? 'Soluk çizgi' : entry.pregnancyTest}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Ovulation Test */}
+                      {entry?.ovulationTest && entry.ovulationTest !== 'not_taken' && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-teal-50 dark:bg-teal-950/30">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+                            <span className="text-lg">📊</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Ovülasyon Testi</p>
+                            <p className="font-semibold text-foreground">
+                              {entry.ovulationTest === 'positive' ? 'Pozitif' : 
+                               entry.ovulationTest === 'negative' ? 'Negatif' : 
+                               entry.ovulationTest === 'own_method' ? 'Kendi yöntemim' : entry.ovulationTest}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Notes */}
                       {entry?.notes && (
                         <div className="p-3 rounded-2xl bg-muted/50">

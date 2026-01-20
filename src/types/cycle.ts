@@ -46,12 +46,22 @@ export interface CycleSettings {
 export interface DayEntry {
   date: string; // ISO date
   flowLevel: FlowLevel;
-  symptoms: Symptom[];
-  mood?: Mood;
+  symptoms: string[]; // Extended to support all symptom types
+  mood?: string; // Extended to support all mood types
   notes?: string;
   intimacy?: boolean;
   protection?: boolean;
   testResult?: 'positive' | 'negative' | null;
+  // Extended tracking data
+  sexualActivity?: string[];
+  discharge?: string[];
+  digestion?: string[];
+  pregnancyTest?: string;
+  ovulationTest?: string;
+  activity?: string[];
+  other?: string[];
+  waterGlasses?: number;
+  weight?: number;
 }
 
 export interface NotificationPreferences {

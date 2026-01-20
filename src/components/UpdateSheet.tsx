@@ -229,25 +229,34 @@ export function UpdateSheet({
       setSearchQuery('');
       if (existingEntry) {
         setFlowLevel(existingEntry.flowLevel);
-        setSelectedSymptoms(existingEntry.symptoms);
+        setSelectedSymptoms(existingEntry.symptoms || []);
         setSelectedMoods(existingEntry.mood ? [existingEntry.mood] : []);
         setNotes(existingEntry.notes || '');
+        // Load extended data
+        setSelectedSexual(existingEntry.sexualActivity || []);
+        setSelectedDischarge(existingEntry.discharge || []);
+        setSelectedDigestion(existingEntry.digestion || []);
+        setSelectedPregnancyTest(existingEntry.pregnancyTest ? [existingEntry.pregnancyTest] : []);
+        setSelectedOvulationTest(existingEntry.ovulationTest ? [existingEntry.ovulationTest] : []);
+        setSelectedActivity(existingEntry.activity || []);
+        setSelectedOther(existingEntry.other || []);
+        setWaterGlasses(existingEntry.waterGlasses || 0);
+        setWeight(existingEntry.weight || null);
       } else {
         setFlowLevel('none');
         setSelectedSymptoms([]);
         setSelectedMoods([]);
         setNotes('');
+        setSelectedSexual([]);
+        setSelectedDischarge([]);
+        setSelectedDigestion([]);
+        setSelectedPregnancyTest([]);
+        setSelectedOvulationTest([]);
+        setSelectedActivity([]);
+        setSelectedOther([]);
+        setWaterGlasses(0);
+        setWeight(null);
       }
-      // Reset extended categories
-      setSelectedSexual([]);
-      setSelectedDischarge([]);
-      setSelectedDigestion([]);
-      setSelectedPregnancyTest([]);
-      setSelectedOvulationTest([]);
-      setSelectedActivity([]);
-      setSelectedOther([]);
-      setWaterGlasses(0);
-      setWeight(null);
     }
   }, [isOpen, existingEntry, initialDate]);
 
@@ -285,13 +294,23 @@ export function UpdateSheet({
     const entry: DayEntry = {
       date: format(currentDate, 'yyyy-MM-dd'),
       flowLevel,
-      symptoms: selectedSymptoms as Symptom[],
-      mood: selectedMoods[0] as Mood | undefined,
+      symptoms: selectedSymptoms,
+      mood: selectedMoods[0] || undefined,
       notes: notes.trim() || undefined,
       intimacy: selectedSexual.length > 0,
       protection: selectedSexual.includes('protected'),
       testResult: selectedPregnancyTest.includes('positive') ? 'positive' : 
                   selectedPregnancyTest.includes('negative') ? 'negative' : null,
+      // Extended data
+      sexualActivity: selectedSexual.length > 0 ? selectedSexual : undefined,
+      discharge: selectedDischarge.length > 0 ? selectedDischarge : undefined,
+      digestion: selectedDigestion.length > 0 ? selectedDigestion : undefined,
+      pregnancyTest: selectedPregnancyTest[0] || undefined,
+      ovulationTest: selectedOvulationTest[0] || undefined,
+      activity: selectedActivity.length > 0 ? selectedActivity : undefined,
+      other: selectedOther.length > 0 ? selectedOther : undefined,
+      waterGlasses: waterGlasses > 0 ? waterGlasses : undefined,
+      weight: weight || undefined,
     };
     onSave(entry);
     onClose();
