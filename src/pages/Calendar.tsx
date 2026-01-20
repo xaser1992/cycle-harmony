@@ -1,7 +1,7 @@
 // 🌸 Calendar Page - Flo Inspired Design with Medication Integration
-import { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pill } from 'lucide-react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Pill, X, Edit3 } from 'lucide-react';
 import { 
   format, 
   startOfMonth, 
@@ -20,8 +20,8 @@ import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
-import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { getMedicationLogsForDate, getMedications } from '@/lib/medicationStorage';
+import { FLOW_LABELS, SYMPTOM_LABELS, MOOD_LABELS } from '@/types/cycle';
 import type { DayEntry } from '@/types/cycle';
 import type { Medication, MedicationLog } from '@/types/medication';
 
@@ -37,13 +37,26 @@ export default function CalendarPage() {
     userSettings 
   } = useCycleData();
   
-  // Swipe navigation - tab arası geçiş için
-  useSwipeNavigation({ threshold: 60 });
-  
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showDayDetail, setShowDayDetail] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [medications, setMedications] = useState<Medication[]>([]);
   const [medicationLogs, setMedicationLogs] = useState<Record<string, MedicationLog[]>>({});
+
+  // Swipe handling for month navigation
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 50;
+    const velocity = 0.3;
+    
+    if (info.offset.x > threshold || info.velocity.x > velocity) {
+      setSwipeDirection('right');
+      setCurrentMonth(prev => subMonths(prev, 1));
+    } else if (info.offset.x < -threshold || info.velocity.x < -velocity) {
+      setSwipeDirection('left');
+      setCurrentMonth(prev => addMonths(prev, 1));
+    }
+  }, []);
 
   // Load medications and logs
   useEffect(() => {
@@ -136,11 +149,30 @@ export default function CalendarPage() {
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
-    openUpdateSheet({ date });
+    setShowDayDetail(true);
+  };
+
+  const handleEditDay = () => {
+    if (selectedDate) {
+      setShowDayDetail(false);
+      openUpdateSheet({ date: selectedDate });
+    }
   };
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
     openUpdateSheet({ initialTab: tab || 'flow' });
+  };
+
+  // Get day type label for detail card
+  const getDayTypeLabel = (type: string | null): { label: string; color: string } => {
+    switch (type) {
+      case 'period': return { label: 'Regl Günü', color: 'from-rose-400 to-pink-500' };
+      case 'predicted': return { label: 'Tahmini Regl', color: 'from-rose-300 to-pink-400' };
+      case 'fertile': return { label: 'Doğurgan Dönem', color: 'from-cyan-400 to-teal-400' };
+      case 'ovulation': return { label: 'Yumurtlama Günü', color: 'from-violet-400 to-purple-500' };
+      case 'pms': return { label: 'PMS Dönemi', color: 'from-orange-300 to-amber-400' };
+      default: return { label: 'Normal Gün', color: 'from-muted to-muted' };
+    }
   };
 
   return (
@@ -207,11 +239,15 @@ export default function CalendarPage() {
           ))}
         </motion.div>
 
-        {/* Calendar Grid */}
+        {/* Calendar Grid with Swipe */}
         <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleDragEnd}
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-card/80 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-lg"
+          className="bg-card/80 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-lg touch-pan-y"
         >
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1 mb-3">
@@ -397,6 +433,186 @@ export default function CalendarPage() {
           </motion.div>
         )}
       </main>
+
+      {/* Day Detail Bottom Sheet */}
+      <AnimatePresence>
+        {showDayDetail && selectedDate && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowDayDetail(false)}
+            />
+            
+            {/* Detail Card */}
+            <motion.div
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-[101] bg-card rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden"
+            >
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+              </div>
+
+              {/* Header */}
+              <div className="px-6 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {isSameDay(selectedDate, new Date()) ? 'Bugün' : format(selectedDate, 'EEEE', { locale: tr })}
+                    </p>
+                    <h2 className="text-2xl font-bold text-foreground">
+                      {format(selectedDate, 'd MMMM yyyy', { locale: tr })}
+                    </h2>
+                  </div>
+                  <div className="flex gap-2">
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleEditDay}
+                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"
+                    >
+                      <Edit3 className="w-5 h-5 text-primary" />
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowDayDetail(false)}
+                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+                    >
+                      <X className="w-5 h-5 text-muted-foreground" />
+                    </motion.button>
+                  </div>
+                </div>
+
+                {/* Day Type Badge */}
+                {(() => {
+                  const dayType = getDayType(selectedDate);
+                  const typeInfo = getDayTypeLabel(dayType);
+                  return (
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${typeInfo.color} text-white text-sm font-medium mb-4`}>
+                      <span>
+                        {dayType === 'period' ? '🩸' : dayType === 'fertile' ? '🌱' : dayType === 'ovulation' ? '🥚' : dayType === 'pms' ? '🌙' : '📅'}
+                      </span>
+                      {typeInfo.label}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Content */}
+              <div className="px-6 pb-8 space-y-4 overflow-y-auto max-h-[40vh]">
+                {/* Entry Summary */}
+                {(() => {
+                  const entry = getEntryForDate(selectedDate);
+                  if (!entry && getMedicationProgress(selectedDate).total === 0) {
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p className="text-sm">Bu gün için kayıt yok</p>
+                        <motion.button
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleEditDay}
+                          className="mt-3 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium"
+                        >
+                          Kayıt Ekle
+                        </motion.button>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-4">
+                      {/* Flow Level */}
+                      {entry && entry.flowLevel !== 'none' && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/30">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center">
+                            <span className="text-lg">{FLOW_LABELS[entry.flowLevel].emoji}</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Akış</p>
+                            <p className="font-semibold text-foreground">{FLOW_LABELS[entry.flowLevel].tr}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mood */}
+                      {entry?.mood && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center">
+                            <span className="text-lg">{MOOD_LABELS[entry.mood].emoji}</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Ruh Hali</p>
+                            <p className="font-semibold text-foreground">{MOOD_LABELS[entry.mood].tr}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Symptoms */}
+                      {entry && entry.symptoms.length > 0 && (
+                        <div className="p-3 rounded-2xl bg-violet-50 dark:bg-violet-950/30">
+                          <p className="text-xs text-muted-foreground mb-2">Semptomlar</p>
+                          <div className="flex flex-wrap gap-2">
+                            {entry.symptoms.map(symptom => (
+                              <span
+                                key={symptom}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-xs font-medium text-violet-700 dark:text-violet-300"
+                              >
+                                <span>{SYMPTOM_LABELS[symptom].emoji}</span>
+                                {SYMPTOM_LABELS[symptom].tr}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Notes */}
+                      {entry?.notes && (
+                        <div className="p-3 rounded-2xl bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">Notlar</p>
+                          <p className="text-sm text-foreground">{entry.notes}</p>
+                        </div>
+                      )}
+
+                      {/* Medication Status */}
+                      {(() => {
+                        const medProgress = getMedicationProgress(selectedDate);
+                        if (medProgress.total === 0) return null;
+                        
+                        return (
+                          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center">
+                                <Pill className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-xs text-muted-foreground">İlaç Durumu</p>
+                                <p className="font-semibold text-foreground">
+                                  {medProgress.taken} / {medProgress.total} doz alındı
+                                </p>
+                              </div>
+                            </div>
+                            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full transition-all"
+                                style={{ width: `${(medProgress.taken / medProgress.total) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  );
+                })()}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <BottomNav onCenterPress={handleCenterPress} />
     </div>
