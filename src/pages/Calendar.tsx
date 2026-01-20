@@ -543,11 +543,11 @@ export default function CalendarPage() {
                       {entry?.mood && (
                         <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center">
-                            <span className="text-lg">{MOOD_LABELS[entry.mood].emoji}</span>
+                            <span className="text-lg">{MOOD_LABELS[entry.mood]?.emoji || '😊'}</span>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">Ruh Hali</p>
-                            <p className="font-semibold text-foreground">{MOOD_LABELS[entry.mood].tr}</p>
+                            <p className="font-semibold text-foreground">{MOOD_LABELS[entry.mood]?.tr || entry.mood}</p>
                           </div>
                         </div>
                       )}
@@ -557,15 +557,18 @@ export default function CalendarPage() {
                         <div className="p-3 rounded-2xl bg-violet-50 dark:bg-violet-950/30">
                           <p className="text-xs text-muted-foreground mb-2">Semptomlar</p>
                           <div className="flex flex-wrap gap-2">
-                            {entry.symptoms.map(symptom => (
-                              <span
-                                key={symptom}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-xs font-medium text-violet-700 dark:text-violet-300"
-                              >
-                                <span>{SYMPTOM_LABELS[symptom].emoji}</span>
-                                {SYMPTOM_LABELS[symptom].tr}
-                              </span>
-                            ))}
+                            {entry.symptoms.map(symptom => {
+                              const label = SYMPTOM_LABELS[symptom];
+                              return (
+                                <span
+                                  key={symptom}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-xs font-medium text-violet-700 dark:text-violet-300"
+                                >
+                                  <span>{label?.emoji || '•'}</span>
+                                  {label?.tr || symptom}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
