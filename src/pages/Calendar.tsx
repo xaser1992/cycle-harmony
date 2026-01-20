@@ -1,7 +1,7 @@
 // 🌸 Calendar Page - Flo Inspired Design with Medication Integration
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pill, X, Edit3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pill, X, Edit3, Bell } from 'lucide-react';
 import { 
   format, 
   startOfMonth, 
@@ -14,18 +14,36 @@ import {
   startOfWeek,
   endOfWeek,
   parseISO,
-  isWithinInterval
+  isWithinInterval,
+  differenceInDays,
+  addDays
 } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { getMedicationLogsForDate, getMedications } from '@/lib/medicationStorage';
+import { scheduleCustomReminder } from '@/lib/notifications';
 import { FLOW_LABELS, SYMPTOM_LABELS, MOOD_LABELS } from '@/types/cycle';
 import type { DayEntry } from '@/types/cycle';
 import type { Medication, MedicationLog } from '@/types/medication';
+import { toast } from 'sonner';
 
 const WEEKDAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+
+// Fertility chance by days relative to ovulation
+const getFertilityChance = (daysFromOvulation: number): number => {
+  const chances: Record<number, number> = {
+    [-5]: 10,
+    [-4]: 16,
+    [-3]: 25,
+    [-2]: 30,
+    [-1]: 25,
+    [0]: 33, // Ovulation day
+    [1]: 8,
+  };
+  return chances[daysFromOvulation] ?? 0;
+};
 
 export default function CalendarPage() {
   const { openUpdateSheet } = useUpdateSheet();
@@ -524,18 +542,38 @@ export default function CalendarPage() {
                         </ul>
                       </div>
                     </div>
-                    {/* Navigate to date button */}
-                    <button
-                      onClick={() => {
-                        setActiveInfoCard(null);
-                        setSelectedDate(parseISO(prediction!.nextPeriodStart));
-                        setShowDayDetail(true);
-                      }}
-                      className="w-full mt-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <Edit3 className="w-5 h-5 text-white" />
-                      <span className="font-semibold text-white">Günü Görüntüle</span>
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setActiveInfoCard(null);
+                          setSelectedDate(parseISO(prediction!.nextPeriodStart));
+                          setShowDayDetail(true);
+                        }}
+                        className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Edit3 className="w-5 h-5 text-white" />
+                        <span className="font-semibold text-white text-sm">Günü Görüntüle</span>
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const success = await scheduleCustomReminder(
+                            'Regl Yaklaşıyor 🌸',
+                            'Regl dönemin yarın başlayabilir. Hazırlıklı ol!',
+                            addDays(parseISO(prediction!.nextPeriodStart), -1),
+                            'tr'
+                          );
+                          if (success) {
+                            toast.success('Hatırlatıcı kuruldu!');
+                          } else {
+                            toast.error('Bildirim izni gerekli');
+                          }
+                        }}
+                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Bell className="w-5 h-5 text-white" />
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -577,75 +615,151 @@ export default function CalendarPage() {
                         </ul>
                       </div>
                     </div>
-                    {/* Navigate to date button */}
-                    <button
-                      onClick={() => {
-                        setActiveInfoCard(null);
-                        setSelectedDate(parseISO(prediction!.ovulationDate));
-                        setShowDayDetail(true);
-                      }}
-                      className="w-full mt-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <Edit3 className="w-5 h-5 text-white" />
-                      <span className="font-semibold text-white">Günü Görüntüle</span>
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setActiveInfoCard(null);
+                          setSelectedDate(parseISO(prediction!.ovulationDate));
+                          setShowDayDetail(true);
+                        }}
+                        className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Edit3 className="w-5 h-5 text-white" />
+                        <span className="font-semibold text-white text-sm">Günü Görüntüle</span>
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const success = await scheduleCustomReminder(
+                            'Yumurtlama Günü 🥚',
+                            'Bugün tahmini yumurtlama günün!',
+                            parseISO(prediction!.ovulationDate),
+                            'tr'
+                          );
+                          if (success) {
+                            toast.success('Hatırlatıcı kuruldu!');
+                          } else {
+                            toast.error('Bildirim izni gerekli');
+                          }
+                        }}
+                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Bell className="w-5 h-5 text-white" />
+                      </button>
+                    </div>
                   </div>
                 )}
 
                 {/* Fertile Window Info */}
-                {activeInfoCard === 'fertile' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <motion.div
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
-                          <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
-                          <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
-                        </svg>
-                      </motion.div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">Doğurgan Dönem</h3>
-                        <p className="text-white/80">
-                          {format(parseISO(prediction!.fertileWindowStart), 'd MMM', { locale: tr })} - {format(parseISO(prediction!.fertileWindowEnd), 'd MMM', { locale: tr })}
-                        </p>
+                {activeInfoCard === 'fertile' && prediction && (() => {
+                  const ovulationDate = parseISO(prediction.ovulationDate);
+                  const fertileStart = parseISO(prediction.fertileWindowStart);
+                  const fertileEnd = parseISO(prediction.fertileWindowEnd);
+                  const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
+                  
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <motion.div
+                          animate={{ y: [0, -5, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
+                            <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
+                            <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
+                          </svg>
+                        </motion.div>
+                        <div>
+                          <h3 className="text-2xl font-bold text-white">Doğurgan Dönem</h3>
+                          <p className="text-white/80">
+                            {format(fertileStart, 'd MMM', { locale: tr })} - {format(fertileEnd, 'd MMM', { locale: tr })}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-3">
+                      
+                      {/* Fertile Days with Pregnancy Chances */}
                       <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-                        <h4 className="font-semibold text-white mb-2">💐 Doğurgan Pencere</h4>
-                        <ul className="text-sm text-white/90 space-y-1">
-                          <li>• Yumurtlamadan 5 gün önce başlar</li>
-                          <li>• Yumurtlamadan 1 gün sonra biter</li>
-                          <li>• Sperm 5 güne kadar canlı kalabilir</li>
-                          <li>• Hamilelik için en uygun dönem</li>
-                        </ul>
+                        <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                          📊 Günlük Hamilelik Şansı
+                        </h4>
+                        <div className="space-y-2">
+                          {fertileDays.map((day) => {
+                            const daysFromOvulation = differenceInDays(day, ovulationDate);
+                            const chance = getFertilityChance(daysFromOvulation);
+                            const isOvulationDay = daysFromOvulation === 0;
+                            
+                            return (
+                              <div key={day.toISOString()} className="flex items-center gap-3">
+                                <div className="w-14 text-xs text-white/80">
+                                  {format(day, 'd MMM', { locale: tr })}
+                                </div>
+                                <div className="flex-1 h-5 bg-white/10 rounded-full overflow-hidden">
+                                  <motion.div
+                                    className={`h-full rounded-full ${isOvulationDay ? 'bg-gradient-to-r from-violet-400 to-purple-500' : 'bg-white/60'}`}
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${chance}%` }}
+                                    transition={{ duration: 0.5, delay: 0.1 }}
+                                  />
+                                </div>
+                                <div className={`w-10 text-right text-sm font-bold ${isOvulationDay ? 'text-white' : 'text-white/80'}`}>
+                                  {chance}%
+                                </div>
+                                {isOvulationDay && (
+                                  <span className="text-xs bg-violet-500/50 px-2 py-0.5 rounded-full text-white">
+                                    🥚
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
+                      
                       <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
                         <h4 className="font-semibold text-white mb-2">🎯 Önemli Bilgiler</h4>
                         <ul className="text-sm text-white/90 space-y-1">
+                          <li>• Yumurtlama günü en yüksek şans (%33)</li>
+                          <li>• Sperm 5 güne kadar canlı kalabilir</li>
                           <li>• Hamilelik istemiyorsanız korunma şart</li>
-                          <li>• Enerji ve özgüven bu dönemde yüksek</li>
-                          <li>• Sosyal aktiviteler için ideal zaman</li>
                         </ul>
                       </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setActiveInfoCard(null);
+                            setSelectedDate(fertileStart);
+                            setShowDayDetail(true);
+                          }}
+                          className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                        >
+                          <Edit3 className="w-5 h-5 text-white" />
+                          <span className="font-semibold text-white text-sm">İlk Günü Görüntüle</span>
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const success = await scheduleCustomReminder(
+                              'Doğurgan Dönem Başlıyor 💐',
+                              'Yumurtlama dönemin başlıyor!',
+                              fertileStart,
+                              'tr'
+                            );
+                            if (success) {
+                              toast.success('Hatırlatıcı kuruldu!');
+                            } else {
+                              toast.error('Bildirim izni gerekli');
+                            }
+                          }}
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                        >
+                          <Bell className="w-5 h-5 text-white" />
+                        </button>
+                      </div>
                     </div>
-                    {/* Navigate to date button */}
-                    <button
-                      onClick={() => {
-                        setActiveInfoCard(null);
-                        setSelectedDate(parseISO(prediction!.fertileWindowStart));
-                        setShowDayDetail(true);
-                      }}
-                      className="w-full mt-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <Edit3 className="w-5 h-5 text-white" />
-                      <span className="font-semibold text-white">İlk Günü Görüntüle</span>
-                    </button>
-                  </div>
-                )}
+                  );
+                })()}
               </motion.div>
             </>
           )}

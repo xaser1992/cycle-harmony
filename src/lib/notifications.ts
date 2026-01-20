@@ -417,3 +417,48 @@ export async function createNotificationChannels(): Promise<void> {
     console.error('Error creating notification channels:', error);
   }
 }
+
+// Schedule a custom reminder for a specific date
+export async function scheduleCustomReminder(
+  title: string,
+  body: string,
+  targetDate: Date,
+  language: 'tr' | 'en' = 'tr'
+): Promise<boolean> {
+  try {
+    const hasPermission = await checkNotificationPermissions();
+    if (!hasPermission) {
+      const granted = await requestNotificationPermissions();
+      if (!granted) {
+        return false;
+      }
+    }
+    
+    // Schedule for 9:00 AM on the target date
+    const scheduleTime = setMinutes(setHours(targetDate, 9), 0);
+    
+    // Only schedule if in the future
+    if (isBefore(scheduleTime, new Date())) {
+      console.warn('Cannot schedule reminder for past date');
+      return false;
+    }
+    
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: Math.floor(Math.random() * 100000) + 20000,
+        title,
+        body,
+        schedule: { at: scheduleTime },
+        channelId: NOTIFICATION_CHANNELS.CRITICAL,
+        sound: 'notification.wav',
+        smallIcon: 'ic_stat_icon',
+      }],
+    });
+    
+    console.log(`Scheduled custom reminder for ${format(scheduleTime, 'yyyy-MM-dd HH:mm')}`);
+    return true;
+  } catch (error) {
+    console.error('Error scheduling custom reminder:', error);
+    return false;
+  }
+}
