@@ -216,13 +216,7 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
                   onClick={(e) => { e.stopPropagation(); setActiveInfoCard('period'); }}
                   className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2"
                 >
-                  <motion.span 
-                    className="text-lg"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  >
-                    🌸
-                  </motion.span>
+                  <span className="text-lg">🌸</span>
                   <div className="flex-1">
                     <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
                       {language === 'tr' ? 'Sonraki Regl' : 'Next Period'}
@@ -244,16 +238,11 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
                   onClick={(e) => { e.stopPropagation(); setActiveInfoCard('ovulation'); }}
                   className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2"
                 >
-                  <motion.div
-                    animate={{ scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
-                      <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
-                      <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
-                    </svg>
-                  </motion.div>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
+                    <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
+                    <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
+                  </svg>
                   <div className="flex-1">
                     <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
                       {language === 'tr' ? 'Yumurtlama' : 'Ovulation'}
@@ -432,13 +421,7 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
               {activeInfoCard === 'period' && (
                 <div className="space-y-4 pt-2">
                   <div className="flex items-center gap-4">
-                    <motion.span 
-                      className="text-5xl"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    >
-                      🌸
-                    </motion.span>
+                    <span className="text-5xl">🌸</span>
                     <div>
                       <h3 className="text-2xl font-bold text-white">{language === 'tr' ? 'Sonraki Regl' : 'Next Period'}</h3>
                       <p className="text-white/80">{format(parseISO(prediction.nextPeriodStart), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
@@ -497,16 +480,11 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
               {activeInfoCard === 'ovulation' && (
                 <div className="space-y-4 pt-2">
                   <div className="flex items-center gap-4">
-                    <motion.div
-                      animate={{ scale: [1, 1.15, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
-                        <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
-                        <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
-                      </svg>
-                    </motion.div>
+                    <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
+                      <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
+                      <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
+                    </svg>
                     <div>
                       <h3 className="text-2xl font-bold text-white">{language === 'tr' ? 'Yumurtlama Günü' : 'Ovulation Day'}</h3>
                       <p className="text-white/80">{format(parseISO(prediction.ovulationDate), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
@@ -571,16 +549,11 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
                   return (
                     <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
-                      <motion.div
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
-                          <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
-                          <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
-                        </svg>
-                      </motion.div>
+                      <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
+                        <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
+                        <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
+                      </svg>
                       <div>
                         <h3 className="text-2xl font-bold text-white">{language === 'tr' ? 'Doğurgan Dönem' : 'Fertile Window'}</h3>
                         <p className="text-white/80">
