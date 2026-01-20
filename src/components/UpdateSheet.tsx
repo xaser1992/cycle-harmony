@@ -1,7 +1,7 @@
 // 🌸 Update Bottom Sheet Component - Flo Inspired Categorized Design
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, ChevronLeft, ChevronRight, Search, Plus, Minus, Trash2, Edit3 } from 'lucide-react';
+import { X, Check, ChevronLeft, ChevronRight, Search, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -438,56 +438,65 @@ export function UpdateSheet({
     </motion.div>
   );
 
-  // Weight Card
-  const WeightCard = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-    >
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-lg">⚖️</span>
-          <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <motion.button
+  // Weight Card - with +/- controls like water
+  const WeightCard = () => {
+    const incrementWeight = () => {
+      setWeight(prev => (prev ?? 60) + 0.1);
+    };
+    
+    const decrementWeight = () => {
+      setWeight(prev => Math.max(30, (prev ?? 60) - 0.1));
+    };
+
+    const displayWeight = weight !== null ? weight.toFixed(1) : null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">⚖️</span>
+            <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
+          </div>
+          <button
             type="button"
             onClick={() => setWeight(null)}
-            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-            whileTap={{ scale: 0.9 }}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            <Trash2 className="w-3.5 h-3.5 text-foreground/70" />
-          </motion.button>
-          <motion.button
-            type="button"
-            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-            whileTap={{ scale: 0.9 }}
-          >
-            <Edit3 className="w-3.5 h-3.5 text-foreground/70" />
-          </motion.button>
+            {language === 'tr' ? 'Temizle' : 'Clear'}
+          </button>
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <div className="flex items-baseline gap-1">
-            <Input
-              type="number"
-              value={weight ?? ''}
-              onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : null)}
-              placeholder="60"
-              className="text-2xl font-bold h-auto py-0.5 px-0 border-0 bg-transparent w-16 focus-visible:ring-0"
-            />
+        <div className="flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={decrementWeight}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
+          >
+            −
+          </button>
+          <div className="flex items-baseline gap-1 min-w-[80px] justify-center">
+            <span className="text-3xl font-bold text-foreground">
+              {displayWeight ?? '--'}
+            </span>
             <span className="text-base text-muted-foreground">kg</span>
           </div>
+          <button
+            type="button"
+            onClick={incrementWeight}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
+          >
+            +
+          </button>
         </div>
-      </div>
-      <button className="flex items-center justify-between w-full mt-2 pt-2 border-t border-border/40 text-muted-foreground hover:text-foreground transition-colors">
-        <span className="text-xs">{language === 'tr' ? 'Grafiği görüntüle' : 'View graph'}</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-      </button>
-    </motion.div>
-  );
+        <p className="text-xs text-center text-muted-foreground mt-2">
+          {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
+        </p>
+      </motion.div>
+    );
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={() => {}}>
