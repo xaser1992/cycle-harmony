@@ -524,6 +524,18 @@ export default function CalendarPage() {
                         </ul>
                       </div>
                     </div>
+                    {/* Navigate to date button */}
+                    <button
+                      onClick={() => {
+                        setActiveInfoCard(null);
+                        setSelectedDate(parseISO(prediction!.nextPeriodStart));
+                        setShowDayDetail(true);
+                      }}
+                      className="w-full mt-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <Edit3 className="w-5 h-5 text-white" />
+                      <span className="font-semibold text-white">Günü Görüntüle</span>
+                    </button>
                   </div>
                 )}
 
@@ -565,6 +577,18 @@ export default function CalendarPage() {
                         </ul>
                       </div>
                     </div>
+                    {/* Navigate to date button */}
+                    <button
+                      onClick={() => {
+                        setActiveInfoCard(null);
+                        setSelectedDate(parseISO(prediction!.ovulationDate));
+                        setShowDayDetail(true);
+                      }}
+                      className="w-full mt-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <Edit3 className="w-5 h-5 text-white" />
+                      <span className="font-semibold text-white">Günü Görüntüle</span>
+                    </button>
                   </div>
                 )}
 
@@ -608,6 +632,18 @@ export default function CalendarPage() {
                         </ul>
                       </div>
                     </div>
+                    {/* Navigate to date button */}
+                    <button
+                      onClick={() => {
+                        setActiveInfoCard(null);
+                        setSelectedDate(parseISO(prediction!.fertileWindowStart));
+                        setShowDayDetail(true);
+                      }}
+                      className="w-full mt-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-3 flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <Edit3 className="w-5 h-5 text-white" />
+                      <span className="font-semibold text-white">İlk Günü Görüntüle</span>
+                    </button>
                   </div>
                 )}
               </motion.div>
