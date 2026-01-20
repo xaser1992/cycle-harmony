@@ -1,6 +1,6 @@
 // 🌸 Calendar Page - Flo Inspired Design with Medication Integration
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pill, X, Edit3, Bell } from 'lucide-react';
 import { 
   format, 
@@ -63,19 +63,7 @@ export default function CalendarPage() {
   const [medicationLogs, setMedicationLogs] = useState<Record<string, MedicationLog[]>>({});
   const [activeInfoCard, setActiveInfoCard] = useState<'period' | 'ovulation' | 'fertile' | null>(null);
 
-  // Swipe handling for month navigation
-  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const threshold = 50;
-    const velocity = 0.3;
-    
-    if (info.offset.x > threshold || info.velocity.x > velocity) {
-      setSwipeDirection('right');
-      setCurrentMonth(prev => subMonths(prev, 1));
-    } else if (info.offset.x < -threshold || info.velocity.x < -velocity) {
-      setSwipeDirection('left');
-      setCurrentMonth(prev => addMonths(prev, 1));
-    }
-  }, []);
+  // Month navigation via buttons only (swipe disabled to allow tab switching)
 
   // Load medications and logs
   useEffect(() => {
@@ -258,16 +246,8 @@ export default function CalendarPage() {
           ))}
         </motion.div>
 
-        {/* Calendar Grid with Swipe */}
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleDragEnd}
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-card/80 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-lg touch-pan-y"
-        >
+        {/* Calendar Grid */}
+        <div className="bg-card/80 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-lg">
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1 mb-3">
             {WEEKDAYS.map(day => (
@@ -337,7 +317,7 @@ export default function CalendarPage() {
               );
             })}
           </div>
-        </motion.div>
+        </div>
 
         {/* Medication Summary for Today */}
         {medications.length > 0 && (
