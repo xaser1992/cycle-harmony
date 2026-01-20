@@ -114,18 +114,14 @@ const Index = () => {
         <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
           <button
             onClick={handleLogPeriod}
-            className={`w-full relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.98] ${
+            className={`w-full relative overflow-hidden rounded-2xl p-4 transition-all duration-200 active:scale-95 active:brightness-110 ${
               isOnPeriod 
-                ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40'
-                : 'bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 animate-pulse-soft'
+                ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/30'
+                : 'bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30'
             }`}
           >
-            {/* Glow effect overlay */}
-            {!isOnPeriod && (
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 animate-[pulse_2s_ease-in-out_infinite]" />
-            )}
-            <div className="relative flex items-center justify-center gap-3">
-              <div className={`w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center transition-transform duration-300 ${!isOnPeriod ? 'animate-float' : ''}`}>
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                 <span className="text-xl">{isOnPeriod ? '✓' : '🩸'}</span>
               </div>
               <span className="text-base font-semibold text-white">
