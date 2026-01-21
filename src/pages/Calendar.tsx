@@ -396,9 +396,13 @@ export default function CalendarPage() {
                 className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
                 onClick={() => setActiveInfoCard(null)}
               />
-              {/* Close Button - Outside modal for stable positioning */}
-              <button
+              {/* Close Button - Animated with modal */}
+              <motion.button
                 type="button"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.1 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setActiveInfoCard(null);
@@ -406,7 +410,7 @@ export default function CalendarPage() {
                 className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
               >
                 <X className="w-5 h-5 text-white" />
-              </button>
+              </motion.button>
               
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
