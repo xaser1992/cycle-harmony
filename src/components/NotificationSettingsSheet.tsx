@@ -7,8 +7,7 @@ import {
   VolumeX, 
   Eye,
   TestTube,
-  Pill,
-  Check
+  Pill
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
