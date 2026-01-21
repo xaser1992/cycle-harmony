@@ -57,7 +57,7 @@ export default function Onboarding() {
   ]);
   
   // Current cycle info
-  const [lastPeriodDate, setLastPeriodDate] = useState(format(subDays(new Date(), 14), 'yyyy-MM-dd'));
+  const [lastPeriodDate, setLastPeriodDate] = useState('');
   const [cycleLength, setCycleLength] = useState(28);
   const [periodLength, setPeriodLength] = useState(5);
   
@@ -189,8 +189,19 @@ export default function Onboarding() {
   };
 
   const canProceed = () => {
-    if (step === 'lastPeriod') return !!lastPeriodDate;
     return true;
+  };
+
+  const handleSkip = () => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < STEPS.length) {
+      setStep(STEPS[nextIndex]);
+    }
+  };
+
+  const canSkip = () => {
+    // Can skip all steps except welcome and complete
+    return step !== 'welcome' && step !== 'complete';
   };
 
   return (
@@ -393,12 +404,15 @@ export default function Onboarding() {
                     value={lastPeriodDate}
                     onChange={(e) => setLastPeriodDate(e.target.value)}
                     max={format(new Date(), 'yyyy-MM-dd')}
+                    placeholder="Tarih seç"
                     className="w-full text-lg p-3 rounded-lg bg-muted border-0 text-foreground"
                   />
                 </Card>
-                <p className="mt-4 text-sm text-muted-foreground text-center">
-                  {format(new Date(lastPeriodDate), 'd MMMM yyyy', { locale: tr })}
-                </p>
+                {lastPeriodDate && (
+                  <p className="mt-4 text-sm text-muted-foreground text-center">
+                    {format(new Date(lastPeriodDate), 'd MMMM yyyy', { locale: tr })}
+                  </p>
+                )}
               </div>
             )}
 
@@ -555,21 +569,33 @@ export default function Onboarding() {
       </div>
 
       {/* Navigation */}
-      <div className="px-6 pb-8 flex gap-4">
-        {currentIndex > 0 && step !== 'complete' && (
-          <Button variant="outline" size="lg" onClick={handleBack} className="rounded-2xl">
-            <ChevronLeft className="w-5 h-5" />
+      <div className="px-6 pb-8 space-y-3">
+        <div className="flex gap-4">
+          {currentIndex > 0 && step !== 'complete' && (
+            <Button variant="outline" size="lg" onClick={handleBack} className="rounded-2xl">
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+          )}
+          <Button 
+            size="lg" 
+            onClick={handleNext}
+            disabled={!canProceed()}
+            className="flex-1 rounded-2xl period-gradient text-white"
+          >
+            {step === 'complete' ? 'Başla' : 'Devam'}
+            {step !== 'complete' && <ChevronRight className="w-5 h-5 ml-2" />}
+          </Button>
+        </div>
+        {canSkip() && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleSkip}
+            className="w-full text-muted-foreground hover:text-foreground"
+          >
+            Atla
           </Button>
         )}
-        <Button 
-          size="lg" 
-          onClick={handleNext}
-          disabled={!canProceed()}
-          className="flex-1 rounded-2xl period-gradient text-white"
-        >
-          {step === 'complete' ? 'Başla' : 'Devam'}
-          {step !== 'complete' && <ChevronRight className="w-5 h-5 ml-2" />}
-        </Button>
       </div>
     </div>
   );
