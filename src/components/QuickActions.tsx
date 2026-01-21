@@ -14,8 +14,8 @@ const DropletIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none">
     <defs>
       <linearGradient id="dropletGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#F472B6" />
-        <stop offset="100%" stopColor="#EC4899" />
+        <stop offset="0%" className="[stop-color:hsl(var(--rose))]" />
+        <stop offset="100%" className="[stop-color:hsl(var(--pink))]" />
       </linearGradient>
     </defs>
     <path 
@@ -30,8 +30,8 @@ const SymptomIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none">
     <defs>
       <linearGradient id="symptomGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#A78BFA" />
-        <stop offset="100%" stopColor="#8B5CF6" />
+        <stop offset="0%" className="[stop-color:hsl(var(--violet))]" />
+        <stop offset="100%" className="[stop-color:hsl(var(--purple))]" />
       </linearGradient>
     </defs>
     <path 
@@ -47,8 +47,8 @@ const MoodIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none">
     <defs>
       <linearGradient id="moodGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#FBBF24" />
-        <stop offset="100%" stopColor="#F59E0B" />
+        <stop offset="0%" className="[stop-color:hsl(var(--amber))]" />
+        <stop offset="100%" className="[stop-color:hsl(var(--orange))]" />
       </linearGradient>
     </defs>
     <circle cx="12" cy="12" r="10" fill="url(#moodGradient)" />
@@ -71,22 +71,22 @@ export function QuickActions({
       label: language === 'tr' 
         ? (isOnPeriod ? 'Regl Bitti' : 'Regl Başladı')
         : (isOnPeriod ? 'Period Ended' : 'Period Started'),
-      gradient: 'from-rose-400 to-pink-500',
-      shadowColor: 'shadow-rose-500/30',
+      gradient: 'from-rose to-pink',
+      shadowColor: 'shadow-rose/30',
       onClick: onLogPeriod,
     },
     {
       icon: SymptomIcon,
       label: language === 'tr' ? 'Semptom' : 'Symptom',
-      gradient: 'from-violet-400 to-purple-500',
-      shadowColor: 'shadow-violet-500/30',
+      gradient: 'from-violet to-purple',
+      shadowColor: 'shadow-violet/30',
       onClick: onLogSymptoms,
     },
     {
       icon: MoodIcon,
       label: language === 'tr' ? 'Ruh Hali' : 'Mood',
-      gradient: 'from-amber-400 to-orange-400',
-      shadowColor: 'shadow-amber-500/30',
+      gradient: 'from-amber to-orange',
+      shadowColor: 'shadow-amber/30',
       onClick: onLogMood,
     },
   ];

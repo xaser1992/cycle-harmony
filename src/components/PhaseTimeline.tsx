@@ -41,7 +41,7 @@ export const PhaseTimeline = forwardRef<HTMLDivElement, PhaseTimelineProps>(func
       name: language === 'tr' ? 'Luteal' : 'Luteal',
       start: (differenceInDays(parseISO(prediction.fertileWindowEnd), lastPeriodStart) / cycleLength) * 100,
       width: 100 - (differenceInDays(parseISO(prediction.fertileWindowEnd), lastPeriodStart) / cycleLength) * 100,
-      color: 'bg-slate-400',
+      color: 'bg-slate',
     },
   ];
 

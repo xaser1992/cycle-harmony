@@ -97,10 +97,10 @@ function CircularProgress({ progress, dayNumber, accentColor, language }: {
   return (
     <div className="relative w-32 h-32">
       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r={radius} stroke="rgba(255,255,255,0.2)" strokeWidth="8" fill="none" />
+        <circle cx="60" cy="60" r={radius} stroke="hsl(var(--background) / 0.2)" strokeWidth="8" fill="none" />
         <circle
           cx="60" cy="60" r={radius}
-          stroke="rgba(255,255,255,0.9)" strokeWidth="8" fill="none" strokeLinecap="round"
+          stroke="hsl(var(--background) / 0.9)" strokeWidth="8" fill="none" strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           className="transition-all duration-700 ease-out"
@@ -584,7 +584,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                       >
                         <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
                           <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
-                          <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
+                          <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" className="fill-teal" opacity="0.5" />
                           <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
                         </svg>
                       </motion.div>
