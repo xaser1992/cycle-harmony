@@ -1,5 +1,5 @@
 // 🔔 Notification Settings Sheet Component
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -58,7 +58,7 @@ const privacyModes: { value: PrivacyMode; label: string; description: string; ic
   { value: 'full', label: 'Gizli', description: 'Sadece başlık göster', icon: '🔒' },
 ];
 
-export function NotificationSettingsSheet({ isOpen, onClose }: NotificationSettingsSheetProps) {
+export const NotificationSettingsSheet = forwardRef<HTMLDivElement, NotificationSettingsSheetProps>(function NotificationSettingsSheet({ isOpen, onClose }, ref) {
   const { notificationPrefs, updateNotificationPrefs, userSettings } = useCycleData();
   const [activeTab, setActiveTab] = useState<'cycle' | 'wellness' | 'medication' | 'settings'>('cycle');
   const [medicationNotificationsEnabled, setMedicationNotificationsEnabled] = useState(true);
@@ -447,4 +447,4 @@ export function NotificationSettingsSheet({ isOpen, onClose }: NotificationSetti
       </SheetContent>
     </Sheet>
   );
-}
+});

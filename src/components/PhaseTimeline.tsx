@@ -1,4 +1,5 @@
 // 🌸 Phase Timeline Component - Performance Optimized
+import { forwardRef } from 'react';
 import type { CyclePrediction, CycleSettings } from '@/types/cycle';
 import { parseISO, differenceInDays } from 'date-fns';
 
@@ -8,7 +9,7 @@ interface PhaseTimelineProps {
   language?: 'tr' | 'en';
 }
 
-export function PhaseTimeline({ prediction, settings, language = 'tr' }: PhaseTimelineProps) {
+export const PhaseTimeline = forwardRef<HTMLDivElement, PhaseTimelineProps>(function PhaseTimeline({ prediction, settings, language = 'tr' }, ref) {
   if (!prediction) return null;
 
   const today = new Date();
@@ -91,4 +92,4 @@ export function PhaseTimeline({ prediction, settings, language = 'tr' }: PhaseTi
       </div>
     </div>
   );
-}
+});

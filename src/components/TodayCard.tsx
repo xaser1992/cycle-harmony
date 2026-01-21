@@ -1,5 +1,5 @@
 // 🌸 Today Status Card Component - Performance Optimized
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPhaseInfo } from '@/lib/predictions';
