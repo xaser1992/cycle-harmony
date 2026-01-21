@@ -135,7 +135,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
     <Sheet open={isOpen} onOpenChange={() => {}}>
       <SheetContent 
         side="bottom" 
-        className="h-[90vh] rounded-t-[2rem] p-0 border-0"
+        className="h-full rounded-t-0 p-0 border-0"
         aria-describedby={undefined}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
