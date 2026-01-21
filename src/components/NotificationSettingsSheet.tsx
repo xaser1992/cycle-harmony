@@ -149,7 +149,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
         
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="relative overflow-hidden bg-gradient-to-r from-violet-400 to-purple-500 px-6 pt-6 pb-8">
+          <div className="relative overflow-hidden bg-gradient-to-r from-violet to-purple px-6 pt-6 pb-8">
             <motion.div
               className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"
               animate={{ scale: [1, 1.1, 1] }}
@@ -229,14 +229,14 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-4 bg-amber-100 dark:bg-amber-900/30 rounded-2xl"
+                className="mb-4 p-4 bg-accent rounded-2xl"
               >
-                <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">
+                <p className="text-sm text-accent-foreground mb-3">
                   Bildirimleri almak için izin vermeniz gerekiyor.
                 </p>
                 <Button
                   onClick={handleRequestPermissions}
-                  className="w-full bg-amber-500 hover:bg-amber-600"
+                  className="w-full bg-amber hover:bg-amber/90"
                 >
                   İzin Ver
                 </Button>
@@ -322,9 +322,9 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                     İlaçlarınız için zamanında hatırlatmalar alın
                   </p>
                   
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-2xl border border-violet-200/30 dark:border-violet-800/30">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet/10 to-purple/10 rounded-2xl border border-violet-light/30">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet to-purple flex items-center justify-center">
                         <Pill className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -364,7 +364,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                     
                     <div className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50">
                       <div className="flex items-center gap-3">
-                        <Clock className="w-5 h-5 text-violet-500" />
+                        <Clock className="w-5 h-5 text-violet" />
                         <div>
                           <p className="text-sm font-medium">Bildirim Saati</p>
                           <p className="text-xs text-muted-foreground">Tercih edilen saat</p>
@@ -379,7 +379,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
 
                     <div className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50">
                       <div className="flex items-center gap-3">
-                        <VolumeX className="w-5 h-5 text-violet-500" />
+                        <VolumeX className="w-5 h-5 text-violet" />
                         <div>
                           <p className="text-sm font-medium">Sessiz Saatler</p>
                           <p className="text-xs text-muted-foreground">Bu saatlerde bildirim gelmez</p>

@@ -66,7 +66,7 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
         <div className="relative -mt-8 mx-2">
           <button
             onClick={handleCenterPress}
-            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 flex items-center justify-center active:scale-90 transition-transform duration-150"
+            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary via-period to-primary flex items-center justify-center active:scale-90 transition-transform duration-150"
             style={{
               boxShadow: '0 4px 20px -2px hsl(var(--primary) / 0.5), 0 0 30px -5px hsl(var(--primary) / 0.3)',
             }}
@@ -335,7 +335,7 @@ function MedicationsIcon({ isActive }: { isActive: boolean }) {
             initial={{ x: -5, opacity: 0.5 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
-            className="w-1/2 h-full rounded-r-full bg-gradient-to-bl from-pink-200 to-pink-100 border-2 border-primary/50"
+            className="w-1/2 h-full rounded-r-full bg-gradient-to-bl from-period-light to-period-light/80 border-2 border-primary/50"
           />
           {/* Center glow */}
           <motion.div 

@@ -624,7 +624,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                                 {chance}%
                               </div>
                               {isOvulationDay && (
-                                <span className="text-xs bg-violet-500/50 px-2 py-0.5 rounded-full text-white">
+                                <span className="text-xs bg-ovulation/50 px-2 py-0.5 rounded-full text-white">
                                   🥚
                                 </span>
                               )}
