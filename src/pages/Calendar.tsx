@@ -222,30 +222,7 @@ export default function CalendarPage() {
         </div>
       </header>
 
-      <main className="px-4">
-        {/* Legend Pills */}
-        <motion.div 
-          className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {[
-            { color: 'bg-gradient-to-r from-rose-400 to-pink-500', label: 'Regl' },
-            { color: 'bg-gradient-to-r from-rose-300/50 to-pink-400/50', label: 'Tahmini' },
-            { color: 'bg-gradient-to-r from-cyan-400 to-teal-400', label: 'Doğurgan' },
-            { color: 'bg-gradient-to-r from-violet-400 to-purple-500', label: 'Yumurtlama' },
-            { color: 'bg-gradient-to-r from-emerald-400 to-green-500', label: 'İlaç ✓', icon: true },
-          ].map((item) => (
-            <div 
-              key={item.label}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 shrink-0"
-            >
-              <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label}</span>
-            </div>
-          ))}
-        </motion.div>
-
+      <main className="px-4 pt-2">
         {/* Calendar Grid */}
         <div className="bg-card/80 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-lg">
           {/* Weekday Headers */}
