@@ -1,6 +1,6 @@
 // 🌸 Calendar Page - Flo Inspired Design with Medication Integration
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pill, X, Edit3, Bell } from 'lucide-react';
 import { 
   format, 
@@ -189,35 +189,28 @@ export default function CalendarPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
         <div className="relative px-6 pt-6 pb-4">
           <div className="flex items-center justify-between">
-            <motion.button 
-              whileTap={{ scale: 0.9 }}
+            <button 
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="w-10 h-10 rounded-full bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm flex items-center justify-center"
+              className="w-10 h-10 rounded-full bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm flex items-center justify-center active:scale-90 transition-transform"
             >
               <ChevronLeft className="w-5 h-5 text-foreground" />
-            </motion.button>
+            </button>
             
-            <motion.div
-              key={format(currentMonth, 'yyyy-MM')}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center"
-            >
+            <div className="text-center">
               <h1 className="text-2xl font-bold text-foreground">
                 {format(currentMonth, 'MMMM', { locale: tr })}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {format(currentMonth, 'yyyy')}
               </p>
-            </motion.div>
+            </div>
             
-            <motion.button 
-              whileTap={{ scale: 0.9 }}
+            <button 
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              className="w-10 h-10 rounded-full bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm flex items-center justify-center"
+              className="w-10 h-10 rounded-full bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm flex items-center justify-center active:scale-90 transition-transform"
             >
               <ChevronRight className="w-5 h-5 text-foreground" />
-            </motion.button>
+            </button>
           </div>
         </div>
       </header>
@@ -247,12 +240,8 @@ export default function CalendarPage() {
               const someMedsTaken = medProgress.taken > 0 && medProgress.taken < medProgress.total;
               
               return (
-                <motion.button
+                <button
                   key={date.toISOString()}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.008 }}
-                  whileTap={{ scale: 0.9 }}
                   onClick={() => handleDayClick(date)}
                   className={`relative aspect-square rounded-2xl flex items-center justify-center text-sm font-medium transition-all
                     ${!isCurrentMonth ? 'opacity-30' : ''}
@@ -269,16 +258,12 @@ export default function CalendarPage() {
                   
                   {/* Entry indicator (bottom left) */}
                   {entry && (entry.symptoms.length > 0 || entry.mood) && (
-                    <motion.span 
-                      className="absolute bottom-1 left-1.5 w-1.5 h-1.5 rounded-full bg-primary"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                    />
+                    <span className="absolute bottom-1 left-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
                   )}
                   
                   {/* Medication indicator (bottom right) */}
                   {hasMedications && isCurrentMonth && (
-                    <motion.span 
+                    <span 
                       className={`absolute bottom-1 right-1.5 w-1.5 h-1.5 rounded-full ${
                         allMedsTaken 
                           ? 'bg-emerald' 
@@ -286,11 +271,9 @@ export default function CalendarPage() {
                             ? 'bg-amber' 
                             : 'bg-muted-foreground/30'
                       }`}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
                     />
                   )}
-                </motion.button>
+                </button>
               );
             })}
           </div>
@@ -298,12 +281,7 @@ export default function CalendarPage() {
 
         {/* Medication Summary for Today */}
         {medications.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mt-4"
-          >
+          <div className="mt-4">
             <div className="bg-gradient-to-r from-violet/10 via-purple/10 to-pink/10 rounded-2xl p-4 border border-violet/30 dark:border-violet/30">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet to-purple flex items-center justify-center">
@@ -317,49 +295,34 @@ export default function CalendarPage() {
                 </div>
               </div>
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-violet to-purple rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ 
+                <div
+                  className="h-full bg-gradient-to-r from-violet to-purple rounded-full transition-all duration-500"
+                  style={{ 
                     width: `${getMedicationProgress(new Date()).total > 0 
                       ? (getMedicationProgress(new Date()).taken / getMedicationProgress(new Date()).total) * 100 
                       : 0}%` 
                   }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Upcoming Events */}
         {prediction && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-6 space-y-3"
-          >
+          <div className="mt-6 space-y-3">
             <h3 className="text-sm font-semibold text-muted-foreground px-1">Yaklaşan Tarihler</h3>
             
             <div className="space-y-3">
               {/* Next Period Card */}
-              <motion.div 
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose to-pink p-4 shadow-lg shadow-rose/20 cursor-pointer"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <div 
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose to-pink p-4 shadow-lg shadow-rose/20 cursor-pointer active:scale-[0.98] transition-transform"
                 onClick={() => setActiveInfoCard('period')}
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <motion.span 
-                      className="text-2xl"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    >
-                      🌸
-                    </motion.span>
+                    <span className="text-2xl">🌸</span>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white">Sonraki Regl</p>
@@ -369,28 +332,21 @@ export default function CalendarPage() {
                   </div>
                   <ChevronRight className="w-5 h-5 text-white/60" />
                 </div>
-              </motion.div>
+              </div>
               
               {/* Ovulation Card */}
-              <motion.div 
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet to-purple p-4 shadow-lg shadow-violet/20 cursor-pointer"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <div 
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet to-purple p-4 shadow-lg shadow-violet/20 cursor-pointer active:scale-[0.98] transition-transform"
                 onClick={() => setActiveInfoCard('ovulation')}
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <motion.div
-                      animate={{ scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
-                        <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
-                        <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
-                      </svg>
-                    </motion.div>
+                    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
+                      <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
+                      <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
+                    </svg>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white">Yumurtlama</p>
@@ -400,28 +356,21 @@ export default function CalendarPage() {
                   </div>
                   <ChevronRight className="w-5 h-5 text-white/60" />
                 </div>
-              </motion.div>
+              </div>
 
               {/* Fertile Window Card */}
-              <motion.div 
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan to-teal p-4 shadow-lg shadow-teal/20 cursor-pointer"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <div 
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan to-teal p-4 shadow-lg shadow-teal/20 cursor-pointer active:scale-[0.98] transition-transform"
                 onClick={() => setActiveInfoCard('fertile')}
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <motion.div
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 21c-1.5-1.5-6-5-6-10a6 6 0 1 1 12 0c0 5-4.5 8.5-6 10z" fill="white" opacity="0.9" />
-                        <path d="M12 18c-1-1-4-3.5-4-7a4 4 0 1 1 8 0c0 3.5-3 6-4 7z" fill="#14b8a6" opacity="0.5" />
-                        <circle cx="10" cy="10" r="1.5" fill="white" opacity="0.8" />
-                      </svg>
-                    </motion.div>
+                    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 21c-1.5-1.5-6-5-6-10a6 6 0 1 1 12 0c0 5-4.5 8.5-6 10z" fill="white" opacity="0.9" />
+                      <path d="M12 18c-1-1-4-3.5-4-7a4 4 0 1 1 8 0c0 3.5-3 6-4 7z" fill="#14b8a6" opacity="0.5" />
+                      <circle cx="10" cy="10" r="1.5" fill="white" opacity="0.8" />
+                    </svg>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white">Doğurgan Dönem</p>
@@ -431,9 +380,9 @@ export default function CalendarPage() {
                   </div>
                   <ChevronRight className="w-5 h-5 text-white/60" />
                 </div>
-              </motion.div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Info Modal for Upcoming Dates */}
@@ -473,13 +422,7 @@ export default function CalendarPage() {
                 {activeInfoCard === 'period' && (
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
-                      <motion.span 
-                        className="text-5xl"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                      >
-                        🌸
-                      </motion.span>
+                      <span className="text-5xl">🌸</span>
                       <div>
                         <h3 className="text-2xl font-bold text-white">Sonraki Regl</h3>
                         <p className="text-white/80">{format(parseISO(prediction!.nextPeriodStart), 'd MMMM EEEE', { locale: tr })}</p>
@@ -542,16 +485,11 @@ export default function CalendarPage() {
                 {activeInfoCard === 'ovulation' && (
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-4">
-                      <motion.div
-                        animate={{ scale: [1, 1.15, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
-                          <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
-                          <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
-                          <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
-                        </svg>
-                      </motion.div>
+                      <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
+                        <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
+                        <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
+                      </svg>
                       <div>
                         <h3 className="text-2xl font-bold text-white">Yumurtlama Günü</h3>
                         <p className="text-white/80">{format(parseISO(prediction!.ovulationDate), 'd MMMM EEEE', { locale: tr })}</p>
@@ -621,16 +559,11 @@ export default function CalendarPage() {
                   return (
                     <div className="space-y-4 pt-2">
                       <div className="flex items-center gap-4">
-                        <motion.div
-                          animate={{ y: [0, -5, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
-                            <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
-                            <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
-                          </svg>
-                        </motion.div>
+                        <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
+                          <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
+                          <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
+                        </svg>
                         <div>
                           <h3 className="text-2xl font-bold text-white">Doğurgan Dönem</h3>
                           <p className="text-white/80">
@@ -656,11 +589,9 @@ export default function CalendarPage() {
                                   {format(day, 'd MMM', { locale: tr })}
                                 </div>
                                 <div className="flex-1 h-5 bg-white/10 rounded-full overflow-hidden">
-                                  <motion.div
-                                    className={`h-full rounded-full ${isOvulationDay ? 'bg-gradient-to-r from-violet to-purple' : 'bg-white/60'}`}
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${chance}%` }}
-                                    transition={{ duration: 0.5, delay: 0.1 }}
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${isOvulationDay ? 'bg-gradient-to-r from-violet to-purple' : 'bg-white/60'}`}
+                                    style={{ width: `${chance}%` }}
                                   />
                                 </div>
                                 <div className={`w-10 text-right text-sm font-bold ${isOvulationDay ? 'text-white' : 'text-white/80'}`}>
@@ -765,20 +696,18 @@ export default function CalendarPage() {
                     </h2>
                   </div>
                   <div className="flex gap-2">
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
+                    <button
                       onClick={handleEditDay}
-                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"
+                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center active:scale-90 transition-transform"
                     >
                       <Edit3 className="w-5 h-5 text-primary" />
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
+                    </button>
+                    <button
                       onClick={() => setShowDayDetail(false)}
-                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                     >
                       <X className="w-5 h-5 text-muted-foreground" />
-                    </motion.button>
+                    </button>
                   </div>
                 </div>
 
@@ -806,13 +735,12 @@ export default function CalendarPage() {
                     return (
                       <div className="text-center py-8 text-muted-foreground">
                         <p className="text-sm">Bu gün için kayıt yok</p>
-                        <motion.button
-                          whileTap={{ scale: 0.95 }}
+                        <button
                           onClick={handleEditDay}
-                          className="mt-3 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium"
+                          className="mt-3 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium active:scale-95 transition-transform"
                         >
                           Kayıt Ekle
-                        </motion.button>
+                        </button>
                       </div>
                     );
                   }
