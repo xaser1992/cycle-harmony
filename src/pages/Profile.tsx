@@ -60,7 +60,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-background safe-area-top">
       {/* Header with gradient */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 h-56" />
+        <div className="absolute inset-0 bg-gradient-to-br from-rose via-pink to-rose h-56" />
         
         {/* Back button */}
         <div className="relative px-4 pt-4">
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                   İptal
                 </Button>
                 <Button
-                  className="flex-1 rounded-xl bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-rose to-pink text-white border-0"
                   onClick={handleSave}
                 >
                   Kaydet
@@ -221,8 +221,8 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-xl">
-                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-violet-500" />
+                <div className="w-10 h-10 rounded-xl bg-violet/10 flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-violet" />
                 </div>
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground">E-posta</p>
@@ -231,8 +231,8 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-xl">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-amber-500" />
+                <div className="w-10 h-10 rounded-xl bg-amber/10 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-amber" />
                 </div>
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground">Doğum Tarihi</p>
@@ -251,7 +251,7 @@ export default function ProfilePage() {
           className="bg-card rounded-3xl p-5 shadow-lg border border-border/50"
         >
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue to-sky flex items-center justify-center">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -282,11 +282,11 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30 rounded-3xl p-5 border border-rose-200/50 dark:border-rose-800/30"
+          className="bg-gradient-to-r from-rose/10 to-pink/10 rounded-3xl p-5 border border-rose/20"
         >
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center shrink-0">
-              <Heart className="w-5 h-5 text-rose-500" />
+            <div className="w-10 h-10 rounded-xl bg-rose/20 flex items-center justify-center shrink-0">
+              <Heart className="w-5 h-5 text-rose" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground mb-1">Sağlık Notu</h3>
