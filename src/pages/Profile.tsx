@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   Camera,
   Edit3,
-  LogOut,
   Heart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
