@@ -233,15 +233,15 @@ export default function Medications() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-pink-500/10 border-violet-200/30 dark:border-violet-800/30">
+        <Card className="bg-gradient-to-br from-violet/10 via-purple/10 to-primary/10 border-violet-light/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-foreground">Bugünkü İlerleme</span>
-              <span className="text-lg font-bold text-violet-600 dark:text-violet-400">
+              <span className="text-lg font-bold text-violet">
                 {Math.round(getTodayProgress())}%
               </span>
             </div>
-            <Progress value={getTodayProgress()} className="h-2.5 bg-violet-100 dark:bg-violet-900/30" />
+            <Progress value={getTodayProgress()} className="h-2.5 bg-violet-light" />
             <p className="text-xs text-muted-foreground mt-2">
               {todayLogs.filter(l => l.taken).length} / {medications.reduce((sum, med) => sum + med.reminderTimes.length, 0)} doz alındı
             </p>
@@ -261,7 +261,7 @@ export default function Medications() {
               setEditingMedication(null);
               setIsAddSheetOpen(true);
             }}
-            className="text-violet-600 dark:text-violet-400"
+            className="text-violet"
           >
             <Plus className="w-4 h-4 mr-1" />
             Ekle
@@ -274,7 +274,7 @@ export default function Medications() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center py-12"
           >
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-violet-light flex items-center justify-center">
               <span className="text-4xl">💊</span>
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">Henüz ilaç eklenmedi</h3>
@@ -286,7 +286,7 @@ export default function Medications() {
                 resetForm();
                 setIsAddSheetOpen(true);
               }}
-              className="bg-gradient-to-r from-violet-500 to-purple-600"
+              className="bg-gradient-to-r from-violet to-purple"
             >
               <Plus className="w-4 h-4 mr-2" />
               İlaç Ekle
@@ -482,7 +482,7 @@ export default function Medications() {
                   variant="ghost"
                   size="sm"
                   onClick={addReminderTime}
-                  className="text-violet-600"
+                  className="text-violet"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Ekle
@@ -529,7 +529,7 @@ export default function Medications() {
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
             <Button
               onClick={handleSaveMedication}
-              className="w-full bg-gradient-to-r from-violet-500 to-purple-600"
+              className="w-full bg-gradient-to-r from-violet to-purple"
             >
               {editingMedication ? 'Güncelle' : 'Kaydet'}
             </Button>
@@ -611,7 +611,7 @@ export default function Medications() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-muted-foreground">Haftalık Uyum</span>
-                        <span className="font-bold text-violet-600">
+                        <span className="font-bold text-violet">
                           {Math.round(medicationStats[selectedMedication.id])}%
                         </span>
                       </div>

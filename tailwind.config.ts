@@ -82,6 +82,14 @@ export default {
           irritable: "hsl(var(--mood-irritable))",
           energetic: "hsl(var(--mood-energetic))",
         },
+        // Accent Colors for UI elements
+        violet: {
+          DEFAULT: "hsl(var(--accent-violet))",
+          light: "hsl(var(--accent-violet-light))",
+        },
+        purple: "hsl(var(--accent-purple))",
+        emerald: "hsl(var(--accent-emerald))",
+        amber: "hsl(var(--accent-amber))",
       },
       borderRadius: {
         lg: "var(--radius)",

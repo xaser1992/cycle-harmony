@@ -81,6 +81,13 @@ html.light {
     --mood-anxious: 30 65% 60%;
     --mood-irritable: 0 60% 55%;
     --mood-energetic: 160 60% 50%;
+
+    /* Accent Gradients - for notifications/settings */
+    --accent-violet: 265 60% 55%;
+    --accent-violet-light: 265 40% 92%;
+    --accent-purple: 280 55% 50%;
+    --accent-emerald: 160 55% 45%;
+    --accent-amber: 40 85% 50%;
   }
 
   .dark {
@@ -135,6 +142,13 @@ html.light {
     --mood-anxious: 30 50% 48%;
     --mood-irritable: 0 50% 48%;
     --mood-energetic: 160 50% 43%;
+
+    /* Accent Gradients - Dark Mode */
+    --accent-violet: 265 50% 52%;
+    --accent-violet-light: 265 32% 20%;
+    --accent-purple: 280 45% 48%;
+    --accent-emerald: 160 45% 42%;
+    --accent-amber: 40 70% 48%;
   }
 }
 
