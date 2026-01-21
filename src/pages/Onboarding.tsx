@@ -11,7 +11,7 @@ import { requestNotificationPermissions } from '@/lib/notifications';
 import { addCycleRecord } from '@/lib/storage';
 import type { HealthCondition, ContraceptiveMethod } from '@/types/cycle';
 
-const STEPS = ['welcome', 'personalInfo', 'healthInfo', 'cycleHistory', 'lastPeriod', 'cycleInfo', 'notifications', 'complete'] as const;
+const STEPS = ['welcome', 'personalInfo', 'healthInfo', 'cycleHistory', 'lastPeriod', 'cycleInfo', 'dataInfo', 'notifications', 'complete'] as const;
 type Step = typeof STEPS[number];
 
 interface PastPeriod {
@@ -161,8 +161,10 @@ export default function Onboarding() {
     }
     
     if (step === 'cycleInfo') {
+      // Use default date if not provided (14 days ago)
+      const periodStart = lastPeriodDate || format(subDays(new Date(), 14), 'yyyy-MM-dd');
       await updateCycleSettings({
-        lastPeriodStart: lastPeriodDate,
+        lastPeriodStart: periodStart,
         cycleLength,
         periodLength,
         lutealPhase: 14,
@@ -192,17 +194,6 @@ export default function Onboarding() {
     return true;
   };
 
-  const handleSkip = () => {
-    const nextIndex = currentIndex + 1;
-    if (nextIndex < STEPS.length) {
-      setStep(STEPS[nextIndex]);
-    }
-  };
-
-  const canSkip = () => {
-    // Can skip all steps except welcome and complete
-    return step !== 'welcome' && step !== 'complete';
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col safe-area-top safe-area-bottom">
@@ -456,6 +447,56 @@ export default function Onboarding() {
               </div>
             )}
 
+            {step === 'dataInfo' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-6">
+                  <span className="text-5xl mb-4 block">📊</span>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Veri Toplama Hakkında</h2>
+                  <p className="text-muted-foreground">
+                    Kişiselleştirilmiş tahminler için verilerine ihtiyacımız var.
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <Card className="p-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                    <div className="flex gap-3">
+                      <span className="text-2xl">⏱️</span>
+                      <div>
+                        <p className="font-medium text-foreground">İlk 2-3 Döngü</p>
+                        <p className="text-sm text-muted-foreground">
+                          Uygulama, seni tanımak için ilk 2-3 regl döngünü takip etmeli. Bu süre yaklaşık <strong>2-3 ay</strong> sürer.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                  
+                  <Card className="p-4 bg-primary/5 border-primary/20">
+                    <div className="flex gap-3">
+                      <span className="text-2xl">🎯</span>
+                      <div>
+                        <p className="font-medium text-foreground">Daha Doğru Tahminler</p>
+                        <p className="text-sm text-muted-foreground">
+                          Ne kadar çok veri girersen, tahminler o kadar doğru olur. Günlük semptomlarm ve ruh halin özellikle yardımcı olur.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                  
+                  <Card className="p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                    <div className="flex gap-3">
+                      <span className="text-2xl">✨</span>
+                      <div>
+                        <p className="font-medium text-foreground">Şimdilik Varsayılan Değerler</p>
+                        <p className="text-sm text-muted-foreground">
+                          Geçmiş döngü bilgilerini girmediysen, ortalama değerler (28 gün döngü, 5 gün regl) kullanılacak ve zamanla kişiselleştirilecek.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            )}
+
             {step === 'notifications' && (
               <div className="flex-1 flex flex-col">
                 <div className="mb-6">
@@ -586,16 +627,6 @@ export default function Onboarding() {
             {step !== 'complete' && <ChevronRight className="w-5 h-5 ml-2" />}
           </Button>
         </div>
-        {canSkip() && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleSkip}
-            className="w-full text-muted-foreground hover:text-foreground"
-          >
-            Atla
-          </Button>
-        )}
       </div>
     </div>
   );
