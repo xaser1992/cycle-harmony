@@ -274,11 +274,14 @@ export function UpdateSheet({
   }, [isOpen, onClose]);
 
   const toggleSelection = (
+    e: React.MouseEvent,
     id: string, 
     selected: string[], 
     setSelected: React.Dispatch<React.SetStateAction<string[]>>,
     singleSelect = false
   ) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (singleSelect) {
       setSelected(prev => prev.includes(id) ? [] : [id]);
     } else {
@@ -367,11 +370,11 @@ export function UpdateSheet({
           {filteredItems.map((item) => {
             const isSelected = selected.includes(item.id);
             return (
-              <motion.button
+              <button
                 key={item.id}
                 type="button"
-                onClick={() => toggleSelection(item.id, selected, setSelected, singleSelect)}
-                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                onClick={(e) => toggleSelection(e, item.id, selected, setSelected, singleSelect)}
+                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 ${
                   isSelected
                     ? `${category.chipSelected} shadow-sm`
                     : `${category.chipBase} hover:opacity-80`
@@ -380,11 +383,10 @@ export function UpdateSheet({
                   touchAction: 'manipulation',
                   WebkitTapHighlightColor: 'transparent',
                 }}
-                whileTap={{ scale: 0.95 }}
               >
                 <span className="text-sm">{item.emoji}</span>
                 <span className="whitespace-nowrap">{language === 'tr' ? item.tr : item.en}</span>
-              </motion.button>
+              </button>
             );
           })}
         </div>
