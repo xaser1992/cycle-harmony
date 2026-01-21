@@ -1,6 +1,5 @@
-// 🌸 Global Header Component - Settings & Notifications
+// 🌸 Global Header Component - Settings & Notifications (Performance Optimized)
 import { forwardRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCycleData } from '@/hooks/useCycleData';
@@ -17,55 +16,30 @@ export const GlobalHeader = forwardRef<HTMLDivElement, {}>(function GlobalHeader
       <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none safe-area-top">
         <div className="flex items-center justify-between px-4 pt-4">
           {/* Settings Button - Left */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.05 }}
+          <button
             onClick={() => navigate('/settings')}
-            className="pointer-events-auto w-11 h-11 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 shadow-lg flex items-center justify-center"
+            className="pointer-events-auto w-11 h-11 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 shadow-lg flex items-center justify-center active:scale-90 transition-transform duration-150 group"
           >
-            <motion.div
-              whileHover={{ rotate: 90 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="group-hover:rotate-90 transition-transform duration-300">
               <Settings className="w-5 h-5 text-muted-foreground" />
-            </motion.div>
-          </motion.button>
+            </div>
+          </button>
 
           {/* Notification Button - Right - Opens Sheet */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.05 }}
+          <button
             onClick={() => setIsNotificationSheetOpen(true)}
-            className={`pointer-events-auto w-11 h-11 rounded-full backdrop-blur-xl border shadow-lg flex items-center justify-center transition-colors ${
+            className={`pointer-events-auto w-11 h-11 rounded-full backdrop-blur-xl border shadow-lg flex items-center justify-center active:scale-90 transition-all duration-150 ${
               notificationPrefs.enabled 
                 ? 'bg-gradient-to-br from-violet-400 to-purple-500 border-violet-400/50' 
                 : 'bg-card/90 border-border/50'
             }`}
           >
-            <AnimatePresence mode="wait">
-              {notificationPrefs.enabled ? (
-                <motion.div
-                  key="bell-on"
-                  initial={{ scale: 0, rotate: -30 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0, rotate: 30 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                >
-                  <Bell className="w-5 h-5 text-white" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="bell-off"
-                  initial={{ scale: 0, rotate: 30 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0, rotate: -30 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                >
-                  <BellOff className="w-5 h-5 text-muted-foreground" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
+            {notificationPrefs.enabled ? (
+              <Bell className="w-5 h-5 text-white animate-fade-in" />
+            ) : (
+              <BellOff className="w-5 h-5 text-muted-foreground animate-fade-in" />
+            )}
+          </button>
         </div>
       </div>
 
