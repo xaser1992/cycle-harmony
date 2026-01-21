@@ -520,11 +520,7 @@ export default function SettingsPage() {
         </SectionCard>
 
         {/* About */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-rose-light to-pink-light dark:from-rose/20 dark:to-pink/20 rounded-3xl p-5 border border-rose/30 dark:border-rose/30"
-        >
+        <div className="bg-gradient-to-br from-rose-light to-pink-light dark:from-rose/20 dark:to-pink/20 rounded-3xl p-5 border border-rose/30 dark:border-rose/30 animate-fade-in">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose to-pink flex items-center justify-center shadow-lg">
               <span className="text-2xl">🌸</span>
@@ -537,7 +533,7 @@ export default function SettingsPage() {
           <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
             Bu uygulama tıbbi bir cihaz değildir. Sağlık kararlarınız için lütfen bir sağlık uzmanına danışın.
           </p>
-        </motion.div>
+        </div>
       </main>
 
       <BottomNav onCenterPress={handleCenterPress} />
