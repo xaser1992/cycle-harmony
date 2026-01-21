@@ -1,4 +1,5 @@
 // 🌸 Global Header Component - Settings & Notifications
+import { forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +7,7 @@ import { useState } from 'react';
 import { useCycleData } from '@/hooks/useCycleData';
 import { NotificationSettingsSheet } from '@/components/NotificationSettingsSheet';
 
-export function GlobalHeader() {
+export const GlobalHeader = forwardRef<HTMLDivElement, {}>(function GlobalHeader(props, ref) {
   const navigate = useNavigate();
   const { notificationPrefs } = useCycleData();
   const [isNotificationSheetOpen, setIsNotificationSheetOpen] = useState(false);
@@ -76,4 +77,4 @@ export function GlobalHeader() {
       />
     </>
   );
-}
+});

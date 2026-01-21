@@ -1,5 +1,5 @@
 // 🌸 Main Today Page
-import { useEffect } from 'react';
+import { useEffect, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
@@ -13,7 +13,7 @@ import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import type { DayEntry } from '@/types/cycle';
 
-const Index = () => {
+const Index = forwardRef<HTMLDivElement, {}>(function Index(props, ref) {
   const navigate = useNavigate();
   const { openUpdateSheet } = useUpdateSheet();
   const { 
@@ -144,6 +144,6 @@ const Index = () => {
       <AppTour language={userSettings.language} />
     </div>
   );
-};
+});
 
 export default Index;
