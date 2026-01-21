@@ -1,6 +1,6 @@
 // 🌸 Update Bottom Sheet Component - Flo Inspired Categorized Design
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// Removed framer-motion to fix trembling issue on mobile
 import { X, Check, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -356,11 +356,7 @@ export function UpdateSheet({
     if (filteredItems.length === 0) return null;
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-      >
+      <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
         <h3 className="font-medium text-foreground mb-2 text-sm">
           {language === 'tr' ? category.title.tr : category.title.en}
         </h3>
@@ -393,17 +389,13 @@ export function UpdateSheet({
             );
           })}
         </div>
-      </motion.div>
+      </div>
     );
   };
 
   // Water Tracking Card
   const WaterCard = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-    >
+    <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <span className="text-lg">💧</span>
@@ -439,14 +431,12 @@ export function UpdateSheet({
         <span className="text-sm text-muted-foreground">/ {waterGoal.toFixed(2).replace('.', ',')} L</span>
       </div>
       <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-        <motion.div 
-          className="h-full bg-sky rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
-          transition={{ duration: 0.3 }}
+        <div 
+          className="h-full bg-sky rounded-full transition-all duration-300"
+          style={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
         />
       </div>
-    </motion.div>
+    </div>
   );
 
   // Weight Card - with +/- controls like water
@@ -466,11 +456,7 @@ export function UpdateSheet({
     const displayWeight = weight !== null ? weight.toFixed(1) : null;
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-      >
+      <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
             <span className="text-lg">⚖️</span>
@@ -509,7 +495,7 @@ export function UpdateSheet({
         <p className="text-xs text-center text-muted-foreground mt-2">
           {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
         </p>
-      </motion.div>
+      </div>
     );
   };
 
@@ -579,32 +565,25 @@ export function UpdateSheet({
 
             {/* Date Navigation */}
             <div className="flex items-center justify-center gap-4 px-8 mt-2">
-              <motion.button
+              <button
                 type="button"
                 onClick={goToPreviousDay}
                 className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
-                whileTap={{ scale: 0.9 }}
               >
                 <ChevronLeft className="w-6 h-6 text-foreground/60" />
-              </motion.button>
+              </button>
               
-              <motion.h2 
-                className="text-lg font-semibold text-foreground"
-                key={currentDate.toISOString()}
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
+              <h2 className="text-lg font-semibold text-foreground">
                 {format(currentDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
-              </motion.h2>
+              </h2>
               
-              <motion.button
+              <button
                 type="button"
                 onClick={goToNextDay}
                 className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
-                whileTap={{ scale: 0.9 }}
               >
                 <ChevronRight className="w-6 h-6 text-foreground/60" />
-              </motion.button>
+              </button>
             </div>
           </div>
 
@@ -715,11 +694,7 @@ export function UpdateSheet({
 
               {/* Notes Section */}
               {!searchQuery && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-                >
+                <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-sm">📝</span>
                     <h3 className="font-medium text-foreground text-sm">
@@ -733,23 +708,21 @@ export function UpdateSheet({
                     className="rounded-lg resize-none border-border/40 focus:border-primary min-h-[70px] bg-muted/30 text-sm"
                     rows={3}
                   />
-                </motion.div>
+                </div>
               )}
             </div>
           </ScrollArea>
 
           {/* Fixed Save Button */}
           <div className="absolute bottom-0 left-0 right-0 px-3 py-3 bg-gradient-to-t from-card via-card to-transparent safe-area-bottom">
-            <motion.div whileTap={{ scale: 0.98 }}>
-              <Button
-                onClick={handleSave}
-                size="lg"
-                className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose to-pink"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                {language === 'tr' ? 'Kaydet' : 'Save'}
-              </Button>
-            </motion.div>
+            <Button
+              onClick={handleSave}
+              size="lg"
+              className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose to-pink active:scale-[0.98] transition-transform"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              {language === 'tr' ? 'Kaydet' : 'Save'}
+            </Button>
           </div>
         </div>
       </SheetContent>
