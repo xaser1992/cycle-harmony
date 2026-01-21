@@ -8,8 +8,11 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Sheet, 
-  SheetContent
+  SheetContent,
+  SheetTitle,
+  SheetDescription
 } from '@/components/ui/sheet';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import type { DayEntry, FlowLevel, Symptom, Mood } from '@/types/cycle';
 import { format, addDays, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -522,6 +525,12 @@ export function UpdateSheet({
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
+        {/* Accessibility: Hidden title and description for screen readers */}
+        <VisuallyHidden.Root>
+          <SheetTitle>Günlük Kayıt</SheetTitle>
+          <SheetDescription>Bugünkü sağlık verilerinizi kaydedin</SheetDescription>
+        </VisuallyHidden.Root>
+        
         <div className="flex flex-col h-full bg-muted/30">
           {/* Header with Date Navigation - Pull to dismiss */}
           <div 

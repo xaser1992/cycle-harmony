@@ -24,7 +24,21 @@ export function calculatePredictions(
   settings: CycleSettings,
   cycleHistory: CycleRecord[] = []
 ): CyclePrediction {
-  const lastPeriodStart = parseISO(settings.lastPeriodStart);
+  // Handle missing or invalid lastPeriodStart - default to 14 days ago
+  let lastPeriodStart: Date;
+  try {
+    if (!settings.lastPeriodStart || settings.lastPeriodStart === '') {
+      lastPeriodStart = addDays(new Date(), -14);
+    } else {
+      lastPeriodStart = parseISO(settings.lastPeriodStart);
+      // Check if parsed date is valid
+      if (isNaN(lastPeriodStart.getTime())) {
+        lastPeriodStart = addDays(new Date(), -14);
+      }
+    }
+  } catch {
+    lastPeriodStart = addDays(new Date(), -14);
+  }
   
   // Calculate average cycle length from history or use default
   let avgCycleLength = settings.cycleLength;
@@ -75,7 +89,22 @@ export function getCyclePhase(
   entries: DayEntry[] = []
 ): CyclePhase {
   const today = startOfDay(date);
-  const lastPeriodStart = parseISO(settings.lastPeriodStart);
+  
+  // Handle missing or invalid lastPeriodStart - default to 14 days ago
+  let lastPeriodStart: Date;
+  try {
+    if (!settings.lastPeriodStart || settings.lastPeriodStart === '') {
+      lastPeriodStart = addDays(new Date(), -14);
+    } else {
+      lastPeriodStart = parseISO(settings.lastPeriodStart);
+      if (isNaN(lastPeriodStart.getTime())) {
+        lastPeriodStart = addDays(new Date(), -14);
+      }
+    }
+  } catch {
+    lastPeriodStart = addDays(new Date(), -14);
+  }
+  
   const lastPeriodEnd = settings.lastPeriodEnd 
     ? parseISO(settings.lastPeriodEnd) 
     : addDays(lastPeriodStart, settings.periodLength - 1);
