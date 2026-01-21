@@ -27,20 +27,40 @@ import { format, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks,
 import { tr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 
-// Flo-style colors
-const CHART_COLORS = {
-  primary: '#F472B6',
-  secondary: '#A78BFA',
-  accent: '#34D399',
-  warning: '#FBBF24',
-  line: '#EC4899',
+// Semantic chart colors using CSS variables
+const getChartColors = () => {
+  const computedStyle = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
+  const getHSL = (varName: string) => {
+    if (!computedStyle) return '#F472B6';
+    const value = computedStyle.getPropertyValue(varName).trim();
+    return value ? `hsl(${value})` : '#F472B6';
+  };
+  
+  return {
+    primary: getHSL('--rose'),
+    secondary: getHSL('--violet'),
+    accent: getHSL('--emerald'),
+    warning: getHSL('--amber'),
+    line: getHSL('--pink'),
+    blue: getHSL('--blue'),
+    cyan: getHSL('--cyan'),
+  };
 };
 
-const CYCLE_PHASE_COLORS = {
-  period: '#F472B6',
-  follicular: '#60A5FA',
-  ovulation: '#A78BFA',
-  luteal: '#FBBF24',
+const getCyclePhaseColors = () => {
+  const computedStyle = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
+  const getHSL = (varName: string) => {
+    if (!computedStyle) return '#F472B6';
+    const value = computedStyle.getPropertyValue(varName).trim();
+    return value ? `hsl(${value})` : '#F472B6';
+  };
+  
+  return {
+    period: getHSL('--rose'),
+    follicular: getHSL('--blue'),
+    ovulation: getHSL('--violet'),
+    luteal: getHSL('--amber'),
+  };
 };
 
 // Common tooltip style - defined once
@@ -184,8 +204,9 @@ const SymptomBar = memo(({
   maxCount: number;
   index: number;
 }) => {
-  const colors = [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.accent, CHART_COLORS.warning];
-  const color = colors[index] || CHART_COLORS.primary;
+  const chartColors = getChartColors();
+  const colors = [chartColors.primary, chartColors.secondary, chartColors.accent, chartColors.warning];
+  const color = colors[index] || chartColors.primary;
   const width = `${(symptom.count / maxCount) * 100}%`;
   
   return (
@@ -416,12 +437,13 @@ export default function StatsPage() {
     const ovulationDays = 3;
     const follicularDays = 8;
     const lutealDays = 28 - periodDays - ovulationDays - follicularDays;
+    const phaseColors = getCyclePhaseColors();
     
     return [
-      { name: 'Adet', days: periodDays, color: CYCLE_PHASE_COLORS.period },
-      { name: 'Foliküler', days: follicularDays, color: CYCLE_PHASE_COLORS.follicular },
-      { name: 'Ovülasyon', days: ovulationDays, color: CYCLE_PHASE_COLORS.ovulation },
-      { name: 'Luteal', days: lutealDays, color: CYCLE_PHASE_COLORS.luteal },
+      { name: 'Adet', days: periodDays, color: phaseColors.period },
+      { name: 'Foliküler', days: follicularDays, color: phaseColors.follicular },
+      { name: 'Ovülasyon', days: ovulationDays, color: phaseColors.ovulation },
+      { name: 'Luteal', days: lutealDays, color: phaseColors.luteal },
     ];
   }, [cycleSettings.periodLength]);
 
@@ -604,12 +626,12 @@ export default function StatsPage() {
                   <AreaChart data={weeklyOverviewData}>
                     <defs>
                       <linearGradient id="colorPeriodArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--rose))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--rose))" stopOpacity={0.1}/>
                       </linearGradient>
                       <linearGradient id="colorSymptomArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={CHART_COLORS.secondary} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={CHART_COLORS.secondary} stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--violet))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--violet))" stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -636,7 +658,7 @@ export default function StatsPage() {
                       type="monotone" 
                       dataKey="periodDays" 
                       name="periodDays"
-                      stroke={CHART_COLORS.primary}
+                      stroke="hsl(var(--rose))"
                       fillOpacity={1}
                       fill="url(#colorPeriodArea)"
                       strokeWidth={2}
@@ -646,7 +668,7 @@ export default function StatsPage() {
                       type="monotone" 
                       dataKey="symptomDays" 
                       name="symptomDays"
-                      stroke={CHART_COLORS.secondary}
+                      stroke="hsl(var(--violet))"
                       fillOpacity={1}
                       fill="url(#colorSymptomArea)"
                       strokeWidth={2}
@@ -659,13 +681,13 @@ export default function StatsPage() {
               {/* Legend */}
               <div className="flex justify-center gap-6 mt-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS.primary }} />
+                  <div className="w-3 h-3 rounded-full bg-rose" />
                   <span className="text-xs text-muted-foreground">
                     {isEnglish ? 'Period days' : 'Regl günleri'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS.secondary }} />
+                  <div className="w-3 h-3 rounded-full bg-violet" />
                   <span className="text-xs text-muted-foreground">
                     {isEnglish ? 'Symptom days' : 'Semptom günleri'}
                   </span>
@@ -727,10 +749,10 @@ export default function StatsPage() {
                     <Line 
                       type="monotone" 
                       dataKey="length" 
-                      stroke={CHART_COLORS.line}
+                      stroke="hsl(var(--pink))"
                       strokeWidth={3}
-                      dot={{ fill: CHART_COLORS.line, strokeWidth: 0, r: 5 }}
-                      activeDot={{ r: 7, fill: CHART_COLORS.line }}
+                      dot={{ fill: 'hsl(var(--pink))', strokeWidth: 0, r: 5 }}
+                      activeDot={{ r: 7, fill: 'hsl(var(--pink))' }}
                       isAnimationActive={false}
                     />
                   </LineChart>
@@ -767,7 +789,7 @@ export default function StatsPage() {
                     <Bar 
                       dataKey="glasses" 
                       radius={[6, 6, 0, 0]}
-                      fill="#60A5FA"
+                      fill="hsl(var(--blue))"
                       isAnimationActive={false}
                     />
                   </BarChart>
@@ -785,13 +807,13 @@ export default function StatsPage() {
                 {/* Stats row */}
                 <div className="flex gap-4 mb-3 text-xs">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: CHART_COLORS.accent }} />
+                    <div className="w-2 h-2 rounded-full bg-emerald" />
                     <span className="text-muted-foreground">
                       {isEnglish ? 'Weekly' : 'Haftalık'}: <span className="font-medium text-foreground">{weightStats.weeklyAvg} kg</span>
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-violet-400" />
+                    <div className="w-2 h-2 rounded-full bg-violet" />
                     <span className="text-muted-foreground">
                       {isEnglish ? 'Monthly' : 'Aylık'}: <span className="font-medium text-foreground">{weightStats.monthlyAvg} kg</span>
                     </span>
@@ -800,12 +822,12 @@ export default function StatsPage() {
                 <div className="h-44">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={weightData}>
-                      <defs>
-                        <linearGradient id="colorWeightArea" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={CHART_COLORS.accent} stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor={CHART_COLORS.accent} stopOpacity={0.1}/>
-                        </linearGradient>
-                      </defs>
+                    <defs>
+                      <linearGradient id="colorWeightArea" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--emerald))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--emerald))" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                       <XAxis 
                         dataKey="date" 
@@ -825,20 +847,20 @@ export default function StatsPage() {
                       />
                       <ReferenceLine 
                         y={weightStats.target} 
-                        stroke="#F472B6" 
+                        stroke="hsl(var(--rose))" 
                         strokeDasharray="5 5" 
                         strokeWidth={2}
                         label={{ 
                           value: `${isEnglish ? 'Target' : 'Hedef'}: ${weightStats.target} kg`, 
                           position: 'insideTopRight',
-                          fill: '#F472B6',
+                          fill: 'hsl(var(--rose))',
                           fontSize: 10
                         }}
                       />
                       <Area 
                         type="monotone" 
                         dataKey="weight" 
-                        stroke={CHART_COLORS.accent}
+                        stroke="hsl(var(--emerald))"
                         fillOpacity={1}
                         fill="url(#colorWeightArea)"
                         strokeWidth={2}
@@ -856,9 +878,9 @@ export default function StatsPage() {
               subtitle={isEnglish ? 'Last 6 months' : 'Son 6 ay'}
               icon={
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="14" width="4" height="6" rx="1" fill={CHART_COLORS.primary} />
-                  <rect x="10" y="10" width="4" height="10" rx="1" fill={CHART_COLORS.primary} opacity="0.7" />
-                  <rect x="16" y="6" width="4" height="14" rx="1" fill={CHART_COLORS.primary} opacity="0.5" />
+                  <rect x="4" y="14" width="4" height="6" rx="1" className="fill-rose" />
+                  <rect x="10" y="10" width="4" height="10" rx="1" className="fill-rose opacity-70" />
+                  <rect x="16" y="6" width="4" height="14" rx="1" className="fill-rose opacity-50" />
                 </svg>
               }
             >
@@ -890,7 +912,7 @@ export default function StatsPage() {
                       {periodDurationData.map((_, index) => (
                         <Cell 
                           key={`duration-cell-${index}`} 
-                          fill={index % 2 === 0 ? CHART_COLORS.primary : '#FDA4AF'} 
+                          fill={index % 2 === 0 ? 'hsl(var(--rose))' : 'hsl(var(--pink))'} 
                         />
                       ))}
                     </Bar>
@@ -905,8 +927,8 @@ export default function StatsPage() {
               subtitle={isEnglish ? 'Day distribution' : 'Gün dağılımı'}
               icon={
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke={CHART_COLORS.primary} strokeWidth="3" fill="none" />
-                  <path d="M12 2 A10 10 0 0 1 22 12" stroke={CHART_COLORS.secondary} strokeWidth="3" fill="none" />
+                  <circle cx="12" cy="12" r="10" className="stroke-rose" strokeWidth="3" fill="none" />
+                  <path d="M12 2 A10 10 0 0 1 22 12" className="stroke-violet" strokeWidth="3" fill="none" />
                 </svg>
               }
             >
@@ -959,8 +981,8 @@ export default function StatsPage() {
             {/* Summary Cards */}
             <div className="grid grid-cols-2 gap-4">
               <SummaryCard
-                gradient="bg-gradient-to-br from-rose-400 to-pink-500"
-                shadowColor="shadow-rose-500/20"
+                gradient="bg-gradient-to-br from-rose to-pink"
+                shadowColor="shadow-rose/20"
                 icon="📅"
                 value={cycleSettings.cycleLength}
                 label={isEnglish ? 'Cycle Length' : 'Döngü Uzunluğu'}
@@ -968,8 +990,8 @@ export default function StatsPage() {
               />
 
               <SummaryCard
-                gradient="bg-gradient-to-br from-violet-400 to-purple-500"
-                shadowColor="shadow-violet-500/20"
+                gradient="bg-gradient-to-br from-violet to-purple"
+                shadowColor="shadow-violet/20"
                 icon="🌸"
                 value={cycleSettings.periodLength}
                 label={isEnglish ? 'Period Duration' : 'Regl Süresi'}
@@ -977,8 +999,8 @@ export default function StatsPage() {
               />
 
               <SummaryCard
-                gradient="bg-gradient-to-br from-cyan-400 to-teal-500"
-                shadowColor="shadow-teal-500/20"
+                gradient="bg-gradient-to-br from-cyan to-teal"
+                shadowColor="shadow-teal/20"
                 icon="🥚"
                 value={14}
                 label={isEnglish ? 'Ovulation' : 'Yumurtlama'}
@@ -986,8 +1008,8 @@ export default function StatsPage() {
               />
 
               <SummaryCard
-                gradient="bg-gradient-to-br from-amber-400 to-orange-500"
-                shadowColor="shadow-orange-500/20"
+                gradient="bg-gradient-to-br from-amber to-orange"
+                shadowColor="shadow-orange/20"
                 icon="💐"
                 value={6}
                 label={isEnglish ? 'Fertile Days' : 'Doğurgan Gün'}
@@ -997,8 +1019,8 @@ export default function StatsPage() {
 
             {/* Water Summary Card */}
             <SummaryCard
-              gradient="bg-gradient-to-br from-sky-400 to-blue-500"
-              shadowColor="shadow-blue-500/20"
+              gradient="bg-gradient-to-br from-sky to-blue"
+              shadowColor="shadow-blue/20"
               icon="💧"
               value={waterStats.todayGlasses}
               label={isEnglish ? 'Glasses Today' : 'Bugün Bardak'}
@@ -1015,8 +1037,8 @@ export default function StatsPage() {
             {/* Weight Summary Card */}
             {weightStats && (
               <SummaryCard
-                gradient="bg-gradient-to-br from-emerald-400 to-teal-500"
-                shadowColor="shadow-teal-500/20"
+                gradient="bg-gradient-to-br from-emerald to-teal"
+                shadowColor="shadow-teal/20"
                 icon="⚖️"
                 value={weightStats.current}
                 label="kg"
@@ -1032,7 +1054,7 @@ export default function StatsPage() {
                       <p className="text-xs text-white/60">
                         {isEnglish ? 'Diff' : 'Fark'}
                       </p>
-                      <p className={`text-sm font-semibold ${weightStats.diff > 0 ? 'text-rose-200' : 'text-emerald-200'}`}>
+                      <p className={`text-sm font-semibold ${weightStats.diff > 0 ? 'text-rose/80' : 'text-emerald/80'}`}>
                         {weightStats.diff > 0 ? '+' : ''}{weightStats.diff} kg
                       </p>
                     </div>
