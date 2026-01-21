@@ -1,5 +1,5 @@
 // 🌸 App Tour - Onboarding sonrası özellik turu
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -80,7 +80,7 @@ interface AppTourProps {
   onComplete?: () => void;
 }
 
-export function AppTour({ language, onComplete }: AppTourProps) {
+export const AppTour = forwardRef<HTMLDivElement, AppTourProps>(function AppTour({ language, onComplete }, ref) {
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -237,4 +237,4 @@ export function AppTour({ language, onComplete }: AppTourProps) {
       </motion.div>
     </AnimatePresence>
   );
-}
+});
