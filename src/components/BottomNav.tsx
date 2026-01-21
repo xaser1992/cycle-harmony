@@ -1,22 +1,7 @@
 // 🌸 Bottom Navigation Component - Ruh Halim Style Animated Icons
-import { useState, useRef, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { createPortal } from 'react-dom';
-
-interface QuickAction {
-  icon: string;
-  label: string;
-  labelEn: string;
-  gradient: string;
-  tab: 'flow' | 'symptoms' | 'mood';
-}
-
-const quickActions: QuickAction[] = [
-  { icon: '🩸', label: 'Akış', labelEn: 'Flow', gradient: 'from-rose-400 to-pink-500', tab: 'flow' },
-  { icon: '💊', label: 'Semptom', labelEn: 'Symptoms', gradient: 'from-violet-400 to-purple-500', tab: 'symptoms' },
-  { icon: '😊', label: 'Ruh Hali', labelEn: 'Mood', gradient: 'from-amber-400 to-orange-400', tab: 'mood' },
-];
 
 // Tab configuration
 interface TabConfig {
@@ -44,51 +29,16 @@ interface BottomNavProps {
   onCenterPress?: (tab?: 'flow' | 'symptoms' | 'mood') => void;
 }
 
-function renderInBody(node: React.ReactNode) {
-  if (typeof document === 'undefined') return null;
-  return createPortal(node, document.body);
-}
-
 export function BottomNav({ onCenterPress }: BottomNavProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [showQuickActions, setShowQuickActions] = useState(false);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const isLongPress = useRef(false);
 
   const handleTap = useCallback((path: string) => {
     navigate(path);
   }, [navigate]);
 
   const handleCenterPress = useCallback(() => {
-    if (isLongPress.current) {
-      isLongPress.current = false;
-      return;
-    }
     onCenterPress?.();
-  }, [onCenterPress]);
-
-  const handleLongPressStart = useCallback(() => {
-    isLongPress.current = false;
-    longPressTimer.current = setTimeout(() => {
-      isLongPress.current = true;
-      setShowQuickActions(true);
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-    }, 500);
-  }, []);
-
-  const handleLongPressEnd = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }, []);
-
-  const handleQuickAction = useCallback((tab: 'flow' | 'symptoms' | 'mood') => {
-    setShowQuickActions(false);
-    onCenterPress?.(tab);
   }, [onCenterPress]);
 
   const leftTabs = tabConfig.slice(0, 2);
@@ -98,59 +48,6 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Glass background */}
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/30" />
-
-      {/* Quick Actions (portal) - CSS-only animations for native performance */}
-      {renderInBody(
-        showQuickActions ? (
-          <>
-            <div
-              className="fixed inset-0 z-[9000] bg-black/30 backdrop-blur-sm animate-fade-in"
-              onClick={() => setShowQuickActions(false)}
-            />
-
-            {quickActions.map((action, index) => {
-              const buttonSize = Math.min(60, window.innerWidth * 0.16);
-              const spacing = Math.max(60, Math.min(80, window.innerWidth * 0.2));
-              const positions = [
-                { x: window.innerWidth * 0.5 - spacing - buttonSize / 2, y: 85 },
-                { x: window.innerWidth * 0.5 - buttonSize / 2, y: 105 },
-                { x: window.innerWidth * 0.5 + spacing - buttonSize / 2, y: 85 },
-              ];
-
-              return (
-                <button
-                  key={action.tab}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleQuickAction(action.tab);
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleQuickAction(action.tab);
-                  }}
-                  className={`fixed z-[9001] flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${action.gradient} shadow-xl cursor-pointer select-none animate-scale-in active:scale-90 transition-transform`}
-                  style={{
-                    width: `${buttonSize}px`,
-                    height: `${buttonSize}px`,
-                    left: `${positions[index].x}px`,
-                    bottom: `calc(${positions[index].y}px + env(safe-area-inset-bottom))`,
-                    touchAction: 'manipulation',
-                    WebkitTapHighlightColor: 'transparent',
-                    animationDelay: `${index * 50}ms`,
-                  }}
-                >
-                  <span className="text-xl pointer-events-none select-none">{action.icon}</span>
-                  <span className="text-[10px] font-medium text-white whitespace-nowrap pointer-events-none select-none">
-                    {action.label}
-                  </span>
-                </button>
-              );
-            })}
-          </>
-        ) : null
-      )}
 
       <div className="relative flex items-center justify-around h-[68px] px-1">
         {/* Left tabs */}
@@ -165,23 +62,17 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
           ))}
         </div>
 
-        {/* Center FAB Button - CSS-only for native performance */}
+        {/* Center FAB Button - Simple click opens UpdateSheet */}
         <div className="relative -mt-8 mx-2">
           <button
             onClick={handleCenterPress}
-            onTouchStart={handleLongPressStart}
-            onTouchEnd={handleLongPressEnd}
-            onTouchCancel={handleLongPressEnd}
-            onMouseDown={handleLongPressStart}
-            onMouseUp={handleLongPressEnd}
-            onMouseLeave={handleLongPressEnd}
             className="relative w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 flex items-center justify-center active:scale-90 transition-transform duration-150"
             style={{
               boxShadow: '0 4px 20px -2px hsl(var(--primary) / 0.5), 0 0 30px -5px hsl(var(--primary) / 0.3)',
             }}
           >
             <svg
-              className={`w-7 h-7 text-white transition-transform duration-200 ${showQuickActions ? 'rotate-45' : ''}`}
+              className="w-7 h-7 text-white"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
