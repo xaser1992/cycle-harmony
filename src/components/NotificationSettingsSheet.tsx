@@ -11,7 +11,8 @@ import {
   Pill,
   Check
 } from 'lucide-react';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { TimePicker } from '@/components/TimePicker';
@@ -135,10 +136,17 @@ export function NotificationSettingsSheet({ isOpen, onClose }: NotificationSetti
       <SheetContent 
         side="bottom" 
         className="h-[90vh] rounded-t-[2rem] p-0 border-0"
+        aria-describedby={undefined}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
+        {/* Accessibility: Hidden title for screen readers */}
+        <VisuallyHidden.Root>
+          <SheetTitle>Bildirim Ayarları</SheetTitle>
+          <SheetDescription>Bildirim tercihlerinizi yönetin</SheetDescription>
+        </VisuallyHidden.Root>
+        
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="relative overflow-hidden bg-gradient-to-r from-violet-400 to-purple-500 px-6 pt-6 pb-8">
