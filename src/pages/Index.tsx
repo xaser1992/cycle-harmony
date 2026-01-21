@@ -95,11 +95,12 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="px-6 space-y-6">
-        {/* Today Status Card */}
+        {/* Today Status Card - Tap to open UpdateSheet */}
         <TodayCard 
           phase={currentPhase} 
           prediction={prediction}
           language={userSettings.language}
+          onTap={() => handleOpenUpdate()}
         />
 
         {/* Phase Timeline */}

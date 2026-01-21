@@ -29,6 +29,7 @@ interface TodayCardProps {
   phase: CyclePhase | null;
   prediction: CyclePrediction | null;
   language?: 'tr' | 'en';
+  onTap?: () => void;
 }
 
 const phaseGradients = {
@@ -116,7 +117,7 @@ function CircularProgress({ progress, dayNumber, accentColor, language }: {
   );
 }
 
-export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps) {
+export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCardProps) {
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
   const [activeInfoCard, setActiveInfoCard] = useState<'period' | 'ovulation' | 'fertile' | null>(null);
@@ -168,7 +169,13 @@ export function TodayCard({ phase, prediction, language = 'tr' }: TodayCardProps
     <>
       <div
         className={`relative rounded-[2rem] bg-gradient-to-br ${phaseGradients[phase.type]} p-6 overflow-hidden shadow-xl cursor-pointer transition-transform duration-150 active:scale-[0.98]`}
-        onClick={() => setShowDetails(true)}
+        onClick={() => {
+          if (onTap) {
+            onTap();
+          } else {
+            setShowDetails(true);
+          }
+        }}
       >
         {/* Static decorative elements - no animations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">

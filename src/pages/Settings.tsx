@@ -17,6 +17,7 @@ import {
   Bell,
   Droplets,
   Scale,
+  RotateCcw,
   type LucideIcon
 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
@@ -26,6 +27,8 @@ import { useAppLock } from '@/components/AppLockProvider';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useNavigate } from 'react-router-dom';
 import { checkNotificationPermissions, requestNotificationPermissions } from '@/lib/notifications';
+import { Preferences } from '@capacitor/preferences';
+import { toast } from 'sonner';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -501,13 +504,25 @@ export default function SettingsPage() {
           icon={Bug}
           gradient="from-gray-500 to-slate-600"
         >
-          <SettingRow
-            icon={Bug}
-            label="Bildirim Tanılama"
-            description="Debug paneli"
-            onClick={() => navigate('/debug')}
-            gradient="from-gray-500 to-slate-600"
-          />
+          <div className="space-y-3">
+            <SettingRow
+              icon={RotateCcw}
+              label="Uygulama Turunu Göster"
+              description="Özellikleri tekrar keşfet"
+              onClick={async () => {
+                await Preferences.remove({ key: 'app_tour_completed' });
+                toast.success(userSettings?.language === 'tr' ? 'Tur sıfırlandı! Ana sayfaya gidin.' : 'Tour reset! Go to home page.');
+              }}
+              gradient="from-violet-400 to-purple-500"
+            />
+            <SettingRow
+              icon={Bug}
+              label="Bildirim Tanılama"
+              description="Debug paneli"
+              onClick={() => navigate('/debug')}
+              gradient="from-gray-500 to-slate-600"
+            />
+          </div>
         </SectionCard>
 
         {/* About */}
