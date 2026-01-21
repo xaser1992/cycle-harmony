@@ -104,7 +104,7 @@ const Index = forwardRef<HTMLDivElement, {}>(function Index(props, ref) {
         />
 
         {/* Phase Timeline */}
-        <div className="bg-card rounded-2xl p-4 border border-border animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <div className="bg-card rounded-2xl p-4 border border-border">
           <PhaseTimeline 
             prediction={prediction}
             settings={cycleSettings}
@@ -113,7 +113,7 @@ const Index = forwardRef<HTMLDivElement, {}>(function Index(props, ref) {
         </div>
 
         {/* Quick Actions - Period button only */}
-        <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div>
           <button
             onClick={handleLogPeriod}
             className={`w-full relative overflow-hidden rounded-2xl p-4 transition-all duration-200 active:scale-95 active:brightness-110 ${

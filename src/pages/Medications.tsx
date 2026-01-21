@@ -1,6 +1,6 @@
 // 💊 Medication Tracking Page - Flo Inspired Design
 import { useState, useEffect, forwardRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Check, X, Clock, Trash2, Edit2, ChevronRight, TrendingUp } from 'lucide-react';
 import { format, isToday } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -215,24 +215,15 @@ export default function Medications() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-24">
       {/* Header */}
-      <motion.div 
-        className="px-5 pt-16 pb-4"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <div className="px-5 pt-16 pb-4">
         <h1 className="text-2xl font-bold text-foreground">İlaç Takibi</h1>
         <p className="text-muted-foreground text-sm mt-1">
           {format(new Date(), 'd MMMM yyyy, EEEE', { locale: tr })}
         </p>
-      </motion.div>
+      </div>
 
       {/* Today's Progress */}
-      <motion.div 
-        className="px-5 mb-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
+      <div className="px-5 mb-6">
         <Card className="bg-gradient-to-br from-violet/10 via-purple/10 to-primary/10 border-violet-light/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
@@ -247,7 +238,7 @@ export default function Medications() {
             </p>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Medications List */}
       <div className="px-5 space-y-4">
@@ -269,11 +260,7 @@ export default function Medications() {
         </div>
 
         {medications.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-12"
-          >
+          <div className="text-center py-12">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-violet-light flex items-center justify-center">
               <span className="text-4xl">💊</span>
             </div>
@@ -291,82 +278,74 @@ export default function Medications() {
               <Plus className="w-4 h-4 mr-2" />
               İlaç Ekle
             </Button>
-          </motion.div>
+          </div>
         ) : (
-          <AnimatePresence mode="popLayout">
-            {medications.map((medication, index) => (
-              <motion.div
+          <div className="space-y-3">
+            {medications.map((medication) => (
+              <Card 
                 key={medication.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ delay: index * 0.05 }}
+                className="overflow-hidden border-l-4 cursor-pointer hover:shadow-md transition-shadow"
+                style={{ borderLeftColor: medication.color }}
+                onClick={() => setSelectedMedication(medication)}
               >
-                <Card 
-                  className="overflow-hidden border-l-4 cursor-pointer hover:shadow-md transition-shadow"
-                  style={{ borderLeftColor: medication.color }}
-                  onClick={() => setSelectedMedication(medication)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                          style={{ backgroundColor: `${medication.color}20` }}
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                        style={{ backgroundColor: `${medication.color}20` }}
+                      >
+                        {medication.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{medication.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {medication.dosage} • {MEDICATION_FREQUENCY_LABELS[medication.frequency].tr}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </div>
+
+                  {/* Dose times for today */}
+                  <div className="flex gap-2 mt-3 flex-wrap">
+                    {medication.reminderTimes.map((time) => {
+                      const taken = isMedicationTakenAtTime(medication.id, time);
+                      return (
+                        <button
+                          key={time}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleMedication(medication, time, taken);
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all active:scale-95 ${
+                            taken
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
                         >
-                          {medication.icon}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{medication.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {medication.dosage} • {MEDICATION_FREQUENCY_LABELS[medication.frequency].tr}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                    </div>
+                          {taken ? (
+                            <Check className="w-3.5 h-3.5" />
+                          ) : (
+                            <Clock className="w-3.5 h-3.5" />
+                          )}
+                          {time}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                    {/* Dose times for today */}
-                    <div className="flex gap-2 mt-3 flex-wrap">
-                      {medication.reminderTimes.map((time) => {
-                        const taken = isMedicationTakenAtTime(medication.id, time);
-                        return (
-                          <motion.button
-                            key={time}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleMedication(medication, time, taken);
-                            }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                              taken
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                : 'bg-muted text-muted-foreground'
-                            }`}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            {taken ? (
-                              <Check className="w-3.5 h-3.5" />
-                            ) : (
-                              <Clock className="w-3.5 h-3.5" />
-                            )}
-                            {time}
-                          </motion.button>
-                        );
-                      })}
+                  {/* Weekly adherence */}
+                  {medicationStats[medication.id] !== undefined && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      <span>Haftalık uyum: {Math.round(medicationStats[medication.id])}%</span>
                     </div>
-
-                    {/* Weekly adherence */}
-                    {medicationStats[medication.id] !== undefined && (
-                      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>Haftalık uyum: {Math.round(medicationStats[medication.id])}%</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+                  )}
+                </CardContent>
+              </Card>
             ))}
-          </AnimatePresence>
+          </div>
         )}
       </div>
 
