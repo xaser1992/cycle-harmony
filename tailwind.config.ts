@@ -86,34 +86,45 @@ export default {
         violet: {
           DEFAULT: "hsl(var(--accent-violet))",
           light: "hsl(var(--accent-violet-light))",
+          dark: "hsl(var(--accent-violet-dark))",
         },
         purple: "hsl(var(--accent-purple))",
         emerald: "hsl(var(--accent-emerald))",
-        amber: "hsl(var(--accent-amber))",
+        amber: {
+          DEFAULT: "hsl(var(--accent-amber))",
+          light: "hsl(var(--accent-amber-light))",
+          dark: "hsl(var(--accent-amber-dark))",
+        },
         // Extended Accent Colors
         rose: {
           DEFAULT: "hsl(var(--accent-rose))",
           light: "hsl(var(--accent-rose-light))",
+          dark: "hsl(var(--accent-rose-dark))",
         },
         pink: {
           DEFAULT: "hsl(var(--accent-pink))",
           light: "hsl(var(--accent-pink-light))",
+          dark: "hsl(var(--accent-pink-dark))",
         },
         teal: {
           DEFAULT: "hsl(var(--accent-teal))",
           light: "hsl(var(--accent-teal-light))",
+          dark: "hsl(var(--accent-teal-dark))",
         },
         cyan: {
           DEFAULT: "hsl(var(--accent-cyan))",
           light: "hsl(var(--accent-cyan-light))",
+          dark: "hsl(var(--accent-cyan-dark))",
         },
         orange: {
           DEFAULT: "hsl(var(--accent-orange))",
           light: "hsl(var(--accent-orange-light))",
+          dark: "hsl(var(--accent-orange-dark))",
         },
         green: {
           DEFAULT: "hsl(var(--accent-green))",
           light: "hsl(var(--accent-green-light))",
+          dark: "hsl(var(--accent-green-dark))",
         },
         red: {
           DEFAULT: "hsl(var(--accent-red))",
