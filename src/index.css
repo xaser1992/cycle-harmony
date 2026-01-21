@@ -88,20 +88,28 @@ html.light {
     --accent-purple: 280 55% 50%;
     --accent-emerald: 160 55% 45%;
     --accent-amber: 40 85% 50%;
+    --accent-amber-light: 40 65% 90%;
+    --accent-amber-dark: 40 80% 30%;
     
     /* Extended Color Palette */
     --accent-rose: 340 75% 55%;
     --accent-rose-light: 340 60% 90%;
+    --accent-rose-dark: 340 70% 35%;
     --accent-pink: 330 65% 58%;
     --accent-pink-light: 330 50% 92%;
+    --accent-pink-dark: 330 60% 38%;
     --accent-teal: 175 55% 45%;
     --accent-teal-light: 175 40% 90%;
+    --accent-teal-dark: 175 50% 28%;
     --accent-cyan: 190 60% 50%;
     --accent-cyan-light: 190 45% 90%;
+    --accent-cyan-dark: 190 55% 30%;
     --accent-orange: 25 85% 55%;
     --accent-orange-light: 25 65% 90%;
+    --accent-orange-dark: 25 80% 35%;
     --accent-green: 145 55% 45%;
     --accent-green-light: 145 40% 90%;
+    --accent-green-dark: 145 50% 28%;
     --accent-red: 0 70% 50%;
     --accent-red-light: 0 50% 90%;
     --accent-blue: 210 70% 55%;
@@ -110,6 +118,7 @@ html.light {
     --accent-sky-light: 200 55% 90%;
     --accent-slate: 220 15% 45%;
     --accent-slate-light: 220 12% 90%;
+    --accent-violet-dark: 265 55% 35%;
   }
 
   .dark {

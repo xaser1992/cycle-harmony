@@ -1,7 +1,7 @@
 // 🌸 Update Bottom Sheet Component - Flo Inspired Categorized Design
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, ChevronLeft, ChevronRight, Search, Plus, Minus } from 'lucide-react';
+import { X, Check, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,7 @@ const CATEGORIES = {
   flow: {
     title: { tr: 'Adet akışı', en: 'Period flow' },
     bgClass: 'bg-rose-light dark:bg-rose/20',
-    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-foreground',
     chipSelected: 'bg-rose text-white',
     items: [
       { id: 'none', emoji: '⚪', tr: 'Yok', en: 'None' },
@@ -46,7 +46,7 @@ const CATEGORIES = {
   mood: {
     title: { tr: 'Ruh hali', en: 'Mood' },
     bgClass: 'bg-amber-light dark:bg-amber/20',
-    chipBase: 'bg-amber-light dark:bg-amber/30 text-amber dark:text-amber-light',
+    chipBase: 'bg-amber-light dark:bg-amber/30 text-foreground',
     chipSelected: 'bg-amber text-white',
     items: [
       { id: 'calm', emoji: '😌', tr: 'Sakinim', en: 'Calm' },
@@ -69,7 +69,7 @@ const CATEGORIES = {
   sexual: {
     title: { tr: 'Cinsel ilişki ve cinsel ilişki isteği', en: 'Sex & sex drive' },
     bgClass: 'bg-pink-light dark:bg-pink/20',
-    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-foreground',
     chipSelected: 'bg-pink text-white',
     items: [
       { id: 'no_sex', emoji: '💔', tr: 'Yapmadım', en: 'Did not have sex' },
@@ -89,7 +89,7 @@ const CATEGORIES = {
   symptoms: {
     title: { tr: 'Belirtiler', en: 'Symptoms' },
     bgClass: 'bg-pink-light dark:bg-pink/20',
-    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-foreground',
     chipSelected: 'bg-pink text-white',
     items: [
       { id: 'all_good', emoji: '👍', tr: 'Her şey yolunda', en: 'All good' },
@@ -109,7 +109,7 @@ const CATEGORIES = {
   discharge: {
     title: { tr: 'Vajinal akıntı', en: 'Vaginal discharge' },
     bgClass: 'bg-violet-light dark:bg-violet/20',
-    chipBase: 'bg-violet-light dark:bg-violet/30 text-violet dark:text-violet-light',
+    chipBase: 'bg-violet-light dark:bg-violet/30 text-foreground',
     chipSelected: 'bg-violet text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Akıntı yok', en: 'No discharge' },
@@ -126,7 +126,7 @@ const CATEGORIES = {
   digestion: {
     title: { tr: 'Sindirim ve dışkı', en: 'Digestion' },
     bgClass: 'bg-rose-light dark:bg-rose/20',
-    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-foreground',
     chipSelected: 'bg-rose text-white',
     items: [
       { id: 'nausea', emoji: '🤢', tr: 'Bulantı', en: 'Nausea' },
@@ -138,7 +138,7 @@ const CATEGORIES = {
   pregnancy_test: {
     title: { tr: 'Gebelik testi', en: 'Pregnancy test' },
     bgClass: 'bg-orange-light dark:bg-orange/20',
-    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-foreground',
     chipSelected: 'bg-orange text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
@@ -151,7 +151,7 @@ const CATEGORIES = {
     title: { tr: 'Ovülasyon testi', en: 'Ovulation test' },
     subtitle: { tr: 'Ovülasyon zamanınızı öğrenmek için kaydedin', en: 'Track to learn your ovulation time' },
     bgClass: 'bg-teal-light dark:bg-teal/20',
-    chipBase: 'bg-teal-light dark:bg-teal/30 text-teal dark:text-teal-light',
+    chipBase: 'bg-teal-light dark:bg-teal/30 text-foreground',
     chipSelected: 'bg-teal text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
@@ -163,7 +163,7 @@ const CATEGORIES = {
   activity: {
     title: { tr: 'Fiziksel aktivite', en: 'Physical activity' },
     bgClass: 'bg-green-light dark:bg-green/20',
-    chipBase: 'bg-green-light dark:bg-green/30 text-green dark:text-green-light',
+    chipBase: 'bg-green-light dark:bg-green/30 text-foreground',
     chipSelected: 'bg-green text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Egzersiz yapmadım', en: 'No exercise' },
@@ -180,7 +180,7 @@ const CATEGORIES = {
   other: {
     title: { tr: 'Diğer', en: 'Other' },
     bgClass: 'bg-orange-light dark:bg-orange/20',
-    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-foreground',
     chipSelected: 'bg-orange text-white',
     items: [
       { id: 'travel', emoji: '📍', tr: 'Seyahat', en: 'Travel' },
@@ -564,7 +564,7 @@ export function UpdateSheet({
               <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
             </div>
 
-            {/* Close button */}
+            {/* Close button - Top Right */}
             <button
               type="button"
               onClick={(e) => {
@@ -572,13 +572,13 @@ export function UpdateSheet({
                 e.stopPropagation();
                 onClose();
               }}
-              className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center z-50 active:scale-90 transition-transform"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center z-50 active:scale-90 transition-transform"
             >
-              <X className="w-6 h-6 text-foreground/70" />
+              <X className="w-6 h-6 text-foreground" />
             </button>
 
             {/* Date Navigation */}
-            <div className="flex items-center justify-between px-8 mb-4">
+            <div className="flex items-center justify-center gap-4 px-8 mt-2">
               <motion.button
                 type="button"
                 onClick={goToPreviousDay}
@@ -605,18 +605,6 @@ export function UpdateSheet({
               >
                 <ChevronRight className="w-6 h-6 text-foreground/60" />
               </motion.button>
-            </div>
-
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={language === 'tr' ? 'Arama' : 'Search'}
-                className="pl-9 h-10 rounded-xl bg-muted/50 border-0 text-sm"
-              />
             </div>
           </div>
 
