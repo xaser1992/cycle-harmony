@@ -8,6 +8,7 @@ import { TodayCard } from '@/components/TodayCard';
 import { PhaseTimeline } from '@/components/PhaseTimeline';
 import { BottomNav } from '@/components/BottomNav';
 import { GlobalHeader } from '@/components/GlobalHeader';
+import { AppTour } from '@/components/AppTour';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import type { DayEntry } from '@/types/cycle';
@@ -137,6 +138,9 @@ const Index = () => {
 
       {/* Bottom Navigation */}
       <BottomNav onCenterPress={handleOpenUpdate} />
+
+      {/* App Tour - shows after onboarding */}
+      <AppTour language={userSettings.language} />
     </div>
   );
 };
