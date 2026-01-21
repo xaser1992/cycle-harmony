@@ -374,6 +374,7 @@ export default function Medications() {
         <SheetContent 
           side="bottom" 
           className="h-[85vh] rounded-t-3xl"
+          aria-describedby={undefined}
           onPointerDownOutside={(e) => e.preventDefault()}
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
@@ -535,6 +536,7 @@ export default function Medications() {
         <SheetContent 
           side="bottom" 
           className="h-[60vh] rounded-t-3xl"
+          aria-describedby={undefined}
           onPointerDownOutside={(e) => e.preventDefault()}
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
