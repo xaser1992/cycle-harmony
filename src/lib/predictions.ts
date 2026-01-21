@@ -168,18 +168,18 @@ export function getPhaseInfo(phase: CyclePhase, language: 'tr' | 'en' = 'tr'): {
 } {
   const labels = {
     tr: {
-      period: { title: 'Regl Dönemi', emoji: '🌸' },
+      period: { title: 'Regl Dönemi', emoji: '🩸' },
       follicular: { title: 'Foliküler Faz', emoji: '🌱' },
-      fertile: { title: 'Doğurgan Dönem', emoji: '💐' },
-      ovulation: { title: 'Yumurtlama Günü', emoji: '🥚' },
+      fertile: { title: 'Doğurgan Dönem', emoji: '💧' },
+      ovulation: { title: 'Yumurtlama Günü', emoji: '✨' },
       luteal: { title: 'Luteal Faz', emoji: '🌙' },
       pms: { title: 'PMS Dönemi', emoji: '⚡' },
     },
     en: {
-      period: { title: 'Period', emoji: '🌸' },
+      period: { title: 'Period', emoji: '🩸' },
       follicular: { title: 'Follicular Phase', emoji: '🌱' },
-      fertile: { title: 'Fertile Window', emoji: '💐' },
-      ovulation: { title: 'Ovulation Day', emoji: '🥚' },
+      fertile: { title: 'Fertile Window', emoji: '💧' },
+      ovulation: { title: 'Ovulation Day', emoji: '✨' },
       luteal: { title: 'Luteal Phase', emoji: '🌙' },
       pms: { title: 'PMS', emoji: '⚡' },
     },
