@@ -1,9 +1,8 @@
 // 🌸 Global Header Component - Settings & Notifications
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { useCycleData } from '@/hooks/useCycleData';
 import { NotificationSettingsSheet } from '@/components/NotificationSettingsSheet';
 
