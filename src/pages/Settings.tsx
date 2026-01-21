@@ -205,7 +205,7 @@ export default function SettingsPage() {
   const AnimatedSwitch = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
     <motion.div
       className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors ${
-        checked ? 'bg-gradient-to-r from-rose-400 to-pink-500' : 'bg-muted'
+        checked ? 'bg-gradient-to-r from-rose to-pink' : 'bg-muted'
       }`}
       onClick={() => onChange(!checked)}
       whileTap={{ scale: 0.95 }}
@@ -242,7 +242,7 @@ export default function SettingsPage() {
         <SectionCard
           title="Döngü Ayarları"
           icon={Calendar}
-          gradient="from-rose-400 to-pink-500"
+          gradient="from-rose to-pink"
           id="cycle"
           collapsible
         >
@@ -301,7 +301,7 @@ export default function SettingsPage() {
         <SectionCard
           title="Wellness Hedefleri"
           icon={Scale}
-          gradient="from-emerald-400 to-teal-500"
+          gradient="from-emerald to-teal"
           id="wellness"
           collapsible
         >
@@ -309,7 +309,7 @@ export default function SettingsPage() {
             {/* Target Weight */}
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div className="flex items-center gap-3">
-                <Scale className="w-5 h-5 text-emerald-500" />
+                <Scale className="w-5 h-5 text-emerald" />
                 <div>
                   <p className="text-sm font-medium">Hedef Ağırlık</p>
                   <p className="text-xs text-muted-foreground">{userSettings?.targetWeight || 60} kg</p>
@@ -337,7 +337,7 @@ export default function SettingsPage() {
             {/* Daily Water Goal */}
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div className="flex items-center gap-3">
-                <Droplets className="w-5 h-5 text-blue-500" />
+                <Droplets className="w-5 h-5 text-blue" />
                 <div>
                   <p className="text-sm font-medium">Günlük Su Hedefi</p>
                   <p className="text-xs text-muted-foreground">
@@ -367,7 +367,7 @@ export default function SettingsPage() {
             {/* Water Reminder Toggle */}
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-blue-500" />
+                <Bell className="w-5 h-5 text-blue" />
                 <div>
                   <p className="text-sm font-medium">Su Hatırlatıcısı</p>
                   <p className="text-xs text-muted-foreground">Günde 3 kez hatırlat</p>
@@ -389,7 +389,7 @@ export default function SettingsPage() {
         <SectionCard
           title="Görünüm"
           icon={themes.find(t => t.value === theme)?.icon || Sun}
-          gradient="from-amber-400 to-orange-500"
+          gradient="from-amber to-orange"
         >
           <div className="grid grid-cols-3 gap-2">
             {themes.map((t) => (
@@ -398,7 +398,7 @@ export default function SettingsPage() {
                 onClick={() => setTheme(t.value)}
                 className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all ${
                   theme === t.value
-                    ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg'
+                    ? 'bg-gradient-to-br from-amber to-orange text-white shadow-lg'
                     : 'bg-muted hover:bg-muted/80'
                 }`}
                 whileTap={{ scale: 0.97 }}
@@ -414,43 +414,43 @@ export default function SettingsPage() {
         <SectionCard
           title="Bildirimler"
           icon={Bell}
-          gradient="from-violet-400 to-purple-500"
+          gradient="from-violet to-purple"
         >
           <div className="space-y-3">
             {notificationGranted === false && (
               <motion.button
                 onClick={handleRequestNotification}
                 disabled={isRequestingNotification}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800"
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-amber-light dark:bg-amber/20 border border-amber/30 dark:border-amber/40"
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber to-orange flex items-center justify-center">
                   <Bell className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-amber-800 dark:text-amber-200">Bildirimlere İzin Ver</p>
-                  <p className="text-xs text-amber-600 dark:text-amber-300">Hatırlatmalar için izin gerekli</p>
+                  <p className="font-medium text-amber dark:text-amber-light">Bildirimlere İzin Ver</p>
+                  <p className="text-xs text-amber/80 dark:text-amber-light/80">Hatırlatmalar için izin gerekli</p>
                 </div>
                 {isRequestingNotification ? (
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full"
+                    className="w-5 h-5 border-2 border-amber border-t-transparent rounded-full"
                   />
                 ) : (
-                  <ChevronRight className="w-5 h-5 text-amber-600" />
+                  <ChevronRight className="w-5 h-5 text-amber" />
                 )}
               </motion.button>
             )}
             
             {notificationGranted === true && (
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-green-100 dark:bg-green-900/30">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-green-light dark:bg-green/20">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green to-emerald flex items-center justify-center">
                   <Bell className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-green-800 dark:text-green-200">Bildirimler Açık</p>
-                  <p className="text-xs text-green-600 dark:text-green-300">Hatırlatmalar aktif</p>
+                  <p className="font-medium text-green dark:text-green-light">Bildirimler Açık</p>
+                  <p className="text-xs text-green/80 dark:text-green-light/80">Hatırlatmalar aktif</p>
                 </div>
               </div>
             )}
@@ -461,12 +461,12 @@ export default function SettingsPage() {
         <SectionCard
           title="Gizlilik & Veri"
           icon={Shield}
-          gradient="from-cyan-400 to-teal-500"
+          gradient="from-cyan to-teal"
         >
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-cyan-500" />
+                <Shield className="w-5 h-5 text-cyan" />
                 <div>
                   <p className="text-sm font-medium">Uygulama Kilidi</p>
                   <p className="text-xs text-muted-foreground">
@@ -485,7 +485,7 @@ export default function SettingsPage() {
               label="Verileri Dışa Aktar"
               description="JSON formatında indir"
               onClick={handleExportData}
-              gradient="from-emerald-400 to-green-500"
+              gradient="from-emerald to-green"
             />
             
             <SettingRow
@@ -493,7 +493,7 @@ export default function SettingsPage() {
               label="Tüm Verileri Sil"
               description="Bu işlem geri alınamaz"
               onClick={handleDeleteAllData}
-              gradient="from-red-400 to-rose-500"
+              gradient="from-red to-rose"
             />
           </div>
         </SectionCard>
@@ -502,7 +502,7 @@ export default function SettingsPage() {
         <SectionCard
           title="Geliştirici"
           icon={Bug}
-          gradient="from-gray-500 to-slate-600"
+          gradient="from-slate to-slate"
         >
           <div className="space-y-3">
             <SettingRow
@@ -513,14 +513,14 @@ export default function SettingsPage() {
                 await Preferences.remove({ key: 'app_tour_completed' });
                 toast.success(userSettings?.language === 'tr' ? 'Tur sıfırlandı! Ana sayfaya gidin.' : 'Tour reset! Go to home page.');
               }}
-              gradient="from-violet-400 to-purple-500"
+              gradient="from-violet to-purple"
             />
             <SettingRow
               icon={Bug}
               label="Bildirim Tanılama"
               description="Debug paneli"
               onClick={() => navigate('/debug')}
-              gradient="from-gray-500 to-slate-600"
+              gradient="from-slate to-slate"
             />
           </div>
         </SectionCard>
@@ -529,10 +529,10 @@ export default function SettingsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30 rounded-3xl p-5 border border-rose-200/50 dark:border-rose-800/30"
+          className="bg-gradient-to-br from-rose-light to-pink-light dark:from-rose/20 dark:to-pink/20 rounded-3xl p-5 border border-rose/30 dark:border-rose/30"
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center shadow-lg">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose to-pink flex items-center justify-center shadow-lg">
               <span className="text-2xl">🌸</span>
             </div>
             <div>

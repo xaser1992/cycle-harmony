@@ -173,11 +173,11 @@ export default function CalendarPage() {
   // Get day type label for detail card
   const getDayTypeLabel = (type: string | null): { label: string; color: string } => {
     switch (type) {
-      case 'period': return { label: 'Regl Günü', color: 'from-rose-400 to-pink-500' };
-      case 'predicted': return { label: 'Tahmini Regl', color: 'from-rose-300 to-pink-400' };
-      case 'fertile': return { label: 'Doğurgan Dönem', color: 'from-cyan-400 to-teal-400' };
-      case 'ovulation': return { label: 'Yumurtlama Günü', color: 'from-violet-400 to-purple-500' };
-      case 'pms': return { label: 'PMS Dönemi', color: 'from-orange-300 to-amber-400' };
+      case 'period': return { label: 'Regl Günü', color: 'from-rose to-pink' };
+      case 'predicted': return { label: 'Tahmini Regl', color: 'from-rose to-pink' };
+      case 'fertile': return { label: 'Doğurgan Dönem', color: 'from-cyan to-teal' };
+      case 'ovulation': return { label: 'Yumurtlama Günü', color: 'from-violet to-purple' };
+      case 'pms': return { label: 'PMS Dönemi', color: 'from-orange to-amber' };
       default: return { label: 'Normal Gün', color: 'from-muted to-muted' };
     }
   };
@@ -257,11 +257,11 @@ export default function CalendarPage() {
                   className={`relative aspect-square rounded-2xl flex items-center justify-center text-sm font-medium transition-all
                     ${!isCurrentMonth ? 'opacity-30' : ''}
                     ${isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''}
-                    ${dayType === 'period' ? 'bg-gradient-to-br from-rose-400 to-pink-500 text-white shadow-md shadow-rose-500/30' : ''}
-                    ${dayType === 'predicted' ? 'bg-gradient-to-br from-rose-300/40 to-pink-400/40 text-rose-600 dark:text-rose-300' : ''}
-                    ${dayType === 'fertile' ? 'bg-gradient-to-br from-cyan-400/30 to-teal-400/30 text-teal-600 dark:text-teal-300' : ''}
-                    ${dayType === 'ovulation' ? 'bg-gradient-to-br from-violet-400 to-purple-500 text-white shadow-md shadow-violet-500/30' : ''}
-                    ${dayType === 'pms' ? 'bg-gradient-to-br from-orange-300/30 to-amber-400/30 text-orange-600 dark:text-orange-300' : ''}
+                    ${dayType === 'period' ? 'bg-gradient-to-br from-rose to-pink text-white shadow-md shadow-rose/30' : ''}
+                    ${dayType === 'predicted' ? 'bg-gradient-to-br from-rose/40 to-pink/40 text-rose dark:text-rose' : ''}
+                    ${dayType === 'fertile' ? 'bg-gradient-to-br from-cyan/30 to-teal/30 text-teal dark:text-teal' : ''}
+                    ${dayType === 'ovulation' ? 'bg-gradient-to-br from-violet to-purple text-white shadow-md shadow-violet/30' : ''}
+                    ${dayType === 'pms' ? 'bg-gradient-to-br from-orange/30 to-amber/30 text-orange dark:text-orange' : ''}
                     ${!dayType && isCurrentMonth ? 'text-foreground hover:bg-muted/50' : ''}
                   `}
                 >
@@ -281,9 +281,9 @@ export default function CalendarPage() {
                     <motion.span 
                       className={`absolute bottom-1 right-1.5 w-1.5 h-1.5 rounded-full ${
                         allMedsTaken 
-                          ? 'bg-emerald-500' 
+                          ? 'bg-emerald' 
                           : someMedsTaken 
-                            ? 'bg-amber-500' 
+                            ? 'bg-amber' 
                             : 'bg-muted-foreground/30'
                       }`}
                       initial={{ scale: 0 }}
@@ -304,9 +304,9 @@ export default function CalendarPage() {
             transition={{ delay: 0.15 }}
             className="mt-4"
           >
-            <div className="bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl p-4 border border-violet-200/30 dark:border-violet-800/30">
+            <div className="bg-gradient-to-r from-violet/10 via-purple/10 to-pink/10 rounded-2xl p-4 border border-violet/30 dark:border-violet/30">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet to-purple flex items-center justify-center">
                   <Pill className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -318,7 +318,7 @@ export default function CalendarPage() {
               </div>
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-violet-400 to-purple-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-violet to-purple rounded-full"
                   initial={{ width: 0 }}
                   animate={{ 
                     width: `${getMedicationProgress(new Date()).total > 0 
@@ -345,7 +345,7 @@ export default function CalendarPage() {
             <div className="space-y-3">
               {/* Next Period Card */}
               <motion.div 
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose-400 to-pink-500 p-4 shadow-lg shadow-rose-500/20 cursor-pointer"
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose to-pink p-4 shadow-lg shadow-rose/20 cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveInfoCard('period')}
@@ -373,7 +373,7 @@ export default function CalendarPage() {
               
               {/* Ovulation Card */}
               <motion.div 
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-400 to-purple-500 p-4 shadow-lg shadow-violet-500/20 cursor-pointer"
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet to-purple p-4 shadow-lg shadow-violet/20 cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveInfoCard('ovulation')}
@@ -404,7 +404,7 @@ export default function CalendarPage() {
 
               {/* Fertile Window Card */}
               <motion.div 
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-400 p-4 shadow-lg shadow-teal-500/20 cursor-pointer"
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan to-teal p-4 shadow-lg shadow-teal/20 cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveInfoCard('fertile')}
@@ -657,7 +657,7 @@ export default function CalendarPage() {
                                 </div>
                                 <div className="flex-1 h-5 bg-white/10 rounded-full overflow-hidden">
                                   <motion.div
-                                    className={`h-full rounded-full ${isOvulationDay ? 'bg-gradient-to-r from-violet-400 to-purple-500' : 'bg-white/60'}`}
+                                    className={`h-full rounded-full ${isOvulationDay ? 'bg-gradient-to-r from-violet to-purple' : 'bg-white/60'}`}
                                     initial={{ width: 0 }}
                                     animate={{ width: `${chance}%` }}
                                     transition={{ duration: 0.5, delay: 0.1 }}
@@ -667,7 +667,7 @@ export default function CalendarPage() {
                                   {chance}%
                                 </div>
                                 {isOvulationDay && (
-                                  <span className="text-xs bg-violet-500/50 px-2 py-0.5 rounded-full text-white">
+                                  <span className="text-xs bg-violet/50 px-2 py-0.5 rounded-full text-white">
                                     🥚
                                   </span>
                                 )}
@@ -821,8 +821,8 @@ export default function CalendarPage() {
                     <div className="space-y-4">
                       {/* Flow Level */}
                       {entry && entry.flowLevel !== 'none' && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/30">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center">
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-rose-light dark:bg-rose/20">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
                             <span className="text-lg">{FLOW_LABELS[entry.flowLevel].emoji}</span>
                           </div>
                           <div>
@@ -834,8 +834,8 @@ export default function CalendarPage() {
 
                       {/* Mood */}
                       {entry?.mood && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center">
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-light dark:bg-amber/20">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber to-orange flex items-center justify-center">
                             <span className="text-lg">{MOOD_LABELS[entry.mood]?.emoji || '😊'}</span>
                           </div>
                           <div>
@@ -847,7 +847,7 @@ export default function CalendarPage() {
 
                       {/* Symptoms */}
                       {entry && entry.symptoms.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-violet-50 dark:bg-violet-950/30">
+                        <div className="p-3 rounded-2xl bg-violet-light dark:bg-violet/20">
                           <p className="text-xs text-muted-foreground mb-2">Semptomlar</p>
                           <div className="flex flex-wrap gap-2">
                             {entry.symptoms.map(symptom => {
@@ -855,7 +855,7 @@ export default function CalendarPage() {
                               return (
                                 <span
                                   key={symptom}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-xs font-medium text-violet-700 dark:text-violet-300"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light"
                                 >
                                   <span>{label?.emoji || '•'}</span>
                                   {label?.tr || symptom}
@@ -868,13 +868,13 @@ export default function CalendarPage() {
 
                       {/* Sexual Activity */}
                       {entry?.sexualActivity && entry.sexualActivity.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-pink-50 dark:bg-pink-950/30">
+                        <div className="p-3 rounded-2xl bg-pink-light dark:bg-pink/20">
                           <p className="text-xs text-muted-foreground mb-2">Cinsel Aktivite</p>
                           <div className="flex flex-wrap gap-2">
                             {entry.sexualActivity.map(item => (
                               <span
                                 key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-100 dark:bg-pink-900/50 text-xs font-medium text-pink-700 dark:text-pink-300"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-light dark:bg-pink/30 text-xs font-medium text-pink dark:text-pink-light"
                               >
                                 💕 {item}
                               </span>
@@ -885,13 +885,13 @@ export default function CalendarPage() {
 
                       {/* Discharge */}
                       {entry?.discharge && entry.discharge.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/30">
+                        <div className="p-3 rounded-2xl bg-violet-light dark:bg-violet/20">
                           <p className="text-xs text-muted-foreground mb-2">Vajinal Akıntı</p>
                           <div className="flex flex-wrap gap-2">
                             {entry.discharge.map(item => (
                               <span
                                 key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/50 text-xs font-medium text-purple-700 dark:text-purple-300"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light"
                               >
                                 💧 {item}
                               </span>
@@ -902,13 +902,13 @@ export default function CalendarPage() {
 
                       {/* Activity */}
                       {entry?.activity && entry.activity.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-green-50 dark:bg-green-950/30">
+                        <div className="p-3 rounded-2xl bg-green-light dark:bg-green/20">
                           <p className="text-xs text-muted-foreground mb-2">Fiziksel Aktivite</p>
                           <div className="flex flex-wrap gap-2">
                             {entry.activity.map(item => (
                               <span
                                 key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/50 text-xs font-medium text-green-700 dark:text-green-300"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-light dark:bg-green/30 text-xs font-medium text-green dark:text-green-light"
                               >
                                 🏃 {item}
                               </span>
@@ -919,8 +919,8 @@ export default function CalendarPage() {
 
                       {/* Water Intake */}
                       {entry?.waterGlasses && entry.waterGlasses > 0 && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-sky-50 dark:bg-sky-950/30">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center">
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-sky-light dark:bg-sky/20">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky to-blue flex items-center justify-center">
                             <span className="text-lg">💧</span>
                           </div>
                           <div>
@@ -932,8 +932,8 @@ export default function CalendarPage() {
 
                       {/* Weight */}
                       {entry?.weight && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/30">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-400 to-gray-500 flex items-center justify-center">
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-light dark:bg-slate/20">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate to-slate flex items-center justify-center">
                             <span className="text-lg">⚖️</span>
                           </div>
                           <div>
@@ -945,8 +945,8 @@ export default function CalendarPage() {
 
                       {/* Pregnancy Test */}
                       {entry?.pregnancyTest && entry.pregnancyTest !== 'not_taken' && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-50 dark:bg-orange-950/30">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-light dark:bg-orange/20">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange to-amber flex items-center justify-center">
                             <span className="text-lg">🧪</span>
                           </div>
                           <div>
@@ -962,8 +962,8 @@ export default function CalendarPage() {
 
                       {/* Ovulation Test */}
                       {entry?.ovulationTest && entry.ovulationTest !== 'not_taken' && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-teal-50 dark:bg-teal-950/30">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-teal-light dark:bg-teal/20">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-cyan flex items-center justify-center">
                             <span className="text-lg">📊</span>
                           </div>
                           <div>
@@ -991,9 +991,9 @@ export default function CalendarPage() {
                         if (medProgress.total === 0) return null;
                         
                         return (
-                          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30">
+                          <div className="p-3 rounded-2xl bg-emerald/10 dark:bg-emerald/20">
                             <div className="flex items-center gap-3 mb-2">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
                                 <Pill className="w-5 h-5 text-white" />
                               </div>
                               <div className="flex-1">
@@ -1005,7 +1005,7 @@ export default function CalendarPage() {
                             </div>
                             <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full transition-all"
+                                className="h-full bg-gradient-to-r from-emerald to-green rounded-full transition-all"
                                 style={{ width: `${(medProgress.taken / medProgress.total) * 100}%` }}
                               />
                             </div>

@@ -28,13 +28,13 @@ interface UpdateSheetProps {
   initialTab?: 'flow' | 'symptoms' | 'mood';
 }
 
-// Category data structures with proper colors
+// Category data structures with proper colors using semantic tokens
 const CATEGORIES = {
   flow: {
     title: { tr: 'Adet akışı', en: 'Period flow' },
-    bgClass: 'bg-rose-50 dark:bg-rose-950/30',
-    chipBase: 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-200',
-    chipSelected: 'bg-rose-500 text-white',
+    bgClass: 'bg-rose-light dark:bg-rose/20',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
+    chipSelected: 'bg-rose text-white',
     items: [
       { id: 'none', emoji: '⚪', tr: 'Yok', en: 'None' },
       { id: 'spotting', emoji: '🩸', tr: 'Lekelenme', en: 'Spotting' },
@@ -45,9 +45,9 @@ const CATEGORIES = {
   },
   mood: {
     title: { tr: 'Ruh hali', en: 'Mood' },
-    bgClass: 'bg-amber-50 dark:bg-amber-950/30',
-    chipBase: 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200',
-    chipSelected: 'bg-amber-500 text-white',
+    bgClass: 'bg-amber-light dark:bg-amber/20',
+    chipBase: 'bg-amber-light dark:bg-amber/30 text-amber dark:text-amber-light',
+    chipSelected: 'bg-amber text-white',
     items: [
       { id: 'calm', emoji: '😌', tr: 'Sakinim', en: 'Calm' },
       { id: 'happy', emoji: '🙂', tr: 'Mutluyum', en: 'Happy' },
@@ -68,9 +68,9 @@ const CATEGORIES = {
   },
   sexual: {
     title: { tr: 'Cinsel ilişki ve cinsel ilişki isteği', en: 'Sex & sex drive' },
-    bgClass: 'bg-pink-50 dark:bg-pink-950/30',
-    chipBase: 'bg-pink-100 dark:bg-pink-900/50 text-pink-800 dark:text-pink-200',
-    chipSelected: 'bg-pink-500 text-white',
+    bgClass: 'bg-pink-light dark:bg-pink/20',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
+    chipSelected: 'bg-pink text-white',
     items: [
       { id: 'no_sex', emoji: '💔', tr: 'Yapmadım', en: 'Did not have sex' },
       { id: 'protected', emoji: '❤️', tr: 'Korunmalı cinsel ilişki', en: 'Protected sex' },
@@ -88,9 +88,9 @@ const CATEGORIES = {
   },
   symptoms: {
     title: { tr: 'Belirtiler', en: 'Symptoms' },
-    bgClass: 'bg-pink-50 dark:bg-pink-950/30',
-    chipBase: 'bg-pink-100 dark:bg-pink-900/50 text-pink-800 dark:text-pink-200',
-    chipSelected: 'bg-pink-400 text-white',
+    bgClass: 'bg-pink-light dark:bg-pink/20',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
+    chipSelected: 'bg-pink text-white',
     items: [
       { id: 'all_good', emoji: '👍', tr: 'Her şey yolunda', en: 'All good' },
       { id: 'cramps', emoji: '🎯', tr: 'Kramp', en: 'Cramps' },
@@ -108,9 +108,9 @@ const CATEGORIES = {
   },
   discharge: {
     title: { tr: 'Vajinal akıntı', en: 'Vaginal discharge' },
-    bgClass: 'bg-purple-50 dark:bg-purple-950/30',
-    chipBase: 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200',
-    chipSelected: 'bg-purple-500 text-white',
+    bgClass: 'bg-violet-light dark:bg-violet/20',
+    chipBase: 'bg-violet-light dark:bg-violet/30 text-violet dark:text-violet-light',
+    chipSelected: 'bg-violet text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Akıntı yok', en: 'No discharge' },
       { id: 'slippery', emoji: '💧', tr: 'Kaygan', en: 'Slippery' },
@@ -125,9 +125,9 @@ const CATEGORIES = {
   },
   digestion: {
     title: { tr: 'Sindirim ve dışkı', en: 'Digestion' },
-    bgClass: 'bg-rose-50 dark:bg-rose-950/30',
-    chipBase: 'bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-200',
-    chipSelected: 'bg-rose-400 text-white',
+    bgClass: 'bg-rose-light dark:bg-rose/20',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
+    chipSelected: 'bg-rose text-white',
     items: [
       { id: 'nausea', emoji: '🤢', tr: 'Bulantı', en: 'Nausea' },
       { id: 'bloating', emoji: '🎈', tr: 'Şişkinlik', en: 'Bloating' },
@@ -137,9 +137,9 @@ const CATEGORIES = {
   },
   pregnancy_test: {
     title: { tr: 'Gebelik testi', en: 'Pregnancy test' },
-    bgClass: 'bg-orange-50 dark:bg-orange-950/30',
-    chipBase: 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200',
-    chipSelected: 'bg-orange-400 text-white',
+    bgClass: 'bg-orange-light dark:bg-orange/20',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
+    chipSelected: 'bg-orange text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
       { id: 'positive', emoji: '➕', tr: 'Pozitif', en: 'Positive' },
@@ -150,9 +150,9 @@ const CATEGORIES = {
   ovulation_test: {
     title: { tr: 'Ovülasyon testi', en: 'Ovulation test' },
     subtitle: { tr: 'Ovülasyon zamanınızı öğrenmek için kaydedin', en: 'Track to learn your ovulation time' },
-    bgClass: 'bg-teal-50 dark:bg-teal-950/30',
-    chipBase: 'bg-teal-100 dark:bg-teal-900/50 text-teal-800 dark:text-teal-200',
-    chipSelected: 'bg-teal-500 text-white',
+    bgClass: 'bg-teal-light dark:bg-teal/20',
+    chipBase: 'bg-teal-light dark:bg-teal/30 text-teal dark:text-teal-light',
+    chipSelected: 'bg-teal text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
       { id: 'positive', emoji: '➕', tr: 'Test: pozitif', en: 'Test: positive' },
@@ -162,9 +162,9 @@ const CATEGORIES = {
   },
   activity: {
     title: { tr: 'Fiziksel aktivite', en: 'Physical activity' },
-    bgClass: 'bg-green-50 dark:bg-green-950/30',
-    chipBase: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200',
-    chipSelected: 'bg-green-500 text-white',
+    bgClass: 'bg-green-light dark:bg-green/20',
+    chipBase: 'bg-green-light dark:bg-green/30 text-green dark:text-green-light',
+    chipSelected: 'bg-green text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Egzersiz yapmadım', en: 'No exercise' },
       { id: 'yoga', emoji: '🧘', tr: 'Yoga', en: 'Yoga' },
@@ -179,9 +179,9 @@ const CATEGORIES = {
   },
   other: {
     title: { tr: 'Diğer', en: 'Other' },
-    bgClass: 'bg-orange-50 dark:bg-orange-950/30',
-    chipBase: 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200',
-    chipSelected: 'bg-orange-400 text-white',
+    bgClass: 'bg-orange-light dark:bg-orange/20',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
+    chipSelected: 'bg-orange text-white',
     items: [
       { id: 'travel', emoji: '📍', tr: 'Seyahat', en: 'Travel' },
       { id: 'stress', emoji: '⚡', tr: 'Stres', en: 'Stress' },
@@ -440,7 +440,7 @@ export function UpdateSheet({
       </div>
       <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
         <motion.div 
-          className="h-full bg-sky-400 rounded-full"
+          className="h-full bg-sky rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
           transition={{ duration: 0.3 }}
@@ -756,7 +756,7 @@ export function UpdateSheet({
               <Button
                 onClick={handleSave}
                 size="lg"
-                className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose-400 to-pink-500"
+                className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose to-pink"
               >
                 <Check className="w-4 h-4 mr-2" />
                 {language === 'tr' ? 'Kaydet' : 'Save'}

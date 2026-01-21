@@ -118,8 +118,8 @@ const Index = forwardRef<HTMLDivElement, {}>(function Index(props, ref) {
             onClick={handleLogPeriod}
             className={`w-full relative overflow-hidden rounded-2xl p-4 transition-all duration-200 active:scale-95 active:brightness-110 ${
               isOnPeriod 
-                ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/30'
-                : 'bg-gradient-to-br from-rose-400 to-pink-500 shadow-lg shadow-rose-500/30'
+                ? 'bg-gradient-to-br from-emerald to-teal shadow-lg shadow-emerald/30'
+                : 'bg-gradient-to-br from-rose to-pink shadow-lg shadow-rose/30'
             }`}
           >
             <div className="flex items-center justify-center gap-3">
