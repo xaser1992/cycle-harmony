@@ -1,6 +1,5 @@
-// 🌸 App Tour - Onboarding sonrası özellik turu
+// 🌸 App Tour - Performance Optimized (No framer-motion)
 import { useState, useEffect, useCallback, forwardRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Preferences } from '@capacitor/preferences';
@@ -135,106 +134,84 @@ export const AppTour = forwardRef<HTMLDivElement, AppTourProps>(function AppTour
   const isLastStep = currentStep === tourSteps.length - 1;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-sm bg-card rounded-3xl shadow-2xl overflow-hidden"
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="relative w-full max-w-sm bg-card rounded-3xl shadow-2xl overflow-hidden animate-scale-in">
+        {/* Skip button */}
+        <button
+          onClick={handleSkip}
+          className="absolute top-4 right-4 p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors z-10 active:scale-90"
+          aria-label={language === 'tr' ? 'Atla' : 'Skip'}
         >
-          {/* Skip button */}
-          <button
-            onClick={handleSkip}
-            className="absolute top-4 right-4 p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors z-10"
-            aria-label={language === 'tr' ? 'Atla' : 'Skip'}
+          <X className="w-4 h-4 text-muted-foreground" />
+        </button>
+
+        {/* Content */}
+        <div className="p-8 pt-12">
+          {/* Emoji */}
+          <div
+            key={step.id}
+            className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center animate-scale-in"
           >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-
-          {/* Content */}
-          <div className="p-8 pt-12">
-            {/* Emoji */}
-            <motion.div
-              key={step.id}
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-              className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center"
-            >
-              <span className="text-4xl">{step.emoji}</span>
-            </motion.div>
-
-            {/* Title */}
-            <motion.h2
-              key={`title-${step.id}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-2xl font-bold text-center text-foreground mb-3"
-            >
-              {language === 'tr' ? step.titleTr : step.titleEn}
-            </motion.h2>
-
-            {/* Description */}
-            <motion.p
-              key={`desc-${step.id}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-center text-muted-foreground leading-relaxed"
-            >
-              {language === 'tr' ? step.descriptionTr : step.descriptionEn}
-            </motion.p>
+            <span className="text-4xl">{step.emoji}</span>
           </div>
 
-          {/* Progress dots */}
-          <div className="flex justify-center gap-2 pb-4">
-            {tourSteps.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentStep(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentStep 
-                    ? 'w-6 bg-primary' 
-                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                }`}
-                aria-label={`Step ${index + 1}`}
-              />
-            ))}
-          </div>
+          {/* Title */}
+          <h2
+            key={`title-${step.id}`}
+            className="text-2xl font-bold text-center text-foreground mb-3 animate-fade-in"
+          >
+            {language === 'tr' ? step.titleTr : step.titleEn}
+          </h2>
 
-          {/* Navigation */}
-          <div className="flex gap-3 p-4 pt-0">
-            {!isFirstStep && (
-              <Button
-                variant="outline"
-                onClick={handlePrev}
-                className="flex-1 rounded-xl h-12"
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                {language === 'tr' ? 'Geri' : 'Back'}
-              </Button>
-            )}
+          {/* Description */}
+          <p
+            key={`desc-${step.id}`}
+            className="text-center text-muted-foreground leading-relaxed animate-fade-in"
+          >
+            {language === 'tr' ? step.descriptionTr : step.descriptionEn}
+          </p>
+        </div>
+
+        {/* Progress dots */}
+        <div className="flex justify-center gap-2 pb-4">
+          {tourSteps.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentStep(index)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentStep 
+                  ? 'w-6 bg-primary' 
+                  : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+              }`}
+              aria-label={`Step ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex gap-3 p-4 pt-0">
+          {!isFirstStep && (
             <Button
-              onClick={handleNext}
-              className={`rounded-xl h-12 ${isFirstStep ? 'flex-1' : 'flex-1'}`}
+              variant="outline"
+              onClick={handlePrev}
+              className="flex-1 rounded-xl h-12"
             >
-              {isLastStep 
-                ? (language === 'tr' ? 'Başla' : 'Start')
-                : (language === 'tr' ? 'İleri' : 'Next')
-              }
-              {!isLastStep && <ChevronRight className="w-4 h-4 ml-1" />}
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              {language === 'tr' ? 'Geri' : 'Back'}
             </Button>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          )}
+          <Button
+            onClick={handleNext}
+            className={`rounded-xl h-12 ${isFirstStep ? 'flex-1' : 'flex-1'}`}
+          >
+            {isLastStep 
+              ? (language === 'tr' ? 'Başla' : 'Start')
+              : (language === 'tr' ? 'İleri' : 'Next')
+            }
+            {!isLastStep && <ChevronRight className="w-4 h-4 ml-1" />}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 });

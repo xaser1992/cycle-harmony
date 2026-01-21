@@ -1,5 +1,4 @@
-// 🌸 Quick Actions Component - Flo Inspired Design
-import { motion } from 'framer-motion';
+// 🌸 Quick Actions Component - Performance Optimized (No framer-motion)
 
 interface QuickActionsProps {
   onLogPeriod: () => void;
@@ -94,36 +93,22 @@ export function QuickActions({
   return (
     <div className="grid grid-cols-3 gap-3">
       {quickActions.map((action, index) => (
-        <motion.button
+        <button
           key={action.label}
           onClick={action.onClick}
-          className={`relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br ${action.gradient} shadow-lg ${action.shadowColor}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
+          className={`relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br ${action.gradient} shadow-lg ${action.shadowColor} active:scale-95 hover:scale-105 hover:-translate-y-0.5 transition-transform duration-150 animate-fade-in`}
+          style={{ animationDelay: `${index * 100}ms` }}
         >
-          {/* Glow effect */}
-          <motion.div
-            className="absolute inset-0 bg-white/10"
-            animate={{ opacity: [0, 0.3, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-          
           {/* Icon container */}
-          <motion.div 
-            className="flex flex-col items-center gap-2"
-            whileHover={{ y: -2 }}
-          >
+          <div className="flex flex-col items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <action.icon className="w-6 h-6" />
             </div>
             <span className="text-xs font-semibold text-white text-center leading-tight">
               {action.label}
             </span>
-          </motion.div>
-        </motion.button>
+          </div>
+        </button>
       ))}
     </div>
   );

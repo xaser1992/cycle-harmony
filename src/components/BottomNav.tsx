@@ -1,7 +1,6 @@
-// 🌸 Bottom Navigation Component - Ruh Halim Style Animated Icons
+// 🌸 Bottom Navigation Component - Performance Optimized (No framer-motion)
 import { useCallback, forwardRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 // Tab configuration
 interface TabConfig {
@@ -17,13 +16,6 @@ const tabConfig: TabConfig[] = [
   { id: 'stats', label: 'İstatistik', labelEn: 'Stats', path: '/stats' },
   { id: 'medications', label: 'İlaçlar', labelEn: 'Meds', path: '/medications' },
 ];
-
-// Spring animation config
-const springConfig = {
-  type: "spring" as const,
-  stiffness: 400,
-  damping: 30,
-};
 
 interface BottomNavProps {
   onCenterPress?: (tab?: 'flow' | 'symptoms' | 'mood') => void;
@@ -103,7 +95,7 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
 });
 
 // ============================================
-// Animated Tab Icons (Ruh Halim Style)
+// Animated Tab Icons (CSS-based animations)
 // ============================================
 
 // Home Icon - Active: Animated flower/lotus, Inactive: Simple flower outline
@@ -111,74 +103,39 @@ function HomeIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
       <div className="relative w-8 h-8 flex items-center justify-center">
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="relative"
-        >
+        <div className="relative animate-scale-in">
           {/* Glow effect */}
           <div className="absolute inset-0 rounded-full blur-md opacity-60 bg-primary" />
           <svg className="relative w-7 h-7 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
             {/* Lotus/flower petals */}
-            <motion.path
+            <path
               d="M12 3C12 3 8 7 8 11C8 15 12 17 12 17C12 17 16 15 16 11C16 7 12 3 12 3Z"
               fill="hsl(var(--primary))"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.1, type: "spring" }}
+              className="animate-scale-in"
             />
-            <motion.path
+            <path
               d="M6 8C6 8 4 12 5 15C6 18 10 19 10 19C10 19 8 15 8 12C8 9 6 8 6 8Z"
               fill="hsl(var(--primary) / 0.7)"
-              initial={{ scale: 0, x: 5 }}
-              animate={{ scale: 1, x: 0 }}
-              transition={{ delay: 0.2, type: "spring" }}
+              className="animate-scale-in"
+              style={{ animationDelay: '100ms' }}
             />
-            <motion.path
+            <path
               d="M18 8C18 8 20 12 19 15C18 18 14 19 14 19C14 19 16 15 16 12C16 9 18 8 18 8Z"
               fill="hsl(var(--primary) / 0.7)"
-              initial={{ scale: 0, x: -5 }}
-              animate={{ scale: 1, x: 0 }}
-              transition={{ delay: 0.2, type: "spring" }}
+              className="animate-scale-in"
+              style={{ animationDelay: '100ms' }}
             />
             {/* Center */}
-            <motion.circle
+            <circle
               cx="12"
               cy="12"
               r="2"
               fill="hsl(var(--primary-foreground))"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring" }}
+              className="animate-scale-in"
+              style={{ animationDelay: '200ms' }}
             />
           </svg>
-        </motion.div>
-        {/* Floating sparkles */}
-        {['✨', '💫'].map((emoji, i) => (
-          <motion.span
-            key={i}
-            initial={{ scale: 0, opacity: 0, y: 0 }}
-            animate={{ 
-              scale: [0, 0.8, 0.6],
-              opacity: [0, 1, 0],
-              y: [0, -10, -15],
-            }}
-            transition={{
-              duration: 0.8,
-              delay: 0.2 + i * 0.15,
-              ease: "easeOut",
-            }}
-            className="absolute text-xs pointer-events-none"
-            style={{
-              left: i === 0 ? '-2px' : 'auto',
-              right: i === 1 ? '-2px' : 'auto',
-              top: '0px',
-            }}
-          >
-            {emoji}
-          </motion.span>
-        ))}
+        </div>
       </div>
     );
   }
@@ -201,47 +158,22 @@ function CalendarIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
       <div className="relative w-7 h-8 flex flex-col items-center">
-        <motion.div
-          initial={{ scale: 0.8, y: 5 }}
-          animate={{ scale: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="relative w-full h-full flex flex-col overflow-hidden rounded-sm border-2 border-primary bg-card shadow-lg"
-        >
+        <div className="relative w-full h-full flex flex-col overflow-hidden rounded-sm border-2 border-primary bg-card shadow-lg animate-scale-in">
           {/* Calendar header with rings */}
           <div className="relative w-full h-2.5 bg-primary">
             {/* Calendar rings */}
-            <motion.div
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ delay: 0.1, duration: 0.2 }}
-              className="absolute -top-1 left-1.5 w-1 h-2 rounded-full bg-primary-foreground/80"
-            />
-            <motion.div
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ delay: 0.15, duration: 0.2 }}
-              className="absolute -top-1 right-1.5 w-1 h-2 rounded-full bg-primary-foreground/80"
-            />
+            <div className="absolute -top-1 left-1.5 w-1 h-2 rounded-full bg-primary-foreground/80" />
+            <div className="absolute -top-1 right-1.5 w-1 h-2 rounded-full bg-primary-foreground/80" />
           </div>
           {/* Calendar body */}
           <div className="w-full flex-1 flex items-center justify-center bg-background">
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 400 }}
-              className="text-sm font-bold text-primary"
-            >
+            <span className="text-sm font-bold text-primary animate-scale-in" style={{ animationDelay: '150ms' }}>
               {todayDate}
-            </motion.span>
+            </span>
           </div>
-        </motion.div>
+        </div>
         {/* Notification dot */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: [0, 1.2, 1] }}
-          transition={{ delay: 0.3, duration: 0.3 }}
-          className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-destructive shadow-sm"
-        />
+        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-destructive shadow-sm animate-scale-in" style={{ animationDelay: '200ms' }} />
       </div>
     );
   }
@@ -263,42 +195,25 @@ function CalendarIcon({ isActive }: { isActive: boolean }) {
 
 // Stats/Chart Icon - Active: Animated bars with trend line, Inactive: Static bars
 function StatsIcon({ isActive }: { isActive: boolean }) {
+  const heights = [0.4, 0.7, 0.5, 0.9];
+  
   if (isActive) {
     return (
       <div className="relative w-8 h-6 flex items-end justify-center gap-0.5 pb-0.5">
-        {[0.4, 0.7, 0.5, 0.9].map((height, i) => (
-          <motion.div
+        {heights.map((height, i) => (
+          <div
             key={i}
-            initial={{ height: 0 }}
-            animate={{ height: `${height * 100}%` }}
-            transition={{ duration: 0.5, delay: i * 0.1, type: "spring", stiffness: 200, damping: 15 }}
-            className={`w-1.5 rounded-t-sm ${
+            className={`w-1.5 rounded-t-sm shadow-sm transition-all duration-500 ease-out ${
               i % 2 === 0 
                 ? 'bg-gradient-to-t from-primary to-primary/70' 
                 : 'bg-gradient-to-t from-pink-500 to-pink-400'
-            } shadow-sm`}
+            }`}
+            style={{ 
+              height: `${height * 100}%`,
+              transitionDelay: `${i * 100}ms`
+            }}
           />
         ))}
-        {/* Trend line */}
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          transition={{ delay: 0.5 }} 
-          className="absolute inset-0 pointer-events-none"
-        >
-          <svg className="w-full h-full" viewBox="0 0 32 24" fill="none">
-            <motion.path 
-              d="M 4 18 Q 10 14, 16 10 T 28 4" 
-              stroke="hsl(var(--primary))" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              fill="none" 
-              initial={{ pathLength: 0 }} 
-              animate={{ pathLength: 1 }} 
-              transition={{ delay: 0.6, duration: 0.6 }} 
-            />
-          </svg>
-        </motion.div>
       </div>
     );
   }
@@ -322,37 +237,17 @@ function MedicationsIcon({ isActive }: { isActive: boolean }) {
     return (
       <div className="relative w-9 h-7 flex items-center justify-center">
         {/* Open pill capsule with animation */}
-        <div className="relative w-full h-full flex shadow-lg rounded-full">
+        <div className="relative w-full h-full flex shadow-lg rounded-full animate-scale-in">
           {/* Left half */}
-          <motion.div 
-            initial={{ x: 5, opacity: 0.5 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-1/2 h-full rounded-l-full bg-gradient-to-br from-primary to-primary/80 border-2 border-primary"
-          />
+          <div className="w-1/2 h-full rounded-l-full bg-gradient-to-br from-primary to-primary/80 border-2 border-primary" />
           {/* Right half */}
-          <motion.div 
-            initial={{ x: -5, opacity: 0.5 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
-            className="w-1/2 h-full rounded-r-full bg-gradient-to-bl from-period-light to-period-light/80 border-2 border-primary/50"
-          />
+          <div className="w-1/2 h-full rounded-r-full bg-gradient-to-bl from-period-light to-period-light/80 border-2 border-primary/50" />
           {/* Center glow */}
-          <motion.div 
-            initial={{ scaleY: 0, opacity: 0 }}
-            animate={{ scaleY: 1, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.3 }}
-            className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-white/60 via-white to-white/60 shadow-lg"
-          />
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-white/60 via-white to-white/60 shadow-lg" />
           {/* Heart icon */}
-          <motion.div 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
-            className="absolute inset-0 flex items-center justify-center"
-          >
+          <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-xs">💊</span>
-          </motion.div>
+          </div>
         </div>
       </div>
     );
@@ -388,38 +283,31 @@ function TabItem({
   };
 
   return (
-    <motion.button
+    <button
       onClick={() => onTap(tab.path)}
-      className={`relative flex flex-col items-center justify-center py-1.5 px-3 min-w-[72px] rounded-lg transition-colors duration-200 ${
+      className={`relative flex flex-col items-center justify-center py-1.5 px-3 min-w-[72px] rounded-lg transition-all duration-200 active:scale-92 ${
         isActive 
           ? 'text-primary bg-primary/10' 
           : 'text-muted-foreground/50 hover:text-muted-foreground/70'
       }`}
-      whileTap={{ scale: 0.92 }}
-      transition={springConfig}
     >
       {/* Icon container */}
-      <motion.div
-        className="relative z-10"
-        animate={{
-          scale: isActive ? 1 : 0.95,
-          y: isActive ? -1 : 0,
-        }}
-        transition={springConfig}
+      <div
+        className={`relative z-10 transition-transform duration-200 ${
+          isActive ? 'scale-100 -translate-y-0.5' : 'scale-95'
+        }`}
       >
         {renderIcon()}
-      </motion.div>
+      </div>
       
       {/* Label */}
-      <motion.span
+      <span
         className={`text-[10px] font-medium truncate w-full leading-tight transition-all duration-200 mt-0.5 ${
           isActive ? 'opacity-100' : 'opacity-70'
         }`}
-        animate={{ opacity: isActive ? 1 : 0.7 }}
-        transition={{ duration: 0.2 }}
       >
         {tab.label}
-      </motion.span>
-    </motion.button>
+      </span>
+    </button>
   );
 }

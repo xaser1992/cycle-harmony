@@ -1,28 +1,13 @@
-import { motion } from 'framer-motion';
-
+// 🌸 Page Loader - Performance Optimized (No framer-motion)
 export function PageLoader() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <motion.div
-        className="flex flex-col items-center gap-4"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <motion.div
-          className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.span 
-          className="text-sm text-muted-foreground"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
+      <div className="flex flex-col items-center gap-4 animate-fade-in">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+        <span className="text-sm text-muted-foreground animate-fade-in">
           Yükleniyor...
-        </motion.span>
-      </motion.div>
+        </span>
+      </div>
     </div>
   );
 }
