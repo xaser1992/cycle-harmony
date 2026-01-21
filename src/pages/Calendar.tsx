@@ -396,27 +396,29 @@ export default function CalendarPage() {
                 className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
                 onClick={() => setActiveInfoCard(null)}
               />
+              {/* Close Button - Outside modal for stable positioning */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveInfoCard(null);
+                }}
+                className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+              
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
                 className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 shadow-2xl overflow-y-auto ${
                   activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose to-pink' :
                   activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet to-purple' :
                   'bg-gradient-to-br from-cyan to-teal'
                 }`}
               >
-                {/* Close Button - Fixed position with high z-index */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveInfoCard(null);
-                  }}
-                  className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
-                >
-                  <X className="w-5 h-5 text-white" />
-                </button>
 
                 {/* Period Info */}
                 {activeInfoCard === 'period' && (
