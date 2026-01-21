@@ -88,6 +88,28 @@ html.light {
     --accent-purple: 280 55% 50%;
     --accent-emerald: 160 55% 45%;
     --accent-amber: 40 85% 50%;
+    
+    /* Extended Color Palette */
+    --accent-rose: 340 75% 55%;
+    --accent-rose-light: 340 60% 90%;
+    --accent-pink: 330 65% 58%;
+    --accent-pink-light: 330 50% 92%;
+    --accent-teal: 175 55% 45%;
+    --accent-teal-light: 175 40% 90%;
+    --accent-cyan: 190 60% 50%;
+    --accent-cyan-light: 190 45% 90%;
+    --accent-orange: 25 85% 55%;
+    --accent-orange-light: 25 65% 90%;
+    --accent-green: 145 55% 45%;
+    --accent-green-light: 145 40% 90%;
+    --accent-red: 0 70% 50%;
+    --accent-red-light: 0 50% 90%;
+    --accent-blue: 210 70% 55%;
+    --accent-blue-light: 210 50% 90%;
+    --accent-sky: 200 75% 55%;
+    --accent-sky-light: 200 55% 90%;
+    --accent-slate: 220 15% 45%;
+    --accent-slate-light: 220 12% 90%;
   }
 
   .dark {
@@ -149,6 +171,28 @@ html.light {
     --accent-purple: 280 45% 48%;
     --accent-emerald: 160 45% 42%;
     --accent-amber: 40 70% 48%;
+    
+    /* Extended Color Palette - Dark Mode */
+    --accent-rose: 340 65% 52%;
+    --accent-rose-light: 340 40% 20%;
+    --accent-pink: 330 55% 52%;
+    --accent-pink-light: 330 35% 18%;
+    --accent-teal: 175 45% 42%;
+    --accent-teal-light: 175 30% 18%;
+    --accent-cyan: 190 50% 45%;
+    --accent-cyan-light: 190 35% 18%;
+    --accent-orange: 25 70% 50%;
+    --accent-orange-light: 25 45% 18%;
+    --accent-green: 145 45% 42%;
+    --accent-green-light: 145 30% 18%;
+    --accent-red: 0 60% 45%;
+    --accent-red-light: 0 40% 18%;
+    --accent-blue: 210 60% 50%;
+    --accent-blue-light: 210 40% 18%;
+    --accent-sky: 200 65% 50%;
+    --accent-sky-light: 200 45% 18%;
+    --accent-slate: 220 12% 40%;
+    --accent-slate-light: 220 10% 18%;
   }
 }
 
