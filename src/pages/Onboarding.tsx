@@ -458,7 +458,7 @@ export default function Onboarding() {
                 </div>
                 
                 <div className="space-y-4">
-                  <Card className="p-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                  <Card className="p-4 bg-amber/10 border-amber/30">
                     <div className="flex gap-3">
                       <span className="text-2xl">⏱️</span>
                       <div>
@@ -482,7 +482,7 @@ export default function Onboarding() {
                     </div>
                   </Card>
                   
-                  <Card className="p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                  <Card className="p-4 bg-emerald/10 border-emerald/30">
                     <div className="flex gap-3">
                       <span className="text-2xl">✨</span>
                       <div>
@@ -556,7 +556,7 @@ export default function Onboarding() {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="flex items-center justify-center gap-2 p-4 bg-green-100 dark:bg-green-900/30 rounded-2xl text-green-700 dark:text-green-300"
+                    className="flex items-center justify-center gap-2 p-4 bg-emerald/20 rounded-2xl text-emerald"
                   >
                     <CheckCircle2 className="w-6 h-6" />
                     <span className="font-medium">Bildirimler açık!</span>
@@ -567,7 +567,7 @@ export default function Onboarding() {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-700 dark:text-amber-300 text-center mt-2"
+                    className="p-3 bg-amber/20 rounded-xl text-amber text-center mt-2"
                   >
                     <p className="text-xs opacity-80">
                       Bildirimlere izin verilmedi. Yukarıdaki butona tıklayarak tekrar deneyebilirsin.
