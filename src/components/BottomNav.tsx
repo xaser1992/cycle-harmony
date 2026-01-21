@@ -126,6 +126,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
                     handleQuickAction(action.tab);
                   }}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     handleQuickAction(action.tab);
                   }}

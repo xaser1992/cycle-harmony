@@ -518,6 +518,9 @@ export function UpdateSheet({
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
+        // Prevent Radix auto-focus from scrolling the underlying page (common on mobile)
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col h-full bg-muted/30">
           {/* Header with Date Navigation - Pull to dismiss */}
