@@ -209,3 +209,61 @@ export const FLOW_LABELS: Record<FlowLevel, { tr: string; en: string; emoji: str
   medium: { tr: 'Orta', en: 'Medium', emoji: '🩸🩸' },
   heavy: { tr: 'Yoğun', en: 'Heavy', emoji: '🩸🩸🩸' },
 };
+
+// Extended category labels for UpdateSheet items
+export const DISCHARGE_LABELS: Record<string, { tr: string; en: string; emoji: string }> = {
+  none: { tr: 'Akıntı yok', en: 'No discharge', emoji: '🚫' },
+  slippery: { tr: 'Kaygan', en: 'Slippery', emoji: '💧' },
+  watery: { tr: 'Sulu', en: 'Watery', emoji: '💦' },
+  sticky: { tr: 'Yapışkan', en: 'Sticky', emoji: '💧' },
+  egg_white: { tr: 'Yumurta akı', en: 'Egg white', emoji: '💧' },
+  spotting: { tr: 'Lekelenme', en: 'Spotting', emoji: '🩸' },
+  unusual: { tr: 'Olağandışı', en: 'Unusual', emoji: '👤' },
+  white_clumpy: { tr: 'Beyaz, topaklı', en: 'White, clumpy', emoji: '⚪' },
+  gray: { tr: 'Gri', en: 'Gray', emoji: '⬛' },
+};
+
+export const SEXUAL_LABELS: Record<string, { tr: string; en: string; emoji: string }> = {
+  no_sex: { tr: 'Yapmadım', en: 'Did not have sex', emoji: '💔' },
+  protected: { tr: 'Korunmalı', en: 'Protected', emoji: '❤️' },
+  unprotected: { tr: 'Korunmasız', en: 'Unprotected', emoji: '💗' },
+  oral: { tr: 'Oral seks', en: 'Oral sex', emoji: '💋' },
+  anal: { tr: 'Anal seks', en: 'Anal sex', emoji: '❣️' },
+  masturbation: { tr: 'Mastürbasyon', en: 'Masturbation', emoji: '💕' },
+  touching: { tr: 'Haz veren dokunma', en: 'Intimate touching', emoji: '💞' },
+  toys: { tr: 'Seks oyuncakları', en: 'Sex toys', emoji: '💝' },
+  orgasm: { tr: 'Orgazm', en: 'Orgasm', emoji: '✨' },
+  high_drive: { tr: 'Yüksek cinsel istek', en: 'High sex drive', emoji: '❤️' },
+  neutral_drive: { tr: 'Nötr seviyede', en: 'Neutral', emoji: '🧡' },
+  low_drive: { tr: 'Düşük seviyede', en: 'Low', emoji: '💛' },
+};
+
+export const ACTIVITY_LABELS: Record<string, { tr: string; en: string; emoji: string }> = {
+  none: { tr: 'Egzersiz yapmadım', en: 'No exercise', emoji: '🚫' },
+  yoga: { tr: 'Yoga', en: 'Yoga', emoji: '🧘' },
+  weights: { tr: 'Ağırlık', en: 'Weights', emoji: '💪' },
+  aerobics: { tr: 'Aerobik ve dans', en: 'Aerobics', emoji: '🎵' },
+  swimming: { tr: 'Yüzme', en: 'Swimming', emoji: '🏊' },
+  team_sports: { tr: 'Takım sporları', en: 'Team sports', emoji: '⚽' },
+  running: { tr: 'Koşu', en: 'Running', emoji: '🏃' },
+  cycling: { tr: 'Bisiklet', en: 'Cycling', emoji: '🚴' },
+  walking: { tr: 'Yürüyüş', en: 'Walking', emoji: '🚶' },
+};
+
+export const DIGESTION_LABELS: Record<string, { tr: string; en: string; emoji: string }> = {
+  nausea: { tr: 'Bulantı', en: 'Nausea', emoji: '🤢' },
+  bloating: { tr: 'Şişkinlik', en: 'Bloating', emoji: '🎈' },
+  constipation: { tr: 'Kabızlık', en: 'Constipation', emoji: '🔵' },
+  diarrhea: { tr: 'İshal', en: 'Diarrhea', emoji: '💧' },
+};
+
+export const OTHER_LABELS: Record<string, { tr: string; en: string; emoji: string }> = {
+  travel: { tr: 'Seyahat', en: 'Travel', emoji: '📍' },
+  stress: { tr: 'Stres', en: 'Stress', emoji: '⚡' },
+  meditation: { tr: 'Meditasyon', en: 'Meditation', emoji: '🧘' },
+  journal: { tr: 'Günlük tutma', en: 'Journal', emoji: '📒' },
+  kegel: { tr: 'Kegel egzersizleri', en: 'Kegel exercises', emoji: '💪' },
+  breathing: { tr: 'Nefes egzersizleri', en: 'Breathing exercises', emoji: '🫁' },
+  illness: { tr: 'Hastalık veya İncinme', en: 'Illness or injury', emoji: '🤒' },
+  alcohol: { tr: 'Alkol', en: 'Alcohol', emoji: '🍷' },
+};

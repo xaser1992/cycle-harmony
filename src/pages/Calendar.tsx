@@ -1,6 +1,5 @@
 // 🌸 Calendar Page - Flo Inspired Design with Medication Integration
 import { useState, useMemo, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pill, X, Edit3, Bell } from 'lucide-react';
 import { 
   format, 
@@ -18,18 +17,20 @@ import {
   differenceInDays,
   addDays
 } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr, enUS } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/hooks/useCycleData';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { getMedicationLogsForDate, getMedications } from '@/lib/medicationStorage';
 import { scheduleCustomReminder } from '@/lib/notifications';
-import { FLOW_LABELS, SYMPTOM_LABELS, MOOD_LABELS } from '@/types/cycle';
+import { FLOW_LABELS, SYMPTOM_LABELS, MOOD_LABELS, DISCHARGE_LABELS, SEXUAL_LABELS, ACTIVITY_LABELS } from '@/types/cycle';
 import type { DayEntry } from '@/types/cycle';
 import type { Medication, MedicationLog } from '@/types/medication';
 import { toast } from 'sonner';
+import { App } from '@capacitor/app';
 
-const WEEKDAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+const WEEKDAYS_TR = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+const WEEKDAYS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 // Fertility chance by days relative to ovulation
 const getFertilityChance = (daysFromOvulation: number): number => {
@@ -55,6 +56,10 @@ export default function CalendarPage() {
     userSettings 
   } = useCycleData();
   
+  const language = userSettings?.language || 'tr';
+  const locale = language === 'tr' ? tr : enUS;
+  const WEEKDAYS = language === 'tr' ? WEEKDAYS_TR : WEEKDAYS_EN;
+  
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayDetail, setShowDayDetail] = useState(false);
@@ -63,7 +68,23 @@ export default function CalendarPage() {
   const [medicationLogs, setMedicationLogs] = useState<Record<string, MedicationLog[]>>({});
   const [activeInfoCard, setActiveInfoCard] = useState<'period' | 'ovulation' | 'fertile' | null>(null);
 
-  // Month navigation via buttons only (swipe disabled to allow tab switching)
+  // Android back button support
+  useEffect(() => {
+    const isAnyModalOpen = showDayDetail || activeInfoCard !== null;
+    if (!isAnyModalOpen) return;
+
+    const backHandler = App.addListener('backButton', () => {
+      if (activeInfoCard) {
+        setActiveInfoCard(null);
+      } else if (showDayDetail) {
+        setShowDayDetail(false);
+      }
+    });
+
+    return () => {
+      backHandler.then(h => h.remove());
+    };
+  }, [showDayDetail, activeInfoCard]);
 
   // Load medications and logs
   useEffect(() => {
@@ -173,12 +194,12 @@ export default function CalendarPage() {
   // Get day type label for detail card
   const getDayTypeLabel = (type: string | null): { label: string; color: string } => {
     switch (type) {
-      case 'period': return { label: 'Regl Günü', color: 'from-rose to-pink' };
-      case 'predicted': return { label: 'Tahmini Regl', color: 'from-rose to-pink' };
-      case 'fertile': return { label: 'Doğurgan Dönem', color: 'from-cyan to-teal' };
-      case 'ovulation': return { label: 'Yumurtlama Günü', color: 'from-violet to-purple' };
-      case 'pms': return { label: 'PMS Dönemi', color: 'from-orange to-amber' };
-      default: return { label: 'Normal Gün', color: 'from-muted to-muted' };
+      case 'period': return { label: language === 'tr' ? 'Regl Günü' : 'Period Day', color: 'from-rose to-pink' };
+      case 'predicted': return { label: language === 'tr' ? 'Tahmini Regl' : 'Predicted Period', color: 'from-rose to-pink' };
+      case 'fertile': return { label: language === 'tr' ? 'Doğurgan Dönem' : 'Fertile Window', color: 'from-cyan to-teal' };
+      case 'ovulation': return { label: language === 'tr' ? 'Yumurtlama Günü' : 'Ovulation Day', color: 'from-violet to-purple' };
+      case 'pms': return { label: language === 'tr' ? 'PMS Dönemi' : 'PMS Period', color: 'from-orange to-amber' };
+      default: return { label: language === 'tr' ? 'Normal Gün' : 'Normal Day', color: 'from-muted to-muted' };
     }
   };
 
@@ -198,7 +219,7 @@ export default function CalendarPage() {
             
             <div className="text-center">
               <h1 className="text-2xl font-bold text-foreground">
-                {format(currentMonth, 'MMMM', { locale: tr })}
+                {format(currentMonth, 'MMMM', { locale })}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {format(currentMonth, 'yyyy')}
@@ -386,43 +407,31 @@ export default function CalendarPage() {
         )}
 
         {/* Info Modal for Upcoming Dates */}
-        <AnimatePresence>
-          {activeInfoCard && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
-                onClick={() => setActiveInfoCard(null)}
-              />
-              {/* Close Button - Animated with modal */}
-              <motion.button
-                type="button"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.1 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveInfoCard(null);
-                }}
-                className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
-              >
-                <X className="w-5 h-5 text-white" />
-              </motion.button>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 shadow-2xl overflow-y-auto ${
-                  activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose to-pink' :
-                  activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet to-purple' :
-                  'bg-gradient-to-br from-cyan to-teal'
-                }`}
-              >
+        {activeInfoCard && (
+          <>
+            <div
+              className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-fade-in"
+              onClick={() => setActiveInfoCard(null)}
+            />
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveInfoCard(null);
+              }}
+              className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            
+            <div
+              className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 shadow-2xl overflow-y-auto animate-scale-in ${
+                activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose to-pink' :
+                activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet to-purple' :
+                'bg-gradient-to-br from-cyan to-teal'
+              }`}
+            >
 
                 {/* Period Info */}
                 {activeInfoCard === 'period' && (
@@ -658,47 +667,40 @@ export default function CalendarPage() {
                     </div>
                   );
                 })()}
-              </motion.div>
+              </div>
             </>
           )}
-        </AnimatePresence>
       </main>
 
       {/* Day Detail Bottom Sheet */}
-      <AnimatePresence>
-        {showDayDetail && selectedDate && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowDayDetail(false)}
-            />
-            
-            {/* Detail Card */}
-            <motion.div
-              initial={{ y: '100%', opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[101] bg-card rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden"
-            >
-              {/* Handle */}
-              <div className="flex justify-center pt-3 pb-2">
-                <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
-              </div>
+      {showDayDetail && selectedDate && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => setShowDayDetail(false)}
+          />
+          
+          {/* Detail Card */}
+          <div
+            className="fixed bottom-0 left-0 right-0 z-[101] bg-card rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden animate-slide-up"
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+            </div>
 
-              {/* Header */}
-              <div className="px-6 pb-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {isSameDay(selectedDate, new Date()) ? 'Bugün' : format(selectedDate, 'EEEE', { locale: tr })}
-                    </p>
+            {/* Header */}
+            <div className="px-6 pb-4">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {isSameDay(selectedDate, new Date()) 
+                      ? (language === 'tr' ? 'Bugün' : 'Today') 
+                      : format(selectedDate, 'EEEE', { locale })}
+                  </p>
                     <h2 className="text-2xl font-bold text-foreground">
-                      {format(selectedDate, 'd MMMM yyyy', { locale: tr })}
+                      {format(selectedDate, 'd MMMM yyyy', { locale })}
                     </h2>
                   </div>
                   <div className="flex gap-2">
@@ -803,16 +805,19 @@ export default function CalendarPage() {
                       {/* Sexual Activity */}
                       {entry?.sexualActivity && entry.sexualActivity.length > 0 && (
                         <div className="p-3 rounded-2xl bg-pink-light dark:bg-pink/20">
-                          <p className="text-xs text-muted-foreground mb-2">Cinsel Aktivite</p>
+                          <p className="text-xs text-muted-foreground mb-2">{language === 'tr' ? 'Cinsel Aktivite' : 'Sexual Activity'}</p>
                           <div className="flex flex-wrap gap-2">
-                            {entry.sexualActivity.map(item => (
-                              <span
-                                key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-light dark:bg-pink/30 text-xs font-medium text-pink dark:text-pink-light"
-                              >
-                                💕 {item}
-                              </span>
-                            ))}
+                            {entry.sexualActivity.map(item => {
+                              const label = SEXUAL_LABELS[item];
+                              return (
+                                <span
+                                  key={item}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-light dark:bg-pink/30 text-xs font-medium text-pink dark:text-pink-light"
+                                >
+                                  {label?.emoji || '💕'} {label ? label[language] : item}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -820,16 +825,19 @@ export default function CalendarPage() {
                       {/* Discharge */}
                       {entry?.discharge && entry.discharge.length > 0 && (
                         <div className="p-3 rounded-2xl bg-violet-light dark:bg-violet/20">
-                          <p className="text-xs text-muted-foreground mb-2">Vajinal Akıntı</p>
+                          <p className="text-xs text-muted-foreground mb-2">{language === 'tr' ? 'Vajinal Akıntı' : 'Vaginal Discharge'}</p>
                           <div className="flex flex-wrap gap-2">
-                            {entry.discharge.map(item => (
-                              <span
-                                key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light"
-                              >
-                                💧 {item}
-                              </span>
-                            ))}
+                            {entry.discharge.map(item => {
+                              const label = DISCHARGE_LABELS[item];
+                              return (
+                                <span
+                                  key={item}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light"
+                                >
+                                  {label?.emoji || '💧'} {label ? label[language] : item}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -837,16 +845,19 @@ export default function CalendarPage() {
                       {/* Activity */}
                       {entry?.activity && entry.activity.length > 0 && (
                         <div className="p-3 rounded-2xl bg-green-light dark:bg-green/20">
-                          <p className="text-xs text-muted-foreground mb-2">Fiziksel Aktivite</p>
+                          <p className="text-xs text-muted-foreground mb-2">{language === 'tr' ? 'Fiziksel Aktivite' : 'Physical Activity'}</p>
                           <div className="flex flex-wrap gap-2">
-                            {entry.activity.map(item => (
-                              <span
-                                key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-light dark:bg-green/30 text-xs font-medium text-green dark:text-green-light"
-                              >
-                                🏃 {item}
-                              </span>
-                            ))}
+                            {entry.activity.map(item => {
+                              const label = ACTIVITY_LABELS[item];
+                              return (
+                                <span
+                                  key={item}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-light dark:bg-green/30 text-xs font-medium text-green dark:text-green-light"
+                                >
+                                  {label?.emoji || '🏃'} {label ? label[language] : item}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -950,10 +961,9 @@ export default function CalendarPage() {
                   );
                 })()}
               </div>
-            </motion.div>
+            </div>
           </>
         )}
-      </AnimatePresence>
 
       <BottomNav onCenterPress={handleCenterPress} />
     </div>

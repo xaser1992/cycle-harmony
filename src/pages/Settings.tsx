@@ -1,6 +1,5 @@
 // 🌸 Settings Page - Flo Inspired Design
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, 
   Shield, 
@@ -18,6 +17,7 @@ import {
   Droplets,
   Scale,
   RotateCcw,
+  Globe,
   type LucideIcon
 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
@@ -97,11 +97,17 @@ export default function SettingsPage() {
       disableLock();
     }
   };
+  const language = userSettings?.language || 'tr';
 
-  const themes: { value: 'light' | 'dark' | 'system'; icon: LucideIcon; label: string }[] = [
-    { value: 'light', icon: Sun, label: 'Açık' },
-    { value: 'dark', icon: Moon, label: 'Koyu' },
-    { value: 'system', icon: Monitor, label: 'Sistem' },
+  const themes: { value: 'light' | 'dark' | 'system'; icon: LucideIcon; label: { tr: string; en: string } }[] = [
+    { value: 'light', icon: Sun, label: { tr: 'Açık', en: 'Light' } },
+    { value: 'dark', icon: Moon, label: { tr: 'Koyu', en: 'Dark' } },
+    { value: 'system', icon: Monitor, label: { tr: 'Sistem', en: 'System' } },
+  ];
+
+  const languages: { value: 'tr' | 'en'; label: string; flag: string }[] = [
+    { value: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+    { value: 'en', label: 'English', flag: '🇬🇧' },
   ];
 
   // Section Card Component
@@ -125,11 +131,7 @@ export default function SettingsPage() {
     const isExpanded = expandedSection === id;
     
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-3xl overflow-hidden shadow-sm border border-border/50"
-      >
+      <div className="bg-card rounded-3xl overflow-hidden shadow-sm border border-border/50 animate-fade-in">
         <button
           onClick={() => collapsible && id && setExpandedSection(isExpanded ? null : id)}
           className="w-full flex items-center gap-4 p-4"
@@ -142,30 +144,18 @@ export default function SettingsPage() {
           </div>
           {rightElement}
           {collapsible && (
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <div className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </motion.div>
+            </div>
           )}
         </button>
         
-        <AnimatePresence>
-          {(!collapsible || isExpanded) && (
-            <motion.div
-              initial={collapsible ? { height: 0, opacity: 0 } : false}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="px-4 pb-4">
-                {children}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+        {(!collapsible || isExpanded) && (
+          <div className="px-4 pb-4">
+            {children}
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -185,10 +175,9 @@ export default function SettingsPage() {
     rightElement?: React.ReactNode;
     gradient?: string;
   }) => (
-    <motion.button
+    <button
       onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 rounded-2xl bg-muted/50 hover:bg-muted transition-colors"
-      whileTap={onClick ? { scale: 0.98 } : undefined}
+      className="w-full flex items-center gap-4 p-4 rounded-2xl bg-muted/50 hover:bg-muted transition-colors active:scale-[0.98]"
     >
       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center`}>
         <Icon className="w-5 h-5 text-white" />
@@ -198,24 +187,23 @@ export default function SettingsPage() {
         {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </div>
       {rightElement || (onClick && <ChevronRight className="w-5 h-5 text-muted-foreground" />)}
-    </motion.button>
+    </button>
   );
 
-  // Animated Toggle Component
+  // Toggle Component
   const AnimatedSwitch = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
-    <motion.div
-      className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors ${
+    <div
+      className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors active:scale-95 ${
         checked ? 'bg-gradient-to-r from-rose to-pink' : 'bg-muted'
       }`}
       onClick={() => onChange(!checked)}
-      whileTap={{ scale: 0.95 }}
     >
-      <motion.div
-        className="absolute top-1 w-6 h-6 rounded-full bg-white shadow-md"
-        animate={{ left: checked ? 'calc(100% - 28px)' : '4px' }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      <div
+        className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-200 ${
+          checked ? 'left-[calc(100%-28px)]' : 'left-1'
+        }`}
       />
-    </motion.div>
+    </div>
   );
 
   return (
@@ -223,24 +211,47 @@ export default function SettingsPage() {
       {/* Header with Back Button */}
       <header className="px-6 pt-6 pb-4">
         <div className="flex items-center gap-4 mb-2">
-          <motion.button
+          <button
             onClick={() => navigate('/')}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
-            whileTap={{ scale: 0.95 }}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
           >
             <ArrowLeft className="w-5 h-5 text-foreground" />
-          </motion.button>
+          </button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Ayarlar</h1>
-            <p className="text-sm text-muted-foreground">Uygulama tercihlerini özelleştir</p>
+            <h1 className="text-2xl font-bold text-foreground">{language === 'tr' ? 'Ayarlar' : 'Settings'}</h1>
+            <p className="text-sm text-muted-foreground">{language === 'tr' ? 'Uygulama tercihlerini özelleştir' : 'Customize app preferences'}</p>
           </div>
         </div>
       </header>
 
       <main className="px-4 space-y-4">
+        {/* Language Settings */}
+        <SectionCard
+          title={language === 'tr' ? 'Dil' : 'Language'}
+          icon={Globe}
+          gradient="from-blue to-cyan"
+        >
+          <div className="grid grid-cols-2 gap-2">
+            {languages.map((lang) => (
+              <button
+                key={lang.value}
+                onClick={() => updateUserSettings({ language: lang.value })}
+                className={`p-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                  language === lang.value
+                    ? 'bg-gradient-to-br from-blue to-cyan text-white shadow-lg'
+                    : 'bg-muted hover:bg-muted/80'
+                }`}
+              >
+                <span className="text-xl">{lang.flag}</span>
+                <span className="text-sm font-medium">{lang.label}</span>
+              </button>
+            ))}
+          </div>
+        </SectionCard>
+
         {/* Cycle Settings */}
         <SectionCard
-          title="Döngü Ayarları"
+          title={language === 'tr' ? 'Döngü Ayarları' : 'Cycle Settings'}
           icon={Calendar}
           gradient="from-rose to-pink"
           id="cycle"
@@ -249,49 +260,45 @@ export default function SettingsPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div>
-                <p className="text-sm font-medium">Döngü Uzunluğu</p>
-                <p className="text-xs text-muted-foreground">{cycleSettings.cycleLength} gün</p>
+                <p className="text-sm font-medium">{language === 'tr' ? 'Döngü Uzunluğu' : 'Cycle Length'}</p>
+                <p className="text-xs text-muted-foreground">{cycleSettings.cycleLength} {language === 'tr' ? 'gün' : 'days'}</p>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ cycleLength: Math.max(21, cycleSettings.cycleLength - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-8 text-center font-bold text-lg">{cycleSettings.cycleLength}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ cycleLength: Math.min(40, cycleSettings.cycleLength + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
             
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div>
-                <p className="text-sm font-medium">Regl Süresi</p>
-                <p className="text-xs text-muted-foreground">{cycleSettings.periodLength} gün</p>
+                <p className="text-sm font-medium">{language === 'tr' ? 'Regl Süresi' : 'Period Length'}</p>
+                <p className="text-xs text-muted-foreground">{cycleSettings.periodLength} {language === 'tr' ? 'gün' : 'days'}</p>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ periodLength: Math.max(2, cycleSettings.periodLength - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-8 text-center font-bold text-lg">{cycleSettings.periodLength}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ periodLength: Math.min(10, cycleSettings.periodLength + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>
@@ -299,78 +306,71 @@ export default function SettingsPage() {
 
         {/* Wellness Goals */}
         <SectionCard
-          title="Wellness Hedefleri"
+          title={language === 'tr' ? 'Wellness Hedefleri' : 'Wellness Goals'}
           icon={Scale}
           gradient="from-emerald to-teal"
           id="wellness"
           collapsible
         >
           <div className="space-y-3">
-            {/* Target Weight */}
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div className="flex items-center gap-3">
                 <Scale className="w-5 h-5 text-emerald" />
                 <div>
-                  <p className="text-sm font-medium">Hedef Ağırlık</p>
+                  <p className="text-sm font-medium">{language === 'tr' ? 'Hedef Ağırlık' : 'Target Weight'}</p>
                   <p className="text-xs text-muted-foreground">{userSettings?.targetWeight || 60} kg</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ targetWeight: Math.max(30, (userSettings?.targetWeight || 60) - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-10 text-center font-bold text-lg">{userSettings?.targetWeight || 60}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ targetWeight: Math.min(150, (userSettings?.targetWeight || 60) + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
             
-            {/* Daily Water Goal */}
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div className="flex items-center gap-3">
                 <Droplets className="w-5 h-5 text-blue" />
                 <div>
-                  <p className="text-sm font-medium">Günlük Su Hedefi</p>
+                  <p className="text-sm font-medium">{language === 'tr' ? 'Günlük Su Hedefi' : 'Daily Water Goal'}</p>
                   <p className="text-xs text-muted-foreground">
-                    {userSettings?.dailyWaterGoal || 9} bardak (~{((userSettings?.dailyWaterGoal || 9) * 0.25).toFixed(2)}L)
+                    {userSettings?.dailyWaterGoal || 9} {language === 'tr' ? 'bardak' : 'glasses'} (~{((userSettings?.dailyWaterGoal || 9) * 0.25).toFixed(2)}L)
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ dailyWaterGoal: Math.max(4, (userSettings?.dailyWaterGoal || 9) - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-8 text-center font-bold text-lg">{userSettings?.dailyWaterGoal || 9}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ dailyWaterGoal: Math.min(20, (userSettings?.dailyWaterGoal || 9) + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
 
-            {/* Water Reminder Toggle */}
             <div className="flex items-center justify-between p-3 bg-background rounded-xl">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-blue" />
                 <div>
-                  <p className="text-sm font-medium">Su Hatırlatıcısı</p>
-                  <p className="text-xs text-muted-foreground">Günde 3 kez hatırlat</p>
+                  <p className="text-sm font-medium">{language === 'tr' ? 'Su Hatırlatıcısı' : 'Water Reminder'}</p>
+                  <p className="text-xs text-muted-foreground">{language === 'tr' ? 'Günde 3 kez hatırlat' : 'Remind 3 times a day'}</p>
                 </div>
               </div>
               <AnimatedSwitch 
@@ -387,60 +387,54 @@ export default function SettingsPage() {
 
         {/* Appearance */}
         <SectionCard
-          title="Görünüm"
+          title={language === 'tr' ? 'Görünüm' : 'Appearance'}
           icon={themes.find(t => t.value === theme)?.icon || Sun}
           gradient="from-amber to-orange"
         >
           <div className="grid grid-cols-3 gap-2">
             {themes.map((t) => (
-              <motion.button
+              <button
                 key={t.value}
                 onClick={() => setTheme(t.value)}
-                className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all ${
+                className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-95 ${
                   theme === t.value
                     ? 'bg-gradient-to-br from-amber to-orange text-white shadow-lg'
                     : 'bg-muted hover:bg-muted/80'
                 }`}
-                whileTap={{ scale: 0.97 }}
               >
                 <t.icon className="w-6 h-6" />
-                <span className="text-sm font-medium">{t.label}</span>
-              </motion.button>
+                <span className="text-sm font-medium">{t.label[language]}</span>
+              </button>
             ))}
           </div>
         </SectionCard>
 
         {/* Notifications */}
         <SectionCard
-          title="Bildirimler"
+          title={language === 'tr' ? 'Bildirimler' : 'Notifications'}
           icon={Bell}
           gradient="from-violet to-purple"
         >
           <div className="space-y-3">
             {notificationGranted === false && (
-              <motion.button
+              <button
                 onClick={handleRequestNotification}
                 disabled={isRequestingNotification}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-amber-light dark:bg-amber/20 border border-amber/30 dark:border-amber/40"
-                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-amber-light dark:bg-amber/20 border border-amber/30 dark:border-amber/40 active:scale-[0.98] transition-transform"
               >
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber to-orange flex items-center justify-center">
                   <Bell className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-amber dark:text-amber-light">Bildirimlere İzin Ver</p>
-                  <p className="text-xs text-amber/80 dark:text-amber-light/80">Hatırlatmalar için izin gerekli</p>
+                  <p className="font-medium text-amber dark:text-amber-light">{language === 'tr' ? 'Bildirimlere İzin Ver' : 'Allow Notifications'}</p>
+                  <p className="text-xs text-amber/80 dark:text-amber-light/80">{language === 'tr' ? 'Hatırlatmalar için izin gerekli' : 'Permission required for reminders'}</p>
                 </div>
                 {isRequestingNotification ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-amber border-t-transparent rounded-full"
-                  />
+                  <div className="w-5 h-5 border-2 border-amber border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <ChevronRight className="w-5 h-5 text-amber" />
                 )}
-              </motion.button>
+              </button>
             )}
             
             {notificationGranted === true && (
@@ -449,8 +443,8 @@ export default function SettingsPage() {
                   <Bell className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-green dark:text-green-light">Bildirimler Açık</p>
-                  <p className="text-xs text-green/80 dark:text-green-light/80">Hatırlatmalar aktif</p>
+                  <p className="font-medium text-green dark:text-green-light">{language === 'tr' ? 'Bildirimler Açık' : 'Notifications On'}</p>
+                  <p className="text-xs text-green/80 dark:text-green-light/80">{language === 'tr' ? 'Hatırlatmalar aktif' : 'Reminders active'}</p>
                 </div>
               </div>
             )}
