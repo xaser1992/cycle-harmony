@@ -343,7 +343,11 @@ export default function CalendarPage() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <span className="text-2xl">🌸</span>
+                    <svg className="w-7 h-7 animate-pulse" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="9" fill="white" opacity="0.9" />
+                      <path d="M12 6c-2 3-5 5-5 8a5 5 0 1 0 10 0c0-3-3-5-5-8z" fill="#f43f5e" opacity="0.7" />
+                      <circle cx="10" cy="11" r="1.5" fill="white" opacity="0.6" />
+                    </svg>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-white">Sonraki Regl</p>
