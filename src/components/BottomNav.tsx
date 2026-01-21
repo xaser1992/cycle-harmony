@@ -1,5 +1,5 @@
 // 🌸 Bottom Navigation Component - Ruh Halim Style Animated Icons
-import { useCallback } from 'react';
+import { useCallback, forwardRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -29,7 +29,7 @@ interface BottomNavProps {
   onCenterPress?: (tab?: 'flow' | 'symptoms' | 'mood') => void;
 }
 
-export function BottomNav({ onCenterPress }: BottomNavProps) {
+export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function BottomNav({ onCenterPress }, ref) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -45,7 +45,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
   const rightTabs = tabConfig.slice(2);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Glass background */}
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/30" />
 
@@ -100,7 +100,7 @@ export function BottomNav({ onCenterPress }: BottomNavProps) {
       </div>
     </nav>
   );
-}
+});
 
 // ============================================
 // Animated Tab Icons (Ruh Halim Style)

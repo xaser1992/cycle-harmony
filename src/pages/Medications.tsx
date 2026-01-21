@@ -1,5 +1,5 @@
 // 💊 Medication Tracking Page - Flo Inspired Design
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Check, X, Clock, Trash2, Edit2, ChevronRight, TrendingUp } from 'lucide-react';
 import { format, isToday } from 'date-fns';
@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -379,6 +380,11 @@ export default function Medications() {
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
+          {/* Accessibility */}
+          <VisuallyHidden.Root>
+            <SheetDescription>İlaç ekleme ve düzenleme formu</SheetDescription>
+          </VisuallyHidden.Root>
+          
           {/* Custom Close Button */}
           <button
             type="button"
@@ -541,6 +547,11 @@ export default function Medications() {
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
+          {/* Accessibility */}
+          <VisuallyHidden.Root>
+            <SheetDescription>İlaç detayları</SheetDescription>
+          </VisuallyHidden.Root>
+          
           {selectedMedication && (
             <>
               {/* Custom Close Button */}
