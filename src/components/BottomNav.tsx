@@ -38,11 +38,24 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
 
   return (
     <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      {/* Premium Glass background */}
-      <div className="absolute inset-0 bg-card/70 backdrop-blur-2xl border-t border-white/20 shadow-[0_-4px_30px_rgba(0,0,0,0.1)]" />
+      {/* True Glass/Frosted background - More transparent */}
+      <div 
+        className="absolute inset-0 border-t border-white/30"
+        style={{
+          background: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+        }}
+      />
       
-      {/* Subtle gradient overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-transparent pointer-events-none" />
+      {/* Subtle inner glow */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to top, rgba(255,255,255,0.1), transparent 50%)',
+        }}
+      />
 
       <div className="relative flex items-center justify-around h-[68px] px-1">
         {/* Left tabs */}
@@ -101,41 +114,58 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
 // Animated Tab Icons (CSS-based animations)
 // ============================================
 
-// Home Icon - Active: Animated flower/lotus, Inactive: Simple flower outline
+// Home Icon - Active: Animated flower/lotus with bounce, Inactive: Simple flower outline
 function HomeIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
       <div className="relative w-8 h-8 flex items-center justify-center">
-        <div className="relative animate-scale-in">
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-full blur-md opacity-60 bg-primary" />
+        {/* Pulsing glow ring */}
+        <div 
+          className="absolute inset-0 rounded-full bg-primary/30 blur-lg"
+          style={{
+            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }}
+        />
+        <div className="relative" style={{ animation: 'bounce 1s ease-in-out' }}>
           <svg className="relative w-7 h-7 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
-            {/* Lotus/flower petals */}
+            {/* Lotus/flower petals with staggered animation */}
             <path
               d="M12 3C12 3 8 7 8 11C8 15 12 17 12 17C12 17 16 15 16 11C16 7 12 3 12 3Z"
               fill="hsl(var(--primary))"
-              className="animate-scale-in"
+              style={{ 
+                animation: 'scale-in 0.4s ease-out forwards',
+                transformOrigin: 'center bottom'
+              }}
             />
             <path
               d="M6 8C6 8 4 12 5 15C6 18 10 19 10 19C10 19 8 15 8 12C8 9 6 8 6 8Z"
               fill="hsl(var(--primary) / 0.7)"
-              className="animate-scale-in"
-              style={{ animationDelay: '100ms' }}
+              style={{ 
+                animation: 'scale-in 0.4s ease-out 0.1s forwards',
+                opacity: 0,
+                transformOrigin: 'right bottom'
+              }}
             />
             <path
               d="M18 8C18 8 20 12 19 15C18 18 14 19 14 19C14 19 16 15 16 12C16 9 18 8 18 8Z"
               fill="hsl(var(--primary) / 0.7)"
-              className="animate-scale-in"
-              style={{ animationDelay: '100ms' }}
+              style={{ 
+                animation: 'scale-in 0.4s ease-out 0.1s forwards',
+                opacity: 0,
+                transformOrigin: 'left bottom'
+              }}
             />
-            {/* Center */}
+            {/* Center with pop effect */}
             <circle
               cx="12"
               cy="12"
               r="2"
               fill="hsl(var(--primary-foreground))"
-              className="animate-scale-in"
-              style={{ animationDelay: '200ms' }}
+              style={{ 
+                animation: 'scale-in 0.3s ease-out 0.25s forwards',
+                opacity: 0,
+                transformOrigin: 'center'
+              }}
             />
           </svg>
         </div>
@@ -144,7 +174,7 @@ function HomeIcon({ isActive }: { isActive: boolean }) {
   }
   
   return (
-    <div className="relative w-6 h-6 flex items-center justify-center opacity-60">
+    <div className="relative w-6 h-6 flex items-center justify-center opacity-60 transition-all duration-300 hover:opacity-80 hover:scale-110">
       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M12 4C12 4 8 8 8 11.5C8 15 12 17 12 17C12 17 16 15 16 11.5C16 8 12 4 12 4Z" />
         <path d="M6 9C6 9 4 12 5 15C6 18 10 19 10 19" strokeLinecap="round" />
@@ -294,16 +324,25 @@ function TabItem({
           : 'text-muted-foreground/50 hover:text-muted-foreground/70'
       }`}
     >
-      {/* Active background pill with animation */}
+      {/* Active background pill with smooth slide animation */}
       {isActive && (
-        <div className="absolute inset-1 bg-primary/15 rounded-xl animate-scale-in" />
+        <div 
+          className="absolute inset-1 rounded-xl"
+          style={{
+            background: 'linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.08))',
+            animation: 'scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+            boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.3), 0 2px 8px hsl(var(--primary) / 0.1)',
+          }}
+        />
       )}
       
-      {/* Icon container with bounce animation on active */}
+      {/* Icon container with spring bounce on active */}
       <div
-        className={`relative z-10 transition-all duration-300 ${
-          isActive ? 'scale-110 -translate-y-0.5 animate-scale-in' : 'scale-95'
-        }`}
+        className="relative z-10 transition-transform duration-300"
+        style={{
+          transform: isActive ? 'scale(1.15) translateY(-2px)' : 'scale(0.95)',
+          animation: isActive ? 'bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+        }}
       >
         {renderIcon()}
       </div>
@@ -317,9 +356,16 @@ function TabItem({
         {tab.label}
       </span>
       
-      {/* Active indicator dot */}
+      {/* Active indicator dot with pulse */}
       {isActive && (
-        <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary animate-scale-in" />
+        <div 
+          className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
+          style={{
+            animation: 'scale-in 0.3s ease-out 0.15s forwards, pulse 2s ease-in-out infinite 0.5s',
+            opacity: 0,
+            boxShadow: '0 0 6px hsl(var(--primary) / 0.6)',
+          }}
+        />
       )}
     </button>
   );
