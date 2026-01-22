@@ -323,6 +323,7 @@ export default function StatsPage() {
   const { openUpdateSheet } = useUpdateSheet();
   const { cycleSettings, entries, userSettings } = useCycleData();
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
+  const [chartKey, setChartKey] = useState(0);
   const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
   const [historyMonth, setHistoryMonth] = useState(new Date());
   
@@ -343,6 +344,10 @@ export default function StatsPage() {
 
   const handleTabChange = useCallback((tab: 'stats' | 'charts' | 'history') => {
     setActiveTab(tab);
+    // Increment chartKey to force chart remount and replay animations
+    if (tab === 'charts') {
+      setChartKey(prev => prev + 1);
+    }
   }, []);
 
   const handlePrevMonth = useCallback(() => {
@@ -814,7 +819,7 @@ export default function StatsPage() {
         )}
 
         {activeTab === 'charts' && (
-          <div className="space-y-5 animate-fade-in">
+          <div key={`charts-container-${chartKey}`} className="space-y-5 animate-fade-in">
             {/* Cycle Length Trend - Line Chart */}
             <ChartCard
               title={isEnglish ? 'Cycle Length Trend' : 'Döngü Uzunluğu Trendi'}
