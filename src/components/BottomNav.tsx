@@ -111,62 +111,46 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
 });
 
 // ============================================
-// Animated Tab Icons (CSS-based animations)
+// Animated Tab Icons with Gradient Backgrounds
 // ============================================
 
-// Home Icon - Active: Animated flower/lotus with bounce, Inactive: Simple flower outline
+// Home Icon - Active: Glowing flower with gradient bg, Inactive: Simple outline
 function HomeIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
-      <div className="relative w-8 h-8 flex items-center justify-center">
-        {/* Pulsing glow ring */}
+      <div className="relative flex items-center justify-center">
+        {/* Gradient background pill */}
         <div 
-          className="absolute inset-0 rounded-full bg-primary/30 blur-lg"
+          className="absolute w-12 h-12 rounded-2xl"
           style={{
-            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            background: 'linear-gradient(135deg, #f472b6 0%, #fbbf24 100%)',
+            boxShadow: '0 4px 15px rgba(244, 114, 182, 0.4)',
+            animation: 'scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         />
-        <div className="relative" style={{ animation: 'bounce 1s ease-in-out' }}>
-          <svg className="relative w-7 h-7 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
-            {/* Lotus/flower petals with staggered animation */}
+        {/* Animated flower icon */}
+        <div className="relative z-10" style={{ animation: 'bounce 0.5s ease-out' }}>
+          <svg className="w-6 h-6 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
+            {/* Center petal */}
             <path
               d="M12 3C12 3 8 7 8 11C8 15 12 17 12 17C12 17 16 15 16 11C16 7 12 3 12 3Z"
-              fill="hsl(var(--primary))"
-              style={{ 
-                animation: 'scale-in 0.4s ease-out forwards',
-                transformOrigin: 'center bottom'
-              }}
+              fill="white"
+              style={{ animation: 'scale-in 0.3s ease-out' }}
             />
+            {/* Left petal */}
             <path
               d="M6 8C6 8 4 12 5 15C6 18 10 19 10 19C10 19 8 15 8 12C8 9 6 8 6 8Z"
-              fill="hsl(var(--primary) / 0.7)"
-              style={{ 
-                animation: 'scale-in 0.4s ease-out 0.1s forwards',
-                opacity: 0,
-                transformOrigin: 'right bottom'
-              }}
+              fill="rgba(255,255,255,0.8)"
+              style={{ animation: 'scale-in 0.3s ease-out 0.1s forwards', opacity: 0 }}
             />
+            {/* Right petal */}
             <path
               d="M18 8C18 8 20 12 19 15C18 18 14 19 14 19C14 19 16 15 16 12C16 9 18 8 18 8Z"
-              fill="hsl(var(--primary) / 0.7)"
-              style={{ 
-                animation: 'scale-in 0.4s ease-out 0.1s forwards',
-                opacity: 0,
-                transformOrigin: 'left bottom'
-              }}
+              fill="rgba(255,255,255,0.8)"
+              style={{ animation: 'scale-in 0.3s ease-out 0.1s forwards', opacity: 0 }}
             />
-            {/* Center with pop effect */}
-            <circle
-              cx="12"
-              cy="12"
-              r="2"
-              fill="hsl(var(--primary-foreground))"
-              style={{ 
-                animation: 'scale-in 0.3s ease-out 0.25s forwards',
-                opacity: 0,
-                transformOrigin: 'center'
-              }}
-            />
+            {/* Center dot */}
+            <circle cx="12" cy="12" r="2" fill="#fbbf24" style={{ animation: 'scale-in 0.3s ease-out 0.2s forwards', opacity: 0 }} />
           </svg>
         </div>
       </div>
@@ -174,8 +158,8 @@ function HomeIcon({ isActive }: { isActive: boolean }) {
   }
   
   return (
-    <div className="relative w-6 h-6 flex items-center justify-center opacity-60 transition-all duration-300 hover:opacity-80 hover:scale-110">
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <div className="relative w-6 h-6 flex items-center justify-center">
+      <svg className="w-6 h-6 text-muted-foreground/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M12 4C12 4 8 8 8 11.5C8 15 12 17 12 17C12 17 16 15 16 11.5C16 8 12 4 12 4Z" />
         <path d="M6 9C6 9 4 12 5 15C6 18 10 19 10 19" strokeLinecap="round" />
         <path d="M18 9C18 9 20 12 19 15C18 18 14 19 14 19" strokeLinecap="round" />
@@ -184,29 +168,38 @@ function HomeIcon({ isActive }: { isActive: boolean }) {
   );
 }
 
-// Calendar Icon - Active: Animated calendar with date, Inactive: Simple outline
+// Calendar Icon - Active: Calendar with date and gradient bg, Inactive: Simple outline
 function CalendarIcon({ isActive }: { isActive: boolean }) {
   const todayDate = new Date().getDate();
   
   if (isActive) {
     return (
-      <div className="relative w-7 h-8 flex flex-col items-center">
-        <div className="relative w-full h-full flex flex-col overflow-hidden rounded-sm border-2 border-primary bg-card shadow-lg animate-scale-in">
-          {/* Calendar header with rings */}
-          <div className="relative w-full h-2.5 bg-primary">
-            {/* Calendar rings */}
-            <div className="absolute -top-1 left-1.5 w-1 h-2 rounded-full bg-primary-foreground/80" />
-            <div className="absolute -top-1 right-1.5 w-1 h-2 rounded-full bg-primary-foreground/80" />
-          </div>
-          {/* Calendar body */}
-          <div className="w-full flex-1 flex items-center justify-center bg-background">
-            <span className="text-sm font-bold text-primary animate-scale-in" style={{ animationDelay: '150ms' }}>
-              {todayDate}
-            </span>
+      <div className="relative flex items-center justify-center">
+        {/* Gradient background pill */}
+        <div 
+          className="absolute w-12 h-12 rounded-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #2dd4bf 0%, #f472b6 100%)',
+            boxShadow: '0 4px 15px rgba(45, 212, 191, 0.4)',
+            animation: 'scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        />
+        {/* Calendar icon with date */}
+        <div className="relative z-10" style={{ animation: 'bounce 0.5s ease-out' }}>
+          <div className="w-7 h-8 flex flex-col overflow-hidden rounded-md border-2 border-white/80 bg-white/20 backdrop-blur-sm">
+            {/* Calendar header */}
+            <div className="w-full h-2.5 bg-white/90 flex items-center justify-center gap-1">
+              <div className="w-0.5 h-1 rounded-full bg-teal-500/70" />
+              <div className="w-0.5 h-1 rounded-full bg-teal-500/70" />
+            </div>
+            {/* Calendar body */}
+            <div className="flex-1 flex items-center justify-center bg-white/10">
+              <span className="text-sm font-bold text-white drop-shadow-md" style={{ animation: 'scale-in 0.3s ease-out 0.15s forwards', opacity: 0 }}>
+                {todayDate}
+              </span>
+            </div>
           </div>
         </div>
-        {/* Notification dot */}
-        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-destructive shadow-sm animate-scale-in" style={{ animationDelay: '200ms' }} />
       </div>
     );
   }
@@ -226,27 +219,36 @@ function CalendarIcon({ isActive }: { isActive: boolean }) {
   );
 }
 
-// Stats/Chart Icon - Active: Animated bars with trend line, Inactive: Static bars
+// Stats/Chart Icon - Active: Animated bars with gradient bg, Inactive: Static bars
 function StatsIcon({ isActive }: { isActive: boolean }) {
-  const heights = [0.4, 0.7, 0.5, 0.9];
-  
   if (isActive) {
     return (
-      <div className="relative w-8 h-6 flex items-end justify-center gap-0.5 pb-0.5">
-        {heights.map((height, i) => (
-          <div
-            key={i}
-            className={`w-1.5 rounded-t-sm shadow-sm transition-all duration-500 ease-out ${
-              i % 2 === 0 
-                ? 'bg-gradient-to-t from-primary to-primary/70' 
-                : 'bg-gradient-to-t from-pink-500 to-pink-400'
-            }`}
-            style={{ 
-              height: `${height * 100}%`,
-              transitionDelay: `${i * 100}ms`
-            }}
-          />
-        ))}
+      <div className="relative flex items-center justify-center">
+        {/* Gradient background pill */}
+        <div 
+          className="absolute w-12 h-12 rounded-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #818cf8 0%, #f472b6 100%)',
+            boxShadow: '0 4px 15px rgba(129, 140, 248, 0.4)',
+            animation: 'scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        />
+        {/* Animated chart bars */}
+        <div className="relative z-10 flex items-end justify-center gap-0.5 h-6" style={{ animation: 'bounce 0.5s ease-out' }}>
+          {[0.4, 0.7, 0.5, 0.9].map((height, i) => (
+            <div
+              key={i}
+              className="w-1.5 bg-white rounded-t-sm"
+              style={{ 
+                height: `${height * 100}%`,
+                animation: `scale-in 0.3s ease-out ${i * 0.08}s forwards`,
+                opacity: 0,
+                transformOrigin: 'bottom',
+                boxShadow: '0 0 6px rgba(255,255,255,0.5)',
+              }}
+            />
+          ))}
+        </div>
       </div>
     );
   }
@@ -264,23 +266,30 @@ function StatsIcon({ isActive }: { isActive: boolean }) {
   );
 }
 
-// Medications/Pill Icon - Active: Animated open book style, Inactive: Closed pill
+// Medications/Pill Icon - Active: Colorful pill with gradient bg, Inactive: Simple pill
 function MedicationsIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
-      <div className="relative w-9 h-7 flex items-center justify-center">
-        {/* Open pill capsule with animation */}
-        <div className="relative w-full h-full flex shadow-lg rounded-full animate-scale-in">
-          {/* Left half */}
-          <div className="w-1/2 h-full rounded-l-full bg-gradient-to-br from-primary to-primary/80 border-2 border-primary" />
-          {/* Right half */}
-          <div className="w-1/2 h-full rounded-r-full bg-gradient-to-bl from-period-light to-period-light/80 border-2 border-primary/50" />
-          {/* Center glow */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-white/60 via-white to-white/60 shadow-lg" />
-          {/* Heart icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs">💊</span>
+      <div className="relative flex items-center justify-center">
+        {/* Gradient background pill */}
+        <div 
+          className="absolute w-12 h-12 rounded-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #fb923c 0%, #fbbf24 100%)',
+            boxShadow: '0 4px 15px rgba(251, 146, 60, 0.4)',
+            animation: 'scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        />
+        {/* Pill capsule icon */}
+        <div className="relative z-10 w-8 h-5" style={{ animation: 'bounce 0.5s ease-out' }}>
+          <div className="w-full h-full flex rounded-full overflow-hidden shadow-lg" style={{ animation: 'scale-in 0.3s ease-out' }}>
+            {/* Left half - orange/red */}
+            <div className="w-1/2 h-full bg-gradient-to-br from-orange-500 to-red-500" />
+            {/* Right half - yellow */}
+            <div className="w-1/2 h-full bg-gradient-to-bl from-yellow-400 to-amber-500" />
           </div>
+          {/* Center line shine */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-white/60" />
         </div>
       </div>
     );
@@ -320,53 +329,23 @@ function TabItem({
       onClick={() => onTap(tab.path)}
       className={`relative flex flex-col items-center justify-center py-1.5 px-3 min-w-[72px] rounded-xl transition-all duration-300 active:scale-90 ${
         isActive 
-          ? 'text-primary' 
+          ? 'text-foreground' 
           : 'text-muted-foreground/50 hover:text-muted-foreground/70'
       }`}
     >
-      {/* Active background pill with smooth slide animation */}
-      {isActive && (
-        <div 
-          className="absolute inset-1 rounded-xl"
-          style={{
-            background: 'linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.08))',
-            animation: 'scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-            boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.3), 0 2px 8px hsl(var(--primary) / 0.1)',
-          }}
-        />
-      )}
-      
-      {/* Icon container with spring bounce on active */}
-      <div
-        className="relative z-10 transition-transform duration-300"
-        style={{
-          transform: isActive ? 'scale(1.15) translateY(-2px)' : 'scale(0.95)',
-          animation: isActive ? 'bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-        }}
-      >
+      {/* Icon container */}
+      <div className="relative z-10 h-12 flex items-center justify-center">
         {renderIcon()}
       </div>
       
-      {/* Label with fade animation */}
+      {/* Label */}
       <span
         className={`text-[10px] font-medium truncate w-full leading-tight transition-all duration-300 mt-0.5 ${
-          isActive ? 'opacity-100 font-semibold' : 'opacity-60'
+          isActive ? 'opacity-100 font-semibold text-foreground' : 'opacity-60'
         }`}
       >
         {tab.label}
       </span>
-      
-      {/* Active indicator dot with pulse */}
-      {isActive && (
-        <div 
-          className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
-          style={{
-            animation: 'scale-in 0.3s ease-out 0.15s forwards, pulse 2s ease-in-out infinite 0.5s',
-            opacity: 0,
-            boxShadow: '0 0 6px hsl(var(--primary) / 0.6)',
-          }}
-        />
-      )}
     </button>
   );
 }
