@@ -828,7 +828,7 @@ export default function StatsPage() {
             >
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={cycleLengthData}>
+                  <LineChart key={`cycle-length-${chartKey}`} data={cycleLengthData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis 
                       dataKey="month" 
@@ -855,6 +855,7 @@ export default function StatsPage() {
                       dot={{ fill: 'hsl(var(--pink))', strokeWidth: 0, r: 5 }}
                       activeDot={{ r: 7, fill: 'hsl(var(--pink))' }}
                       isAnimationActive={true}
+                      animationBegin={0}
                       animationDuration={1000}
                       animationEasing="ease-out"
                     />
@@ -871,7 +872,7 @@ export default function StatsPage() {
             >
               <div className="h-40">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={waterData}>
+                  <BarChart key={`water-${chartKey}`} data={waterData}>
                     <XAxis 
                       dataKey="day" 
                       axisLine={false}
@@ -894,6 +895,7 @@ export default function StatsPage() {
                       radius={[6, 6, 0, 0]}
                       fill="hsl(var(--blue))"
                       isAnimationActive={true}
+                      animationBegin={0}
                       animationDuration={600}
                       animationEasing="ease-out"
                     />
@@ -926,7 +928,7 @@ export default function StatsPage() {
                 </div>
                 <div className="h-44">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={weightData}>
+                    <AreaChart key={`weight-${chartKey}`} data={weightData}>
                     <defs>
                       <linearGradient id="colorWeightArea" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="hsl(var(--emerald))" stopOpacity={0.8}/>
@@ -970,6 +972,7 @@ export default function StatsPage() {
                         fill="url(#colorWeightArea)"
                         strokeWidth={2}
                         isAnimationActive={true}
+                        animationBegin={0}
                         animationDuration={800}
                         animationEasing="ease-out"
                       />
@@ -993,7 +996,7 @@ export default function StatsPage() {
             >
               <div className="h-40">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={periodDurationData}>
+                  <BarChart key={`period-duration-${chartKey}`} data={periodDurationData}>
                     <XAxis 
                       dataKey="month" 
                       axisLine={false}
@@ -1015,6 +1018,7 @@ export default function StatsPage() {
                       dataKey="duration" 
                       radius={[8, 8, 0, 0]}
                       isAnimationActive={true}
+                      animationBegin={0}
                       animationDuration={600}
                       animationEasing="ease-out"
                     >
@@ -1045,7 +1049,7 @@ export default function StatsPage() {
                 {/* Donut Chart */}
                 <div className="w-28 h-28 relative">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <PieChart key={`phase-${chartKey}`}>
                       <Pie
                         data={phaseDistribution}
                         cx="50%"
@@ -1056,6 +1060,7 @@ export default function StatsPage() {
                         dataKey="days"
                         strokeWidth={0}
                         isAnimationActive={true}
+                        animationBegin={0}
                         animationDuration={800}
                         animationEasing="ease-out"
                       >
