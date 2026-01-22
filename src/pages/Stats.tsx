@@ -324,6 +324,7 @@ export default function StatsPage() {
   const { cycleSettings, entries, userSettings } = useCycleData();
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
   const [chartKey, setChartKey] = useState(0);
+  const [shouldAnimateCharts, setShouldAnimateCharts] = useState(false);
   const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
   const [historyMonth, setHistoryMonth] = useState(new Date());
   
@@ -344,11 +345,33 @@ export default function StatsPage() {
 
   const handleTabChange = useCallback((tab: 'stats' | 'charts' | 'history') => {
     setActiveTab(tab);
-    // Increment chartKey to force chart remount and replay animations
-    if (tab === 'charts') {
-      setChartKey(prev => prev + 1);
-    }
   }, []);
+
+  // Ensure Recharts animations start AFTER container measurement settles.
+  // Some WebViews/preview environments mount charts while width/height is still 0,
+  // which can cause animations to never trigger.
+  useEffect(() => {
+    if (activeTab !== 'charts') {
+      setShouldAnimateCharts(false);
+      return;
+    }
+
+    // First disable, let layout settle, then enable on next frame(s)
+    setShouldAnimateCharts(false);
+
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setShouldAnimateCharts(true);
+        setChartKey(prev => prev + 1);
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+    };
+  }, [activeTab]);
 
   const handlePrevMonth = useCallback(() => {
     setHistoryMonth(prev => subMonths(prev, 1));
@@ -827,7 +850,7 @@ export default function StatsPage() {
               icon={<TrendingUp className="w-5 h-5 text-primary" />}
             >
               <div className="h-44">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" debounce={50}>
                   <LineChart key={`cycle-length-${chartKey}`} data={cycleLengthData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis 
@@ -854,7 +877,7 @@ export default function StatsPage() {
                       strokeWidth={3}
                       dot={{ fill: 'hsl(var(--pink))', strokeWidth: 0, r: 5 }}
                       activeDot={{ r: 7, fill: 'hsl(var(--pink))' }}
-                      isAnimationActive={true}
+                      isAnimationActive={shouldAnimateCharts}
                       animationId={chartKey}
                       animationBegin={0}
                       animationDuration={1000}
@@ -872,7 +895,7 @@ export default function StatsPage() {
               icon={<span className="text-lg">💧</span>}
             >
               <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" debounce={50}>
                   <BarChart key={`water-${chartKey}`} data={waterData}>
                     <XAxis 
                       dataKey="day" 
@@ -895,7 +918,7 @@ export default function StatsPage() {
                       dataKey="glasses" 
                       radius={[6, 6, 0, 0]}
                       fill="hsl(var(--blue))"
-                      isAnimationActive={true}
+                      isAnimationActive={shouldAnimateCharts}
                       animationId={chartKey}
                       animationBegin={0}
                       animationDuration={600}
@@ -929,7 +952,7 @@ export default function StatsPage() {
                   </div>
                 </div>
                 <div className="h-44">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
                     <AreaChart key={`weight-${chartKey}`} data={weightData}>
                     <defs>
                       <linearGradient id="colorWeightArea" x1="0" y1="0" x2="0" y2="1">
@@ -973,7 +996,7 @@ export default function StatsPage() {
                         fillOpacity={1}
                         fill="url(#colorWeightArea)"
                         strokeWidth={2}
-                        isAnimationActive={true}
+                        isAnimationActive={shouldAnimateCharts}
                         animationId={chartKey}
                         animationBegin={0}
                         animationDuration={800}
@@ -998,7 +1021,7 @@ export default function StatsPage() {
               }
             >
               <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" debounce={50}>
                   <BarChart key={`period-duration-${chartKey}`} data={periodDurationData}>
                     <XAxis 
                       dataKey="month" 
@@ -1020,7 +1043,7 @@ export default function StatsPage() {
                     <Bar 
                       dataKey="duration" 
                       radius={[8, 8, 0, 0]}
-                      isAnimationActive={true}
+                      isAnimationActive={shouldAnimateCharts}
                       animationId={chartKey}
                       animationBegin={0}
                       animationDuration={600}
@@ -1052,7 +1075,7 @@ export default function StatsPage() {
               <div className="flex items-center gap-6">
                 {/* Donut Chart */}
                 <div className="w-28 h-28 relative">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
                     <PieChart key={`phase-${chartKey}`}>
                       <Pie
                         data={phaseDistribution}
@@ -1063,7 +1086,7 @@ export default function StatsPage() {
                         paddingAngle={3}
                         dataKey="days"
                         strokeWidth={0}
-                        isAnimationActive={true}
+                        isAnimationActive={shouldAnimateCharts}
                         animationId={chartKey}
                         animationBegin={0}
                         animationDuration={800}
