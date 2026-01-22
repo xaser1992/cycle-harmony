@@ -314,16 +314,22 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
             </div>
           </div>
 
-          {/* Bottom tip */}
-          <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3">
+          {/* Bottom tip - Clicking this shows details modal */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDetails(true);
+            }}
+            className="mt-4 w-full bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3 active:scale-95 transition-transform"
+          >
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               <span className="text-lg">💡</span>
             </div>
-            <p className={`text-xs ${phaseAccentColors[phase.type]} flex-1`}>
+            <p className={`text-xs ${phaseAccentColors[phase.type]} flex-1 text-left`}>
               {language === 'tr' ? 'Detaylar için dokun' : 'Tap for details'}
             </p>
             <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
-          </div>
+          </button>
         </div>
       </div>
 
