@@ -254,7 +254,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
       </div>
 
       {/* Content - Single scrollable list */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 bg-background">
+      <div className="flex-1 overflow-y-auto px-6 py-6 pb-32 bg-background">
         {!hasPermission && (
           <div className="mb-4 p-4 bg-accent rounded-2xl">
             <p className="text-sm text-accent-foreground mb-3">
