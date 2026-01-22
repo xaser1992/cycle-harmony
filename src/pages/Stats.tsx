@@ -123,6 +123,98 @@ const ChartCard = memo(({
 ));
 ChartCard.displayName = 'ChartCard';
 
+// Animated SVG Icons for Summary Cards
+const CalendarIcon = memo(() => (
+  <svg className="w-6 h-6 animate-pulse" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="4" width="18" height="18" rx="3" className="stroke-white" strokeWidth="2" />
+    <path d="M3 10h18" className="stroke-white" strokeWidth="2" />
+    <path d="M8 2v4M16 2v4" className="stroke-white" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="12" cy="16" r="2" className="fill-white animate-ping" style={{ animationDuration: '2s' }} />
+  </svg>
+));
+CalendarIcon.displayName = 'CalendarIcon';
+
+const FlowerIcon = memo(() => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <g className="animate-spin" style={{ animationDuration: '8s', transformOrigin: 'center' }}>
+      <circle cx="12" cy="6" r="3" className="fill-white/80" />
+      <circle cx="18" cy="12" r="3" className="fill-white/80" />
+      <circle cx="12" cy="18" r="3" className="fill-white/80" />
+      <circle cx="6" cy="12" r="3" className="fill-white/80" />
+    </g>
+    <circle cx="12" cy="12" r="3" className="fill-white" />
+  </svg>
+));
+FlowerIcon.displayName = 'FlowerIcon';
+
+const OvulationIcon = memo(() => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="6" className="fill-white/30 animate-ping" style={{ animationDuration: '1.5s' }} />
+    <circle cx="12" cy="12" r="5" className="fill-white/50" />
+    <circle cx="12" cy="12" r="3" className="fill-white" />
+    <circle cx="13" cy="11" r="1" className="fill-white/80" />
+  </svg>
+));
+OvulationIcon.displayName = 'OvulationIcon';
+
+const FertileIcon = memo(() => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <path 
+      d="M12 3C12 3 4 10 4 15C4 19 7.5 21 12 21C16.5 21 20 19 20 15C20 10 12 3 12 3Z" 
+      className="fill-white/80 animate-bounce" 
+      style={{ animationDuration: '2s' }}
+    />
+    <circle cx="10" cy="14" r="2" className="fill-white/40" />
+    <circle cx="14" cy="12" r="1.5" className="fill-white/40" />
+  </svg>
+));
+FertileIcon.displayName = 'FertileIcon';
+
+const WaterIcon = memo(() => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <path 
+      d="M12 2C12 2 5 11 5 16C5 20 8 22 12 22C16 22 19 20 19 16C19 11 12 2 12 2Z" 
+      className="fill-white/80"
+    />
+    <path 
+      d="M12 6C12 6 8 11 8 14C8 16 9.5 17 12 17" 
+      className="stroke-white/40 animate-pulse" 
+      strokeWidth="1.5" 
+      fill="none"
+      style={{ animationDuration: '1.5s' }}
+    />
+  </svg>
+));
+WaterIcon.displayName = 'WaterIcon';
+
+const ScaleIcon = memo(() => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <rect x="4" y="16" width="16" height="4" rx="2" className="fill-white/80" />
+    <path d="M12 4v8" className="stroke-white" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="12" cy="12" r="3" className="fill-white animate-pulse" style={{ animationDuration: '2s' }} />
+    <path d="M6 8L12 4L18 8" className="stroke-white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+));
+ScaleIcon.displayName = 'ScaleIcon';
+
+const InsightIcon = memo(() => (
+  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+    <path 
+      d="M12 2C8 2 5 5 5 9C5 12 7 14 8 15V18C8 19 9 20 10 20H14C15 20 16 19 16 18V15C17 14 19 12 19 9C19 5 16 2 12 2Z" 
+      className="fill-primary/80"
+    />
+    <path d="M10 22h4" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+    <circle 
+      cx="12" 
+      cy="9" 
+      r="2" 
+      className="fill-background animate-ping" 
+      style={{ animationDuration: '2s' }}
+    />
+  </svg>
+));
+InsightIcon.displayName = 'InsightIcon';
+
 // Summary Card Component - CSS transitions
 const SummaryCard = memo(({ 
   gradient, 
@@ -135,7 +227,7 @@ const SummaryCard = memo(({
 }: { 
   gradient: string;
   shadowColor: string;
-  icon: string;
+  icon: React.ReactNode;
   value: string | number;
   label: string;
   sublabel?: string;
@@ -148,7 +240,7 @@ const SummaryCard = memo(({
       <div className="flex items-start justify-between">
         <div>
           <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
-            <span className="text-xl">{icon}</span>
+            {icon}
           </div>
           <p className="text-3xl font-bold text-white">{value}</p>
           <p className="text-sm text-white/80">{label}</p>
@@ -158,7 +250,7 @@ const SummaryCard = memo(({
     ) : (
       <>
         <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
-          <span className="text-xl">{icon}</span>
+          {icon}
         </div>
         <p className="text-3xl font-bold text-white">{value}</p>
         <p className="text-sm text-white/80">{label}</p>
@@ -983,7 +1075,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-rose to-pink"
                 shadowColor="shadow-rose/20"
-                icon="📅"
+                icon={<CalendarIcon />}
                 value={cycleSettings.cycleLength}
                 label={isEnglish ? 'Cycle Length' : 'Döngü Uzunluğu'}
                 sublabel={isEnglish ? 'avg. days' : 'gün ortalama'}
@@ -992,7 +1084,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-violet to-purple"
                 shadowColor="shadow-violet/20"
-                icon="🌸"
+                icon={<FlowerIcon />}
                 value={cycleSettings.periodLength}
                 label={isEnglish ? 'Period Duration' : 'Regl Süresi'}
                 sublabel={isEnglish ? 'avg. days' : 'gün ortalama'}
@@ -1001,7 +1093,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-cyan to-teal"
                 shadowColor="shadow-teal/20"
-                icon="🥚"
+                icon={<OvulationIcon />}
                 value={14}
                 label={isEnglish ? 'Ovulation' : 'Yumurtlama'}
                 sublabel={isEnglish ? 'cycle day' : 'döngü günü'}
@@ -1010,7 +1102,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-amber to-orange"
                 shadowColor="shadow-orange/20"
-                icon="💐"
+                icon={<FertileIcon />}
                 value={6}
                 label={isEnglish ? 'Fertile Days' : 'Doğurgan Gün'}
                 sublabel={isEnglish ? 'predicted' : 'tahmin edilen'}
@@ -1021,7 +1113,7 @@ export default function StatsPage() {
             <SummaryCard
               gradient="bg-gradient-to-br from-sky to-blue"
               shadowColor="shadow-blue/20"
-              icon="💧"
+              icon={<WaterIcon />}
               value={waterStats.todayGlasses}
               label={isEnglish ? 'Glasses Today' : 'Bugün Bardak'}
               rightContent={
@@ -1039,7 +1131,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-emerald to-teal"
                 shadowColor="shadow-teal/20"
-                icon="⚖️"
+                icon={<ScaleIcon />}
                 value={weightStats.current}
                 label="kg"
                 rightContent={
@@ -1067,7 +1159,7 @@ export default function StatsPage() {
             <div className="bg-card rounded-3xl p-5 border border-border/50 animate-fade-in">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-2xl">💡</span>
+                  <InsightIcon />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">
