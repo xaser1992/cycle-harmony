@@ -855,6 +855,7 @@ export default function StatsPage() {
                       dot={{ fill: 'hsl(var(--pink))', strokeWidth: 0, r: 5 }}
                       activeDot={{ r: 7, fill: 'hsl(var(--pink))' }}
                       isAnimationActive={true}
+                      animationId={chartKey}
                       animationBegin={0}
                       animationDuration={1000}
                       animationEasing="ease-out"
@@ -895,6 +896,7 @@ export default function StatsPage() {
                       radius={[6, 6, 0, 0]}
                       fill="hsl(var(--blue))"
                       isAnimationActive={true}
+                      animationId={chartKey}
                       animationBegin={0}
                       animationDuration={600}
                       animationEasing="ease-out"
@@ -972,6 +974,7 @@ export default function StatsPage() {
                         fill="url(#colorWeightArea)"
                         strokeWidth={2}
                         isAnimationActive={true}
+                        animationId={chartKey}
                         animationBegin={0}
                         animationDuration={800}
                         animationEasing="ease-out"
@@ -1018,6 +1021,7 @@ export default function StatsPage() {
                       dataKey="duration" 
                       radius={[8, 8, 0, 0]}
                       isAnimationActive={true}
+                      animationId={chartKey}
                       animationBegin={0}
                       animationDuration={600}
                       animationEasing="ease-out"
@@ -1060,6 +1064,7 @@ export default function StatsPage() {
                         dataKey="days"
                         strokeWidth={0}
                         isAnimationActive={true}
+                        animationId={chartKey}
                         animationBegin={0}
                         animationDuration={800}
                         animationEasing="ease-out"
