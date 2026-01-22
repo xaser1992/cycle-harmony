@@ -38,8 +38,11 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
 
   return (
     <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      {/* Glass background */}
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/30" />
+      {/* Premium Glass background */}
+      <div className="absolute inset-0 bg-card/70 backdrop-blur-2xl border-t border-white/20 shadow-[0_-4px_30px_rgba(0,0,0,0.1)]" />
+      
+      {/* Subtle gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-transparent pointer-events-none" />
 
       <div className="relative flex items-center justify-around h-[68px] px-1">
         {/* Left tabs */}
@@ -58,7 +61,7 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
         <div className="relative -mt-8 mx-2">
           <button
             onClick={handleCenterPress}
-            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary via-period to-primary flex items-center justify-center active:scale-90 transition-transform duration-150"
+            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary via-period to-primary flex items-center justify-center active:scale-90 transition-all duration-200 hover:shadow-2xl"
             style={{
               boxShadow: '0 4px 20px -2px hsl(var(--primary) / 0.5), 0 0 30px -5px hsl(var(--primary) / 0.3)',
             }}
@@ -285,29 +288,39 @@ function TabItem({
   return (
     <button
       onClick={() => onTap(tab.path)}
-      className={`relative flex flex-col items-center justify-center py-1.5 px-3 min-w-[72px] rounded-lg transition-all duration-200 active:scale-92 ${
+      className={`relative flex flex-col items-center justify-center py-1.5 px-3 min-w-[72px] rounded-xl transition-all duration-300 active:scale-90 ${
         isActive 
-          ? 'text-primary bg-primary/10' 
+          ? 'text-primary' 
           : 'text-muted-foreground/50 hover:text-muted-foreground/70'
       }`}
     >
-      {/* Icon container */}
+      {/* Active background pill with animation */}
+      {isActive && (
+        <div className="absolute inset-1 bg-primary/15 rounded-xl animate-scale-in" />
+      )}
+      
+      {/* Icon container with bounce animation on active */}
       <div
-        className={`relative z-10 transition-transform duration-200 ${
-          isActive ? 'scale-100 -translate-y-0.5' : 'scale-95'
+        className={`relative z-10 transition-all duration-300 ${
+          isActive ? 'scale-110 -translate-y-0.5 animate-scale-in' : 'scale-95'
         }`}
       >
         {renderIcon()}
       </div>
       
-      {/* Label */}
+      {/* Label with fade animation */}
       <span
-        className={`text-[10px] font-medium truncate w-full leading-tight transition-all duration-200 mt-0.5 ${
-          isActive ? 'opacity-100' : 'opacity-70'
+        className={`text-[10px] font-medium truncate w-full leading-tight transition-all duration-300 mt-0.5 ${
+          isActive ? 'opacity-100 font-semibold' : 'opacity-60'
         }`}
       >
         {tab.label}
       </span>
+      
+      {/* Active indicator dot */}
+      {isActive && (
+        <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary animate-scale-in" />
+      )}
     </button>
   );
 }

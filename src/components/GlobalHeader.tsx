@@ -30,12 +30,12 @@ export const GlobalHeader = forwardRef<HTMLDivElement, {}>(function GlobalHeader
             onClick={() => setIsNotificationSheetOpen(true)}
             className={`pointer-events-auto w-11 h-11 rounded-full backdrop-blur-xl border shadow-lg flex items-center justify-center active:scale-90 transition-all duration-150 ${
               notificationPrefs.enabled 
-                ? 'bg-gradient-to-br from-violet-400 to-purple-500 border-violet-400/50' 
+                ? 'bg-gradient-to-br from-primary/90 to-primary border-primary/50' 
                 : 'bg-card/90 border-border/50'
             }`}
           >
             {notificationPrefs.enabled ? (
-              <Bell className="w-5 h-5 text-white animate-fade-in" />
+              <Bell className="w-5 h-5 text-primary-foreground animate-fade-in" />
             ) : (
               <BellOff className="w-5 h-5 text-muted-foreground animate-fade-in" />
             )}
