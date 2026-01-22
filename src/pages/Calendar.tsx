@@ -417,32 +417,32 @@ export default function CalendarPage() {
               className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-fade-in"
               onClick={() => setActiveInfoCard(null)}
             />
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveInfoCard(null);
-              }}
-              className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
             
             <div
-              className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 shadow-2xl overflow-y-auto animate-scale-in ${
+              className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 pt-16 shadow-2xl overflow-y-auto animate-scale-in ${
                 activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose to-pink' :
                 activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet to-purple' :
                 'bg-gradient-to-br from-cyan to-teal'
               }`}
             >
+              {/* Close Button - Inside modal with proper z-index */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveInfoCard(null);
+                }}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[110] active:scale-90 transition-transform"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
 
                 {/* Period Info */}
                 {activeInfoCard === 'period' && (
-                  <div className="space-y-4 pt-2">
-                    <div className="flex items-center gap-4">
-                      <span className="text-5xl">🌸</span>
-                      <div>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 pr-8">
+                      <span className="text-5xl flex-shrink-0">🌸</span>
+                      <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white">Sonraki Regl</h3>
                         <p className="text-white/80">{format(parseISO(prediction!.nextPeriodStart), 'd MMMM EEEE', { locale: tr })}</p>
                       </div>
@@ -502,14 +502,14 @@ export default function CalendarPage() {
 
                 {/* Ovulation Info */}
                 {activeInfoCard === 'ovulation' && (
-                  <div className="space-y-4 pt-2">
-                    <div className="flex items-center gap-4">
-                      <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 pr-8">
+                      <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="none">
                         <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
                         <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
                         <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
                       </svg>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white">Yumurtlama Günü</h3>
                         <p className="text-white/80">{format(parseISO(prediction!.ovulationDate), 'd MMMM EEEE', { locale: tr })}</p>
                       </div>
@@ -576,14 +576,14 @@ export default function CalendarPage() {
                   const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
                   
                   return (
-                    <div className="space-y-4 pt-2">
-                      <div className="flex items-center gap-4">
-                        <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 pr-8">
+                        <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="none">
                           <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
                           <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
                           <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
                         </svg>
-                        <div>
+                        <div className="flex-1">
                           <h3 className="text-2xl font-bold text-white">Doğurgan Dönem</h3>
                           <p className="text-white/80">
                             {format(fertileStart, 'd MMM', { locale: tr })} - {format(fertileEnd, 'd MMM', { locale: tr })}

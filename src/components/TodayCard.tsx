@@ -363,13 +363,13 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] animate-fade-in"
             onClick={() => setShowDetails(false)}
           />
 
           {/* Modal Content */}
           <div
-            className={`fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 rounded-[2rem] bg-gradient-to-br ${phaseGradients[phase.type]} p-6 overflow-hidden shadow-2xl max-h-[80vh] overflow-y-auto animate-scale-in`}
+            className={`fixed inset-x-4 top-1/2 -translate-y-1/2 z-[101] rounded-[2rem] bg-gradient-to-br ${phaseGradients[phase.type]} p-6 pt-16 overflow-hidden shadow-2xl max-h-[80vh] overflow-y-auto animate-scale-in`}
           >
             {/* Static decorative elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -377,7 +377,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
               <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
             </div>
 
-            {/* Close button */}
+            {/* Close button - Always on top */}
             <button
               type="button"
               onClick={(e) => {
@@ -385,7 +385,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                 e.stopPropagation();
                 setShowDetails(false);
               }}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[110] active:scale-90 transition-transform"
             >
               <X className="w-5 h-5 text-white" />
             </button>
@@ -393,7 +393,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
             {/* Header */}
             <div className="relative z-10 flex items-center gap-4 mb-6">
               <PhaseIcon type={phase.type} className="w-14 h-14" />
-              <div>
+              <div className="flex-1 pr-4">
                 <h2 className="text-2xl font-bold text-white">{phaseInfo.title}</h2>
                 <p className={`text-sm ${phaseAccentColors[phase.type]}`}>{phaseInfo.subtitle}</p>
               </div>
@@ -503,34 +503,34 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
             onClick={() => setActiveInfoCard(null)}
           />
           <div
-            className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 shadow-2xl overflow-y-auto animate-scale-in ${
+            className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 pt-16 shadow-2xl overflow-y-auto animate-scale-in ${
               activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose-400 to-pink-500' :
               activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet-400 to-purple-500' :
               'bg-gradient-to-br from-cyan-400 to-teal-400'
             }`}
           >
-            {/* Close Button */}
+            {/* Close Button - Always on top */}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveInfoCard(null);
               }}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[110] active:scale-90 transition-transform"
             >
               <X className="w-5 h-5 text-white" />
             </button>
 
             {/* Period Info */}
             {activeInfoCard === 'period' && (
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center gap-4">
-                  <svg className="w-14 h-14 animate-pulse" viewBox="0 0 48 48" fill="none">
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 pr-8">
+                  <svg className="w-14 h-14 animate-pulse flex-shrink-0" viewBox="0 0 48 48" fill="none">
                     <circle cx="24" cy="24" r="18" fill="white" opacity="0.9" />
                     <path d="M24 12c-4 6-10 10-10 16a10 10 0 1 0 20 0c0-6-6-10-10-16z" fill="#f43f5e" opacity="0.7" />
                     <circle cx="20" cy="22" r="3" fill="white" opacity="0.6" />
                   </svg>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-2xl font-bold text-white">{language === 'tr' ? 'Sonraki Regl' : 'Next Period'}</h3>
                     <p className="text-white/80">{format(parseISO(prediction.nextPeriodStart), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
                   </div>
@@ -586,14 +586,14 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
 
             {/* Ovulation Info */}
             {activeInfoCard === 'ovulation' && (
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center gap-4">
-                  <svg className="w-14 h-14 animate-ping" style={{ animationDuration: '2s' }} viewBox="0 0 48 48" fill="none">
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 pr-8">
+                  <svg className="w-14 h-14 animate-ping flex-shrink-0" style={{ animationDuration: '2s' }} viewBox="0 0 48 48" fill="none">
                     <circle cx="24" cy="24" r="16" fill="white" opacity="0.9" />
                     <circle cx="24" cy="24" r="10" fill="#a855f7" opacity="0.6" />
                     <circle cx="20" cy="20" r="4" fill="white" opacity="0.8" />
                   </svg>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-2xl font-bold text-white">{language === 'tr' ? 'Yumurtlama Günü' : 'Ovulation Day'}</h3>
                     <p className="text-white/80">{format(parseISO(prediction.ovulationDate), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
                   </div>
@@ -661,14 +661,14 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
               const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
               
               return (
-                <div className="space-y-4 pt-2">
-                  <div className="flex items-center gap-4">
-                    <svg className="w-14 h-14 animate-bounce" style={{ animationDuration: '2s' }} viewBox="0 0 48 48" fill="none">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 pr-8">
+                    <svg className="w-14 h-14 animate-bounce flex-shrink-0" style={{ animationDuration: '2s' }} viewBox="0 0 48 48" fill="none">
                       <path d="M24 44c-3-3-12-10-12-20a12 12 0 1 1 24 0c0 10-9 17-12 20z" fill="white" opacity="0.9" />
                       <path d="M24 38c-2-2-8-7-8-14a8 8 0 1 1 16 0c0 7-6 12-8 14z" fill="#14b8a6" opacity="0.5" />
                       <circle cx="20" cy="20" r="3" fill="white" opacity="0.8" />
                     </svg>
-                    <div>
+                    <div className="flex-1">
                       <h3 className="text-2xl font-bold text-white">{language === 'tr' ? 'Doğurgan Dönem' : 'Fertile Window'}</h3>
                       <p className="text-white/80">
                         {format(fertileStart, 'd MMM', { locale: language === 'tr' ? tr : undefined })} - {format(fertileEnd, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
