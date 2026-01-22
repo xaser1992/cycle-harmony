@@ -754,7 +754,9 @@ export default function StatsPage() {
                       fillOpacity={1}
                       fill="url(#colorPeriodArea)"
                       strokeWidth={2}
-                      isAnimationActive={false}
+                      isAnimationActive={true}
+                      animationDuration={800}
+                      animationEasing="ease-out"
                     />
                     <Area 
                       type="monotone" 
@@ -764,7 +766,9 @@ export default function StatsPage() {
                       fillOpacity={1}
                       fill="url(#colorSymptomArea)"
                       strokeWidth={2}
-                      isAnimationActive={false}
+                      isAnimationActive={true}
+                      animationDuration={800}
+                      animationEasing="ease-out"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -845,7 +849,9 @@ export default function StatsPage() {
                       strokeWidth={3}
                       dot={{ fill: 'hsl(var(--pink))', strokeWidth: 0, r: 5 }}
                       activeDot={{ r: 7, fill: 'hsl(var(--pink))' }}
-                      isAnimationActive={false}
+                      isAnimationActive={true}
+                      animationDuration={1000}
+                      animationEasing="ease-out"
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -882,7 +888,9 @@ export default function StatsPage() {
                       dataKey="glasses" 
                       radius={[6, 6, 0, 0]}
                       fill="hsl(var(--blue))"
-                      isAnimationActive={false}
+                      isAnimationActive={true}
+                      animationDuration={600}
+                      animationEasing="ease-out"
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -956,7 +964,9 @@ export default function StatsPage() {
                         fillOpacity={1}
                         fill="url(#colorWeightArea)"
                         strokeWidth={2}
-                        isAnimationActive={false}
+                        isAnimationActive={true}
+                        animationDuration={800}
+                        animationEasing="ease-out"
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -999,7 +1009,9 @@ export default function StatsPage() {
                     <Bar 
                       dataKey="duration" 
                       radius={[8, 8, 0, 0]}
-                      isAnimationActive={false}
+                      isAnimationActive={true}
+                      animationDuration={600}
+                      animationEasing="ease-out"
                     >
                       {periodDurationData.map((_, index) => (
                         <Cell 
@@ -1038,7 +1050,9 @@ export default function StatsPage() {
                         paddingAngle={3}
                         dataKey="days"
                         strokeWidth={0}
-                        isAnimationActive={false}
+                        isAnimationActive={true}
+                        animationDuration={800}
+                        animationEasing="ease-out"
                       >
                         {phaseDistribution.map((entry, index) => (
                           <Cell key={`phase-cell-${index}`} fill={entry.color} />
