@@ -1,5 +1,5 @@
 // 🌸 Statistics Page - Flo Inspired Design (Performance Optimized)
-import { useState, useMemo, useEffect, memo, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef, memo, useCallback } from 'react';
 import { TrendingUp, Calendar, BarChart3, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
   BarChart, 
@@ -325,6 +325,7 @@ export default function StatsPage() {
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
   const [chartKey, setChartKey] = useState(0);
   const [shouldAnimateCharts, setShouldAnimateCharts] = useState(false);
+  const chartsContainerRef = useRef<HTMLDivElement | null>(null);
   const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
   const [historyMonth, setHistoryMonth] = useState(new Date());
   
@@ -347,28 +348,60 @@ export default function StatsPage() {
     setActiveTab(tab);
   }, []);
 
-  // Ensure Recharts animations start AFTER container measurement settles.
-  // Some WebViews/preview environments mount charts while width/height is still 0,
-  // which can cause animations to never trigger.
+  // Ensure Recharts animations start ONLY after the charts container has a real size.
+  // In some WebViews/preview environments, charts mount when width/height is still 0,
+  // causing Recharts to skip animations and render the final state.
   useEffect(() => {
     if (activeTab !== 'charts') {
       setShouldAnimateCharts(false);
       return;
     }
 
-    // First disable, let layout settle, then enable on next frame(s)
     setShouldAnimateCharts(false);
 
-    let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
+    const el = chartsContainerRef.current;
+    if (!el) {
+      // Fallback: if ref isn't ready yet, try once on next frame.
+      const raf = requestAnimationFrame(() => {
+        setChartKey((prev) => prev + 1);
         setShouldAnimateCharts(true);
-        setChartKey(prev => prev + 1);
       });
+      return () => cancelAnimationFrame(raf);
+    }
+
+    let raf1 = 0;
+    let raf2 = 0;
+    let didTrigger = false;
+
+    const trigger = () => {
+      if (didTrigger) return;
+      didTrigger = true;
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          // Remount charts after layout settles so animations reliably fire.
+          setChartKey((prev) => prev + 1);
+          setShouldAnimateCharts(true);
+        });
+      });
+    };
+
+    const ro = new ResizeObserver(() => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) trigger();
     });
+    ro.observe(el);
+
+    // Immediate check (covers cases where size is already ready)
+    const rect = el.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) trigger();
+
+    // Hard fallback: don't get stuck if ResizeObserver is throttled.
+    const timeout = window.setTimeout(() => trigger(), 250);
 
     return () => {
-      cancelAnimationFrame(raf1);
+      window.clearTimeout(timeout);
+      ro.disconnect();
+      if (raf1) cancelAnimationFrame(raf1);
       if (raf2) cancelAnimationFrame(raf2);
     };
   }, [activeTab]);
@@ -842,7 +875,11 @@ export default function StatsPage() {
         )}
 
         {activeTab === 'charts' && (
-          <div key={`charts-container-${chartKey}`} className="space-y-5 animate-fade-in">
+          <div
+            ref={chartsContainerRef}
+            key={`charts-container-${chartKey}`}
+            className="space-y-5 animate-fade-in"
+          >
             {/* Cycle Length Trend - Line Chart */}
             <ChartCard
               title={isEnglish ? 'Cycle Length Trend' : 'Döngü Uzunluğu Trendi'}
