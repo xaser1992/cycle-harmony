@@ -49,36 +49,61 @@ const phaseAccentColors = {
   pms: 'text-orange-100',
 };
 
-const phaseDetails: Record<string, { tips: string[]; activities: string[]; nutrition: string[] }> = {
+const phaseDetails: Record<string, { 
+  tips: string[]; 
+  activities: string[]; 
+  nutrition: string[];
+  sleep: string[];
+  skincare: string[];
+  hormones: string[];
+}> = {
   period: {
     tips: ['Bol su için', 'Hafif egzersiz yapın', 'Sıcak kompres uygulayın'],
     activities: ['Yoga', 'Yürüyüş', 'Meditasyon'],
     nutrition: ['Demir açısından zengin gıdalar', 'Koyu yeşil yapraklılar', 'Kırmızı et'],
+    sleep: ['8-9 saat uyku hedefleyin', 'Karanlık ve serin odada uyuyun', 'Kafein alımını azaltın'],
+    skincare: ['Yağ kontrolü için hafif nemlendirici', 'Akne önleyici ürünler kullanın', 'Cildi temiz tutun'],
+    hormones: ['Östrojen ve progesteron en düşük seviyede', 'FSH yükselmeye başlıyor', 'Prostaglandin krampları tetikliyor'],
   },
   follicular: {
     tips: ['Enerji seviyeniz yükseliyor', 'Yeni projeler başlatın', 'Sosyal aktiviteler planlayın'],
     activities: ['HIIT', 'Koşu', 'Dans'],
     nutrition: ['Protein ağırlıklı', 'Taze sebzeler', 'Fermente gıdalar'],
+    sleep: ['6-8 saat yeterli olabilir', 'Sabah erkenden uyanmak kolay', 'Enerji seviyeleri yüksek'],
+    skincare: ['Cilt parlak ve sağlıklı', 'Hafif peeling yapabilirsiniz', 'Güneş koruması önemli'],
+    hormones: ['Östrojen yükseliyor', 'LH artmaya başlıyor', 'Testosteron hafifçe yükseliyor'],
   },
   fertile: {
     tips: ['En verimli dönemdesiniz', 'Yaratıcılığınız zirve', 'İletişim becerileriniz güçlü'],
     activities: ['Yoğun antrenman', 'Takım sporları', 'Sosyal etkinlikler'],
     nutrition: ['Omega-3 kaynakları', 'Çinko içeren gıdalar', 'B vitamini'],
+    sleep: ['Uyku kalitesi yüksek', 'Gece uyanmaları az', 'Rüyalar canlı olabilir'],
+    skincare: ['Cilt en parlak döneminde', 'Minimal makyaj yeterli', 'Doğal parlaklık'],
+    hormones: ['Östrojen zirvede', 'LH ani yükselişte', 'Servikal mukus artar'],
   },
   ovulation: {
     tips: ['Doğurganlık zirvede', 'Enerji maksimum', 'Önemli kararlar için ideal'],
     activities: ['Güç antrenmanı', 'Rekabetçi sporlar', 'Sunum yapın'],
     nutrition: ['Antioksidan zengin', 'E vitamini', 'Taze meyveler'],
+    sleep: ['Uyku ihtiyacı azalabilir', 'Vücut ısısı hafif yükselir', 'Gece hafif terlemeler olabilir'],
+    skincare: ['Cilt yumuşak ve esnek', 'Kolajen üretimi artar', 'Anti-aging ürünler etkili'],
+    hormones: ['LH zirvede - yumurtlama tetiklenir', 'Östrojen düşmeye başlar', 'Progesteron yükselmeye başlar'],
   },
   luteal: {
     tips: ['Dinlenmeye öncelik verin', 'Stresten kaçının', 'Uyku düzenine dikkat'],
     activities: ['Pilates', 'Hafif yürüyüş', 'Esneme'],
     nutrition: ['Magnezyum', 'Kompleks karbonhidrat', 'Bitter çikolata'],
+    sleep: ['Uyku kalitesi düşebilir', 'Daha fazla uyku ihtiyacı', 'Rahatlatıcı rutinler oluşturun'],
+    skincare: ['Yağlanma artabilir', 'Sivilce önleyici bakım', 'Nemlendirmeye önem verin'],
+    hormones: ['Progesteron zirvede', 'Östrojen ikinci kez yükselir', 'PMS belirtileri başlayabilir'],
   },
   pms: {
     tips: ['Kendinize nazik olun', 'Rahatlama teknikleri', 'Destek isteyin'],
     activities: ['Yoga', 'Yüzme', 'Nefes egzersizleri'],
     nutrition: ['Kalsiyum', 'B6 vitamini', 'Tam tahıllar'],
+    sleep: ['9 saat veya daha fazla uyuyun', 'Uyku kalitesi düşük olabilir', 'Lavanta yağı rahatlatıcı'],
+    skincare: ['Sivilce çıkabilir', 'Yatıştırıcı maskeler kullanın', 'Aşırı bakımdan kaçının'],
+    hormones: ['Östrojen ve progesteron düşüyor', 'Serotonin seviyesi azalır', 'Ruh hali dalgalanmaları normal'],
   },
 };
 
@@ -386,6 +411,51 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                   {details.tips.map((tip, i) => (
                     <div key={i} className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
                       <p className="text-sm text-white">{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sleep Recommendations */}
+              <div>
+                <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center gap-2">
+                  <span className="text-lg">😴</span>
+                  {language === 'tr' ? 'Uyku Önerileri' : 'Sleep Tips'}
+                </h3>
+                <div className="space-y-2">
+                  {details.sleep.map((item, i) => (
+                    <div key={i} className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
+                      <p className="text-sm text-white">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skincare Tips */}
+              <div>
+                <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center gap-2">
+                  <span className="text-lg">✨</span>
+                  {language === 'tr' ? 'Cilt Bakımı' : 'Skincare'}
+                </h3>
+                <div className="space-y-2">
+                  {details.skincare.map((item, i) => (
+                    <div key={i} className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
+                      <p className="text-sm text-white">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hormone Info */}
+              <div>
+                <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center gap-2">
+                  <span className="text-lg">🧬</span>
+                  {language === 'tr' ? 'Hormon Bilgisi' : 'Hormone Info'}
+                </h3>
+                <div className="space-y-2">
+                  {details.hormones.map((item, i) => (
+                    <div key={i} className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
+                      <p className="text-sm text-white">{item}</p>
                     </div>
                   ))}
                 </div>
