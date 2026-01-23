@@ -1,5 +1,6 @@
 // 🌸 Notification Service using Capacitor Local Notifications
 import { LocalNotifications, ScheduleOptions, LocalNotificationSchema } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
 import { parseISO, addDays, setHours, setMinutes, isBefore, isAfter, format } from 'date-fns';
 import type { 
   NotificationType, 
@@ -8,6 +9,9 @@ import type {
   PrivacyMode,
   NotificationContent 
 } from '@/types/cycle';
+
+// Check if we're on a native platform
+const isNative = () => Capacitor.isNativePlatform();
 
 // Notification channel IDs for Android
 export const NOTIFICATION_CHANNELS = {
@@ -176,6 +180,10 @@ function getNextValidTime(
 
 // Request notification permissions
 export async function requestNotificationPermissions(): Promise<boolean> {
+  if (!isNative()) {
+    console.log('Notifications not supported on web');
+    return false;
+  }
   try {
     const result = await LocalNotifications.requestPermissions();
     return result.display === 'granted';
@@ -187,6 +195,9 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
 // Check current permission status
 export async function checkNotificationPermissions(): Promise<boolean> {
+  if (!isNative()) {
+    return false;
+  }
   try {
     const result = await LocalNotifications.checkPermissions();
     return result.display === 'granted';
@@ -198,6 +209,7 @@ export async function checkNotificationPermissions(): Promise<boolean> {
 
 // Cancel all scheduled notifications
 export async function cancelAllNotifications(): Promise<void> {
+  if (!isNative()) return;
   try {
     const pending = await LocalNotifications.getPending();
     if (pending.notifications.length > 0) {
@@ -214,6 +226,11 @@ export async function scheduleNotifications(
   prefs: NotificationPreferences,
   language: 'tr' | 'en' = 'tr'
 ): Promise<void> {
+  if (!isNative()) {
+    console.log('Notifications not supported on web');
+    return;
+  }
+  
   if (!prefs.enabled) {
     await cancelAllNotifications();
     return;
@@ -350,6 +367,7 @@ export async function scheduleNotifications(
 
 // Get list of pending notifications (for debug panel)
 export async function getPendingNotifications(): Promise<LocalNotificationSchema[]> {
+  if (!isNative()) return [];
   try {
     const pending = await LocalNotifications.getPending();
     return pending.notifications;
@@ -361,6 +379,10 @@ export async function getPendingNotifications(): Promise<LocalNotificationSchema
 
 // Send a test notification immediately
 export async function sendTestNotification(language: 'tr' | 'en' = 'tr'): Promise<void> {
+  if (!isNative()) {
+    throw new Error('Notifications not supported on web');
+  }
+  
   const hasPermission = await checkNotificationPermissions();
   if (!hasPermission) {
     throw new Error('Notification permissions not granted');
@@ -382,6 +404,8 @@ export async function sendTestNotification(language: 'tr' | 'en' = 'tr'): Promis
 
 // Create notification channels for Android
 export async function createNotificationChannels(): Promise<void> {
+  if (!isNative()) return;
+  
   try {
     await LocalNotifications.createChannel({
       id: NOTIFICATION_CHANNELS.CRITICAL,
@@ -407,9 +431,10 @@ export async function createNotificationChannels(): Promise<void> {
       id: NOTIFICATION_CHANNELS.WELLNESS,
       name: 'Wellness',
       description: 'Su iç, egzersiz gibi wellness hatırlatmaları',
-      importance: 2, // LOW
+      importance: 3, // DEFAULT - was LOW(2), now higher for visibility
+      sound: 'notification.wav', // Added sound
       visibility: 0, // PRIVATE
-      vibration: false,
+      vibration: true, // Added vibration
     });
     
     console.log('Notification channels created');
@@ -425,6 +450,11 @@ export async function scheduleCustomReminder(
   targetDate: Date,
   language: 'tr' | 'en' = 'tr'
 ): Promise<boolean> {
+  if (!isNative()) {
+    console.log('Custom reminders not supported on web');
+    return false;
+  }
+  
   try {
     const hasPermission = await checkNotificationPermissions();
     if (!hasPermission) {

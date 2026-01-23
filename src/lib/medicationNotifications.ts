@@ -1,8 +1,12 @@
 // 💊 Medication Notification Service
 import { LocalNotifications, LocalNotificationSchema, ActionPerformed } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
 import { setHours, setMinutes, addDays, isAfter, format } from 'date-fns';
 import type { Medication } from '@/types/medication';
 import { recordMedicationDose } from '@/lib/medicationStorage';
+
+// Check if we're on a native platform
+const isNative = () => Capacitor.isNativePlatform();
 
 // Medication notification channel
 export const MEDICATION_NOTIFICATION_CHANNEL = 'medication_reminders';
@@ -12,6 +16,8 @@ const MEDICATION_NOTIFICATION_BASE_ID = 20000;
 
 // Register action types for medication notifications
 export async function registerMedicationActionTypes(): Promise<void> {
+  if (!isNative()) return;
+  
   try {
     await LocalNotifications.registerActionTypes({
       types: [
@@ -75,6 +81,8 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
 
 // Create medication notification channel for Android
 export async function createMedicationNotificationChannel(): Promise<void> {
+  if (!isNative()) return;
+  
   try {
     await LocalNotifications.createChannel({
       id: MEDICATION_NOTIFICATION_CHANNEL,
@@ -100,6 +108,8 @@ function generateNotificationId(medicationId: string, dayOffset: number, timeInd
 
 // Cancel all medication notifications
 export async function cancelMedicationNotifications(): Promise<void> {
+  if (!isNative()) return;
+  
   try {
     const pending = await LocalNotifications.getPending();
     const medicationNotifications = pending.notifications.filter(
@@ -117,6 +127,8 @@ export async function cancelMedicationNotifications(): Promise<void> {
 
 // Schedule medication notifications for a single medication
 export async function scheduleMedicationNotification(medication: Medication): Promise<void> {
+  if (!isNative()) return;
+  
   if (!medication.isActive || medication.reminderTimes.length === 0) {
     return;
   }
@@ -168,6 +180,11 @@ export async function scheduleMedicationNotification(medication: Medication): Pr
 
 // Schedule notifications for all active medications
 export async function scheduleMedicationNotifications(medications: Medication[]): Promise<void> {
+  if (!isNative()) {
+    console.log('Medication notifications not supported on web');
+    return;
+  }
+  
   // First, cancel existing medication notifications
   await cancelMedicationNotifications();
   
@@ -193,6 +210,8 @@ export async function scheduleMedicationNotifications(medications: Medication[])
 
 // Get pending medication notifications (for debug)
 export async function getPendingMedicationNotifications(): Promise<LocalNotificationSchema[]> {
+  if (!isNative()) return [];
+  
   try {
     const pending = await LocalNotifications.getPending();
     return pending.notifications.filter(
@@ -209,6 +228,8 @@ export async function scheduleOneTimeMedicationReminder(
   medication: Medication,
   delayMinutes: number = 15
 ): Promise<void> {
+  if (!isNative()) return;
+  
   const notificationTime = new Date(Date.now() + delayMinutes * 60 * 1000);
   
   try {
@@ -231,6 +252,10 @@ export async function scheduleOneTimeMedicationReminder(
 
 // Test medication notification
 export async function sendTestMedicationNotification(): Promise<void> {
+  if (!isNative()) {
+    throw new Error('Medication notifications not supported on web');
+  }
+  
   try {
     await LocalNotifications.schedule({
       notifications: [{

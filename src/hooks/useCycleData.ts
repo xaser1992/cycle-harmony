@@ -1,10 +1,11 @@
 // 🌸 Cycle Data Hook
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { CycleSettings, DayEntry, NotificationPreferences, UserSettings, CyclePrediction, CyclePhase } from '@/types/cycle';
 import { DEFAULT_CYCLE_SETTINGS, DEFAULT_NOTIFICATION_PREFS, DEFAULT_USER_SETTINGS } from '@/types/cycle';
 import * as storage from '@/lib/storage';
 import { calculatePredictions, getCyclePhase } from '@/lib/predictions';
-import { scheduleNotifications } from '@/lib/notifications';
+import { scheduleNotifications, createNotificationChannels, checkNotificationPermissions } from '@/lib/notifications';
+import { Capacitor } from '@capacitor/core';
 
 export function useCycleData() {
   const [cycleSettings, setCycleSettings] = useState<CycleSettings>(DEFAULT_CYCLE_SETTINGS);
@@ -14,6 +15,7 @@ export function useCycleData() {
   const [prediction, setPrediction] = useState<CyclePrediction | null>(null);
   const [currentPhase, setCurrentPhase] = useState<CyclePhase | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const hasScheduledNotifications = useRef(false);
 
   // Load all data on mount
   useEffect(() => {
@@ -40,6 +42,28 @@ export function useCycleData() {
         // Get current phase
         const phase = getCyclePhase(new Date(), currentSettings, pred, dayEntries || []);
         setCurrentPhase(phase);
+
+        // Schedule notifications on initial load (only on native platforms)
+        const finalNotifPrefs = notifPrefs || DEFAULT_NOTIFICATION_PREFS;
+        const finalUserSettings = userPrefs || DEFAULT_USER_SETTINGS;
+        
+        if (pred && finalNotifPrefs.enabled && !hasScheduledNotifications.current) {
+          hasScheduledNotifications.current = true;
+          
+          // Only run on native platforms
+          if (Capacitor.isNativePlatform()) {
+            try {
+              await createNotificationChannels();
+              const hasPermission = await checkNotificationPermissions();
+              if (hasPermission) {
+                await scheduleNotifications(pred, finalNotifPrefs, finalUserSettings.language);
+                console.log('Initial notifications scheduled');
+              }
+            } catch (error) {
+              console.warn('Could not schedule initial notifications:', error);
+            }
+          }
+        }
       } catch (error) {
         console.error('Error loading cycle data:', error);
       } finally {
@@ -61,9 +85,13 @@ export function useCycleData() {
     setPrediction(pred);
     setCurrentPhase(getCyclePhase(new Date(), updated, pred, entries));
 
-    // Reschedule notifications
-    if (notificationPrefs.enabled) {
-      await scheduleNotifications(pred, notificationPrefs, userSettings.language);
+    // Reschedule notifications (only on native platforms)
+    if (notificationPrefs.enabled && Capacitor.isNativePlatform()) {
+      try {
+        await scheduleNotifications(pred, notificationPrefs, userSettings.language);
+      } catch (error) {
+        console.warn('Could not reschedule notifications:', error);
+      }
     }
   }, [cycleSettings, entries, notificationPrefs, userSettings.language]);
 
@@ -80,8 +108,13 @@ export function useCycleData() {
     setNotificationPrefs(updated);
     await storage.saveNotificationPrefs(updated);
 
-    if (prediction) {
-      await scheduleNotifications(prediction, updated, userSettings.language);
+    // Schedule notifications (only on native platforms)
+    if (prediction && Capacitor.isNativePlatform()) {
+      try {
+        await scheduleNotifications(prediction, updated, userSettings.language);
+      } catch (error) {
+        console.warn('Could not schedule notifications:', error);
+      }
     }
   }, [notificationPrefs, prediction, userSettings.language]);
 
