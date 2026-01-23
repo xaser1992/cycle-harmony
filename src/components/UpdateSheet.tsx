@@ -1,10 +1,8 @@
 // 🌸 Update Bottom Sheet Component - Flo Inspired Categorized Design
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, ChevronLeft, ChevronRight, Search, Plus, Minus } from 'lucide-react';
+import { X, Check, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Sheet, 
@@ -205,7 +203,6 @@ export function UpdateSheet({
   initialTab = 'flow'
 }: UpdateSheetProps) {
   const [currentDate, setCurrentDate] = useState(initialDate);
-  const [searchQuery, setSearchQuery] = useState('');
   
   // Selection states
   const [flowLevel, setFlowLevel] = useState<FlowLevel>('none');
@@ -229,7 +226,6 @@ export function UpdateSheet({
   useEffect(() => {
     if (isOpen) {
       setCurrentDate(initialDate);
-      setSearchQuery('');
       if (existingEntry) {
         setFlowLevel(existingEntry.flowLevel);
         setSelectedSymptoms(existingEntry.symptoms || []);
@@ -325,20 +321,8 @@ export function UpdateSheet({
   const goToPreviousDay = () => setCurrentDate(prev => subDays(prev, 1));
   const goToNextDay = () => setCurrentDate(prev => addDays(prev, 1));
 
-  // Filter items based on search
-  const filterItems = (items: typeof CATEGORIES.mood.items) => {
-    if (!searchQuery.trim()) return items;
-    const query = searchQuery.toLowerCase();
-    return items.filter(item => 
-      item.tr.toLowerCase().includes(query) || 
-      item.en.toLowerCase().includes(query)
-    );
-  };
-
-  // Check if category has matching items
-  const categoryHasMatches = (category: typeof CATEGORIES.mood) => {
-    return filterItems(category.items).length > 0;
-  };
+  // Filter items - no search, always return all
+  const filterItems = (items: typeof CATEGORIES.mood.items) => items;
 
   // Category Card Component
   const CategoryCard = ({ 
@@ -356,11 +340,7 @@ export function UpdateSheet({
     if (filteredItems.length === 0) return null;
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-      >
+      <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
         <h3 className="font-medium text-foreground mb-2 text-sm">
           {language === 'tr' ? category.title.tr : category.title.en}
         </h3>
@@ -393,17 +373,13 @@ export function UpdateSheet({
             );
           })}
         </div>
-      </motion.div>
+      </div>
     );
   };
 
   // Water Tracking Card
   const WaterCard = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-    >
+    <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <span className="text-lg">💧</span>
@@ -439,14 +415,12 @@ export function UpdateSheet({
         <span className="text-sm text-muted-foreground">/ {waterGoal.toFixed(2).replace('.', ',')} L</span>
       </div>
       <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-        <motion.div 
-          className="h-full bg-sky rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
-          transition={{ duration: 0.3 }}
+        <div 
+          className="h-full bg-sky rounded-full transition-all duration-300"
+          style={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
         />
       </div>
-    </motion.div>
+    </div>
   );
 
   // Weight Card - with +/- controls like water
@@ -466,11 +440,7 @@ export function UpdateSheet({
     const displayWeight = weight !== null ? weight.toFixed(1) : null;
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-      >
+      <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
             <span className="text-lg">⚖️</span>
@@ -509,7 +479,7 @@ export function UpdateSheet({
         <p className="text-xs text-center text-muted-foreground mt-2">
           {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
         </p>
-      </motion.div>
+      </div>
     );
   };
 
@@ -564,7 +534,7 @@ export function UpdateSheet({
               <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
             </div>
 
-            {/* Close button */}
+            {/* Close button - moved to right */}
             <button
               type="button"
               onClick={(e) => {
@@ -572,51 +542,32 @@ export function UpdateSheet({
                 e.stopPropagation();
                 onClose();
               }}
-              className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center z-50 active:scale-90 transition-transform"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-50 active:scale-90 transition-transform"
             >
               <X className="w-6 h-6 text-foreground/70" />
             </button>
 
             {/* Date Navigation */}
-            <div className="flex items-center justify-between px-8 mb-4">
-              <motion.button
+            <div className="flex items-center justify-center gap-6 mb-4">
+              <button
                 type="button"
                 onClick={goToPreviousDay}
                 className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
-                whileTap={{ scale: 0.9 }}
               >
                 <ChevronLeft className="w-6 h-6 text-foreground/60" />
-              </motion.button>
+              </button>
               
-              <motion.h2 
-                className="text-lg font-semibold text-foreground"
-                key={currentDate.toISOString()}
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
+              <h2 className="text-lg font-semibold text-foreground">
                 {format(currentDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
-              </motion.h2>
+              </h2>
               
-              <motion.button
+              <button
                 type="button"
                 onClick={goToNextDay}
                 className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
-                whileTap={{ scale: 0.9 }}
               >
                 <ChevronRight className="w-6 h-6 text-foreground/60" />
-              </motion.button>
-            </div>
-
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={language === 'tr' ? 'Arama' : 'Search'}
-                className="pl-9 h-10 rounded-xl bg-muted/50 border-0 text-sm"
-              />
+              </button>
             </div>
           </div>
 
@@ -624,135 +575,109 @@ export function UpdateSheet({
           <ScrollArea className="flex-1 px-3">
             <div className="py-3 space-y-2.5 pb-24">
               {/* Flow Category */}
-              {categoryHasMatches(CATEGORIES.flow) && (
-                <CategoryCard 
-                  category={CATEGORIES.flow}
-                  selected={[flowLevel]}
-                  setSelected={(val) => {
-                    const newVal = typeof val === 'function' ? val([flowLevel]) : val;
-                    setFlowLevel((newVal[0] as FlowLevel) || 'none');
-                  }}
-                  singleSelect
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.flow}
+                selected={[flowLevel]}
+                setSelected={(val) => {
+                  const newVal = typeof val === 'function' ? val([flowLevel]) : val;
+                  setFlowLevel((newVal[0] as FlowLevel) || 'none');
+                }}
+                singleSelect
+              />
 
               {/* Mood Category */}
-              {categoryHasMatches(CATEGORIES.mood) && (
-                <CategoryCard 
-                  category={CATEGORIES.mood}
-                  selected={selectedMoods}
-                  setSelected={setSelectedMoods}
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.mood}
+                selected={selectedMoods}
+                setSelected={setSelectedMoods}
+              />
 
               {/* Sexual Activity Category */}
-              {categoryHasMatches(CATEGORIES.sexual) && (
-                <CategoryCard 
-                  category={CATEGORIES.sexual}
-                  selected={selectedSexual}
-                  setSelected={setSelectedSexual}
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.sexual}
+                selected={selectedSexual}
+                setSelected={setSelectedSexual}
+              />
 
               {/* Symptoms Category */}
-              {categoryHasMatches(CATEGORIES.symptoms) && (
-                <CategoryCard 
-                  category={CATEGORIES.symptoms}
-                  selected={selectedSymptoms}
-                  setSelected={setSelectedSymptoms}
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.symptoms}
+                selected={selectedSymptoms}
+                setSelected={setSelectedSymptoms}
+              />
 
               {/* Discharge Category */}
-              {categoryHasMatches(CATEGORIES.discharge) && (
-                <CategoryCard 
-                  category={CATEGORIES.discharge}
-                  selected={selectedDischarge}
-                  setSelected={setSelectedDischarge}
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.discharge}
+                selected={selectedDischarge}
+                setSelected={setSelectedDischarge}
+              />
 
               {/* Digestion Category */}
-              {categoryHasMatches(CATEGORIES.digestion) && (
-                <CategoryCard 
-                  category={CATEGORIES.digestion}
-                  selected={selectedDigestion}
-                  setSelected={setSelectedDigestion}
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.digestion}
+                selected={selectedDigestion}
+                setSelected={setSelectedDigestion}
+              />
 
               {/* Pregnancy Test Category */}
-              {categoryHasMatches(CATEGORIES.pregnancy_test) && (
-                <CategoryCard 
-                  category={CATEGORIES.pregnancy_test}
-                  selected={selectedPregnancyTest}
-                  setSelected={setSelectedPregnancyTest}
-                  singleSelect
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.pregnancy_test}
+                selected={selectedPregnancyTest}
+                setSelected={setSelectedPregnancyTest}
+                singleSelect
+              />
 
               {/* Ovulation Test Category */}
-              {categoryHasMatches(CATEGORIES.ovulation_test) && (
-                <CategoryCard 
-                  category={CATEGORIES.ovulation_test}
-                  selected={selectedOvulationTest}
-                  setSelected={setSelectedOvulationTest}
-                  singleSelect
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.ovulation_test}
+                selected={selectedOvulationTest}
+                setSelected={setSelectedOvulationTest}
+                singleSelect
+              />
 
               {/* Activity Category */}
-              {categoryHasMatches(CATEGORIES.activity) && (
-                <CategoryCard 
-                  category={CATEGORIES.activity}
-                  selected={selectedActivity}
-                  setSelected={setSelectedActivity}
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.activity}
+                selected={selectedActivity}
+                setSelected={setSelectedActivity}
+              />
 
               {/* Other Category */}
-              {categoryHasMatches(CATEGORIES.other) && (
-                <CategoryCard 
-                  category={CATEGORIES.other}
-                  selected={selectedOther}
-                  setSelected={setSelectedOther}
-                />
-              )}
+              <CategoryCard 
+                category={CATEGORIES.other}
+                selected={selectedOther}
+                setSelected={setSelectedOther}
+              />
 
               {/* Water Tracking */}
-              {!searchQuery && <WaterCard />}
+              <WaterCard />
 
               {/* Weight Tracking */}
-              {!searchQuery && <WeightCard />}
+              <WeightCard />
 
               {/* Notes Section */}
-              {!searchQuery && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
-                >
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-sm">📝</span>
-                    <h3 className="font-medium text-foreground text-sm">
-                      {language === 'tr' ? 'Notlar' : 'Notes'}
-                    </h3>
-                  </div>
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder={language === 'tr' ? 'Bugün hakkında bir şeyler yaz...' : 'Write something about today...'}
-                    className="rounded-lg resize-none border-border/40 focus:border-primary min-h-[70px] bg-muted/30 text-sm"
-                    rows={3}
-                  />
-                </motion.div>
-              )}
+              <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-sm">📝</span>
+                  <h3 className="font-medium text-foreground text-sm">
+                    {language === 'tr' ? 'Notlar' : 'Notes'}
+                  </h3>
+                </div>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={language === 'tr' ? 'Bugün hakkında bir şeyler yaz...' : 'Write something about today...'}
+                  className="rounded-lg resize-none border-border/40 focus:border-primary min-h-[70px] bg-muted/30 text-sm"
+                  rows={3}
+                />
+              </div>
             </div>
           </ScrollArea>
 
           {/* Fixed Save Button */}
           <div className="absolute bottom-0 left-0 right-0 px-3 py-3 bg-gradient-to-t from-card via-card to-transparent safe-area-bottom">
-            <motion.div whileTap={{ scale: 0.98 }}>
+            <div className="active:scale-[0.98] transition-transform">
               <Button
                 onClick={handleSave}
                 size="lg"
@@ -761,7 +686,7 @@ export function UpdateSheet({
                 <Check className="w-4 h-4 mr-2" />
                 {language === 'tr' ? 'Kaydet' : 'Save'}
               </Button>
-            </motion.div>
+            </div>
           </div>
         </div>
       </SheetContent>
