@@ -31,7 +31,7 @@ const CATEGORIES = {
   flow: {
     title: { tr: 'Adet akışı', en: 'Period flow' },
     bgClass: 'bg-rose-light dark:bg-rose/20',
-    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-foreground',
     chipSelected: 'bg-rose text-white',
     items: [
       { id: 'none', emoji: '⚪', tr: 'Yok', en: 'None' },
@@ -44,7 +44,7 @@ const CATEGORIES = {
   mood: {
     title: { tr: 'Ruh hali', en: 'Mood' },
     bgClass: 'bg-amber-light dark:bg-amber/20',
-    chipBase: 'bg-amber-light dark:bg-amber/30 text-amber dark:text-amber-light',
+    chipBase: 'bg-amber-light dark:bg-amber/30 text-foreground',
     chipSelected: 'bg-amber text-white',
     items: [
       { id: 'calm', emoji: '😌', tr: 'Sakinim', en: 'Calm' },
@@ -67,7 +67,7 @@ const CATEGORIES = {
   sexual: {
     title: { tr: 'Cinsel ilişki ve cinsel ilişki isteği', en: 'Sex & sex drive' },
     bgClass: 'bg-pink-light dark:bg-pink/20',
-    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-foreground',
     chipSelected: 'bg-pink text-white',
     items: [
       { id: 'no_sex', emoji: '💔', tr: 'Yapmadım', en: 'Did not have sex' },
@@ -87,7 +87,7 @@ const CATEGORIES = {
   symptoms: {
     title: { tr: 'Belirtiler', en: 'Symptoms' },
     bgClass: 'bg-pink-light dark:bg-pink/20',
-    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-foreground',
     chipSelected: 'bg-pink text-white',
     items: [
       { id: 'all_good', emoji: '👍', tr: 'Her şey yolunda', en: 'All good' },
@@ -107,7 +107,7 @@ const CATEGORIES = {
   discharge: {
     title: { tr: 'Vajinal akıntı', en: 'Vaginal discharge' },
     bgClass: 'bg-violet-light dark:bg-violet/20',
-    chipBase: 'bg-violet-light dark:bg-violet/30 text-violet dark:text-violet-light',
+    chipBase: 'bg-violet-light dark:bg-violet/30 text-foreground',
     chipSelected: 'bg-violet text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Akıntı yok', en: 'No discharge' },
@@ -124,7 +124,7 @@ const CATEGORIES = {
   digestion: {
     title: { tr: 'Sindirim ve dışkı', en: 'Digestion' },
     bgClass: 'bg-rose-light dark:bg-rose/20',
-    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-foreground',
     chipSelected: 'bg-rose text-white',
     items: [
       { id: 'nausea', emoji: '🤢', tr: 'Bulantı', en: 'Nausea' },
@@ -136,7 +136,7 @@ const CATEGORIES = {
   pregnancy_test: {
     title: { tr: 'Gebelik testi', en: 'Pregnancy test' },
     bgClass: 'bg-orange-light dark:bg-orange/20',
-    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-foreground',
     chipSelected: 'bg-orange text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
@@ -149,7 +149,7 @@ const CATEGORIES = {
     title: { tr: 'Ovülasyon testi', en: 'Ovulation test' },
     subtitle: { tr: 'Ovülasyon zamanınızı öğrenmek için kaydedin', en: 'Track to learn your ovulation time' },
     bgClass: 'bg-teal-light dark:bg-teal/20',
-    chipBase: 'bg-teal-light dark:bg-teal/30 text-teal dark:text-teal-light',
+    chipBase: 'bg-teal-light dark:bg-teal/30 text-foreground',
     chipSelected: 'bg-teal text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
@@ -161,7 +161,7 @@ const CATEGORIES = {
   activity: {
     title: { tr: 'Fiziksel aktivite', en: 'Physical activity' },
     bgClass: 'bg-green-light dark:bg-green/20',
-    chipBase: 'bg-green-light dark:bg-green/30 text-green dark:text-green-light',
+    chipBase: 'bg-green-light dark:bg-green/30 text-foreground',
     chipSelected: 'bg-green text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Egzersiz yapmadım', en: 'No exercise' },
@@ -178,7 +178,7 @@ const CATEGORIES = {
   other: {
     title: { tr: 'Diğer', en: 'Other' },
     bgClass: 'bg-orange-light dark:bg-orange/20',
-    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-foreground',
     chipSelected: 'bg-orange text-white',
     items: [
       { id: 'travel', emoji: '📍', tr: 'Seyahat', en: 'Travel' },
