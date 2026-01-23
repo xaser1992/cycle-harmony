@@ -1,3 +1,4 @@
+import React from 'react';
 import { createRoot } from "react-dom/client";
 import { LocalNotifications } from '@capacitor/local-notifications';
 import App from "./App.tsx";
