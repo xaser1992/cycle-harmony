@@ -1,6 +1,6 @@
-// 🌸 Onboarding Page - Performance Optimized (No framer-motion)
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, Bell, Calendar, Heart, CheckCircle2, User, Stethoscope, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -200,9 +200,11 @@ export default function Onboarding() {
       {/* Progress Bar */}
       <div className="px-6 pt-4">
         <div className="h-1 bg-muted rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-primary rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+          <motion.div 
+            className="h-full bg-primary rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.3 }}
           />
         </div>
         <p className="text-xs text-muted-foreground mt-2 text-center">
@@ -212,372 +214,399 @@ export default function Onboarding() {
 
       {/* Content */}
       <div className="flex-1 flex flex-col px-6 py-6 overflow-y-auto">
-        <div
-          key={step}
-          className="flex-1 flex flex-col animate-fade-in"
-        >
-          {step === 'welcome' && (
-            <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <span className="text-7xl mb-6 animate-pulse">
-                🌸
-              </span>
-              <h1 className="text-3xl font-bold text-foreground mb-3">Döngü Takibi</h1>
-              <p className="text-muted-foreground text-lg max-w-xs">
-                Sağlığını takip et, kendini daha iyi tanı.
-              </p>
-              <Card className="mt-8 p-4 bg-secondary/50 border-0 max-w-xs">
-                <p className="text-sm text-muted-foreground">
-                  🔒 Verileriniz yalnızca cihazınızda saklanır ve tamamen gizlidir.
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex-1 flex flex-col"
+          >
+            {step === 'welcome' && (
+              <div className="flex-1 flex flex-col items-center justify-center text-center">
+                <motion.span 
+                  className="text-7xl mb-6"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                >
+                  🌸
+                </motion.span>
+                <h1 className="text-3xl font-bold text-foreground mb-3">Döngü Takibi</h1>
+                <p className="text-muted-foreground text-lg max-w-xs">
+                  Sağlığını takip et, kendini daha iyi tanı.
                 </p>
-              </Card>
-            </div>
-          )}
-
-          {step === 'personalInfo' && (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-6">
-                <User className="w-12 h-12 text-primary mb-4" />
-                <h2 className="text-2xl font-bold text-foreground mb-2">Kişisel Bilgiler</h2>
-                <p className="text-muted-foreground">Daha doğru tahminler için doğum tarihini gir.</p>
+                <Card className="mt-8 p-4 bg-secondary/50 border-0 max-w-xs">
+                  <p className="text-sm text-muted-foreground">
+                    🔒 Verileriniz yalnızca cihazınızda saklanır ve tamamen gizlidir.
+                  </p>
+                </Card>
               </div>
-              
-              <Card className="p-4 bg-card border-border">
-                <label className="text-sm text-muted-foreground block mb-2">Doğum Tarihi</label>
-                <input
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  max={format(new Date(), 'yyyy-MM-dd')}
-                  className="w-full text-lg p-3 rounded-lg bg-muted border-0 text-foreground"
-                />
-              </Card>
-              
-              {birthDate && (
-                <p className="mt-4 text-sm text-muted-foreground text-center">
-                  {format(new Date(birthDate), 'd MMMM yyyy', { locale: tr })}
+            )}
+
+            {step === 'personalInfo' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-6">
+                  <User className="w-12 h-12 text-primary mb-4" />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Kişisel Bilgiler</h2>
+                  <p className="text-muted-foreground">Daha doğru tahminler için doğum tarihini gir.</p>
+                </div>
+                
+                <Card className="p-4 bg-card border-border">
+                  <label className="text-sm text-muted-foreground block mb-2">Doğum Tarihi</label>
+                  <input
+                    type="date"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    max={format(new Date(), 'yyyy-MM-dd')}
+                    className="w-full text-lg p-3 rounded-lg bg-muted border-0 text-foreground"
+                  />
+                </Card>
+                
+                {birthDate && (
+                  <p className="mt-4 text-sm text-muted-foreground text-center">
+                    {format(new Date(birthDate), 'd MMMM yyyy', { locale: tr })}
+                  </p>
+                )}
+                
+                <p className="mt-4 text-xs text-muted-foreground text-center opacity-70">
+                  Bu bilgi isteğe bağlıdır ve yalnızca yaşa göre tahmin iyileştirmeleri için kullanılır.
                 </p>
-              )}
-              
-              <p className="mt-4 text-xs text-muted-foreground text-center opacity-70">
-                Bu bilgi isteğe bağlıdır ve yalnızca yaşa göre tahmin iyileştirmeleri için kullanılır.
-              </p>
-            </div>
-          )}
+              </div>
+            )}
 
-          {step === 'healthInfo' && (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-6">
-                <Stethoscope className="w-12 h-12 text-primary mb-4" />
-                <h2 className="text-2xl font-bold text-foreground mb-2">Sağlık Bilgileri</h2>
-                <p className="text-muted-foreground">Döngünü etkileyebilecek durumları seç.</p>
-              </div>
-              
-              <div className="space-y-3 mb-6">
-                <label className="text-sm font-medium text-foreground">Sağlık Durumları</label>
-                {HEALTH_CONDITIONS.map((condition) => (
-                  <Card 
-                    key={condition.id}
-                    className={`p-3 cursor-pointer transition-all ${
-                      healthConditions.includes(condition.id)
-                        ? 'bg-primary/10 border-primary'
-                        : 'bg-card border-border'
-                    }`}
-                    onClick={() => toggleHealthCondition(condition.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        healthConditions.includes(condition.id)
-                          ? 'border-primary bg-primary'
-                          : 'border-muted-foreground'
-                      }`}>
-                        {healthConditions.includes(condition.id) && (
-                          <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">{condition.label}</p>
-                        <p className="text-xs text-muted-foreground">{condition.description}</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-              
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-foreground">Doğum Kontrol Yöntemi</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {CONTRACEPTIVE_METHODS.map((method) => (
+            {step === 'healthInfo' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-6">
+                  <Stethoscope className="w-12 h-12 text-primary mb-4" />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Sağlık Bilgileri</h2>
+                  <p className="text-muted-foreground">Döngünü etkileyebilecek durumları seç.</p>
+                </div>
+                
+                <div className="space-y-3 mb-6">
+                  <label className="text-sm font-medium text-foreground">Sağlık Durumları</label>
+                  {HEALTH_CONDITIONS.map((condition) => (
                     <Card 
-                      key={method.id}
-                      className={`p-3 cursor-pointer transition-all text-center ${
-                        contraceptiveMethod === method.id
+                      key={condition.id}
+                      className={`p-3 cursor-pointer transition-all ${
+                        healthConditions.includes(condition.id)
                           ? 'bg-primary/10 border-primary'
                           : 'bg-card border-border'
                       }`}
-                      onClick={() => setContraceptiveMethod(method.id)}
+                      onClick={() => toggleHealthCondition(condition.id)}
                     >
-                      <p className="text-sm font-medium text-foreground">{method.label}</p>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          healthConditions.includes(condition.id)
+                            ? 'border-primary bg-primary'
+                            : 'border-muted-foreground'
+                        }`}>
+                          {healthConditions.includes(condition.id) && (
+                            <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{condition.label}</p>
+                          <p className="text-xs text-muted-foreground">{condition.description}</p>
+                        </div>
+                      </div>
                     </Card>
                   ))}
                 </div>
+                
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-foreground">Doğum Kontrol Yöntemi</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {CONTRACEPTIVE_METHODS.map((method) => (
+                      <Card 
+                        key={method.id}
+                        className={`p-3 cursor-pointer transition-all text-center ${
+                          contraceptiveMethod === method.id
+                            ? 'bg-primary/10 border-primary'
+                            : 'bg-card border-border'
+                        }`}
+                        onClick={() => setContraceptiveMethod(method.id)}
+                      >
+                        <p className="text-sm font-medium text-foreground">{method.label}</p>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {step === 'cycleHistory' && (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-6">
-                <History className="w-12 h-12 text-primary mb-4" />
-                <h2 className="text-2xl font-bold text-foreground mb-2">Geçmiş Döngüler</h2>
-                <p className="text-muted-foreground">Son 3 regl dönemini gir. Daha iyi tahminler için önemli!</p>
-              </div>
-              
-              <div className="space-y-4">
-                {pastPeriods.map((period, index) => (
-                  <Card key={index} className="p-4 bg-card border-border">
-                    <p className="text-sm font-medium text-foreground mb-3">
-                      {index + 1}. Dönem {index === 0 && <span className="text-muted-foreground">(En eski)</span>}
-                    </p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs text-muted-foreground">Başlangıç</label>
-                        <input
-                          type="date"
-                          value={period.startDate}
-                          onChange={(e) => updatePastPeriod(index, 'startDate', e.target.value)}
-                          max={format(new Date(), 'yyyy-MM-dd')}
-                          className="w-full text-sm p-2 rounded-lg bg-muted border-0 text-foreground mt-1"
-                        />
+            {step === 'cycleHistory' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-6">
+                  <History className="w-12 h-12 text-primary mb-4" />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Geçmiş Döngüler</h2>
+                  <p className="text-muted-foreground">Son 3 regl dönemini gir. Daha iyi tahminler için önemli!</p>
+                </div>
+                
+                <div className="space-y-4">
+                  {pastPeriods.map((period, index) => (
+                    <Card key={index} className="p-4 bg-card border-border">
+                      <p className="text-sm font-medium text-foreground mb-3">
+                        {index + 1}. Dönem {index === 0 && <span className="text-muted-foreground">(En eski)</span>}
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground">Başlangıç</label>
+                          <input
+                            type="date"
+                            value={period.startDate}
+                            onChange={(e) => updatePastPeriod(index, 'startDate', e.target.value)}
+                            max={format(new Date(), 'yyyy-MM-dd')}
+                            className="w-full text-sm p-2 rounded-lg bg-muted border-0 text-foreground mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">Bitiş</label>
+                          <input
+                            type="date"
+                            value={period.endDate}
+                            onChange={(e) => updatePastPeriod(index, 'endDate', e.target.value)}
+                            max={format(new Date(), 'yyyy-MM-dd')}
+                            min={period.startDate}
+                            className="w-full text-sm p-2 rounded-lg bg-muted border-0 text-foreground mt-1"
+                          />
+                        </div>
                       </div>
+                    </Card>
+                  ))}
+                </div>
+                
+                <p className="mt-4 text-xs text-muted-foreground text-center">
+                  Hatırlamıyorsan boş bırakabilirsin. Tahmini değerler kullanılacak.
+                </p>
+              </div>
+            )}
+
+            {step === 'lastPeriod' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-8">
+                  <Calendar className="w-12 h-12 text-primary mb-4" />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Son Regl Tarihin</h2>
+                  <p className="text-muted-foreground">En son regl döneminin <strong>başladığı</strong> tarihi seç.</p>
+                </div>
+                <Card className="p-4 bg-card border-border">
+                  <input
+                    type="date"
+                    value={lastPeriodDate}
+                    onChange={(e) => setLastPeriodDate(e.target.value)}
+                    max={format(new Date(), 'yyyy-MM-dd')}
+                    placeholder="Tarih seç"
+                    className="w-full text-lg p-3 rounded-lg bg-muted border-0 text-foreground"
+                  />
+                </Card>
+                {lastPeriodDate && (
+                  <p className="mt-4 text-sm text-muted-foreground text-center">
+                    {format(new Date(lastPeriodDate), 'd MMMM yyyy', { locale: tr })}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {step === 'cycleInfo' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-6">
+                  <Heart className="w-12 h-12 text-primary mb-4" />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Döngü Bilgilerin</h2>
+                  <p className="text-muted-foreground">
+                    {pastPeriods.some(p => p.startDate) 
+                      ? 'Geçmiş döngülerinden hesaplandı. Gerekirse düzenleyebilirsin.'
+                      : 'Ortalama değerleri bilmiyorsan varsayılanları kullanabilirsin.'}
+                  </p>
+                </div>
+                
+                <div className="space-y-6">
+                  <Card className="p-4 bg-card border-border">
+                    <label className="text-sm text-muted-foreground">Döngü Uzunluğu (gün)</label>
+                    <div className="flex items-center gap-4 mt-2">
+                      <Button variant="outline" size="icon" onClick={() => setCycleLength(Math.max(21, cycleLength - 1))}>-</Button>
+                      <span className="text-2xl font-bold text-foreground flex-1 text-center">{cycleLength}</span>
+                      <Button variant="outline" size="icon" onClick={() => setCycleLength(Math.min(40, cycleLength + 1))}>+</Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Bir reglin başlangıcından diğerine kadar geçen gün sayısı
+                    </p>
+                  </Card>
+
+                  <Card className="p-4 bg-card border-border">
+                    <label className="text-sm text-muted-foreground">Regl Süresi (gün)</label>
+                    <div className="flex items-center gap-4 mt-2">
+                      <Button variant="outline" size="icon" onClick={() => setPeriodLength(Math.max(2, periodLength - 1))}>-</Button>
+                      <span className="text-2xl font-bold text-foreground flex-1 text-center">{periodLength}</span>
+                      <Button variant="outline" size="icon" onClick={() => setPeriodLength(Math.min(10, periodLength + 1))}>+</Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Regl kanamasının sürdüğü ortalama gün sayısı
+                    </p>
+                  </Card>
+                </div>
+              </div>
+            )}
+
+            {step === 'dataInfo' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-6">
+                  <span className="text-5xl mb-4 block">📊</span>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Veri Toplama Hakkında</h2>
+                  <p className="text-muted-foreground">
+                    Kişiselleştirilmiş tahminler için verilerine ihtiyacımız var.
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <Card className="p-4 bg-amber/10 border-amber/30">
+                    <div className="flex gap-3">
+                      <span className="text-2xl">⏱️</span>
                       <div>
-                        <label className="text-xs text-muted-foreground">Bitiş</label>
-                        <input
-                          type="date"
-                          value={period.endDate}
-                          onChange={(e) => updatePastPeriod(index, 'endDate', e.target.value)}
-                          max={format(new Date(), 'yyyy-MM-dd')}
-                          min={period.startDate}
-                          className="w-full text-sm p-2 rounded-lg bg-muted border-0 text-foreground mt-1"
-                        />
+                        <p className="font-medium text-foreground">İlk 2-3 Döngü</p>
+                        <p className="text-sm text-muted-foreground">
+                          Uygulama, seni tanımak için ilk 2-3 regl döngünü takip etmeli. Bu süre yaklaşık <strong>2-3 ay</strong> sürer.
+                        </p>
                       </div>
                     </div>
                   </Card>
-                ))}
-              </div>
-              
-              <p className="mt-4 text-xs text-muted-foreground text-center">
-                Hatırlamıyorsan boş bırakabilirsin. Tahmini değerler kullanılacak.
-              </p>
-            </div>
-          )}
-
-          {step === 'lastPeriod' && (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-8">
-                <Calendar className="w-12 h-12 text-primary mb-4" />
-                <h2 className="text-2xl font-bold text-foreground mb-2">Son Regl Tarihin</h2>
-                <p className="text-muted-foreground">En son regl döneminin <strong>başladığı</strong> tarihi seç.</p>
-              </div>
-              <Card className="p-4 bg-card border-border">
-                <input
-                  type="date"
-                  value={lastPeriodDate}
-                  onChange={(e) => setLastPeriodDate(e.target.value)}
-                  max={format(new Date(), 'yyyy-MM-dd')}
-                  placeholder="Tarih seç"
-                  className="w-full text-lg p-3 rounded-lg bg-muted border-0 text-foreground"
-                />
-              </Card>
-              {lastPeriodDate && (
-                <p className="mt-4 text-sm text-muted-foreground text-center">
-                  {format(new Date(lastPeriodDate), 'd MMMM yyyy', { locale: tr })}
-                </p>
-              )}
-            </div>
-          )}
-
-          {step === 'cycleInfo' && (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-6">
-                <Heart className="w-12 h-12 text-primary mb-4" />
-                <h2 className="text-2xl font-bold text-foreground mb-2">Döngü Bilgilerin</h2>
-                <p className="text-muted-foreground">
-                  {pastPeriods.some(p => p.startDate) 
-                    ? 'Geçmiş döngülerinden hesaplandı. Gerekirse düzenleyebilirsin.'
-                    : 'Ortalama değerleri bilmiyorsan varsayılanları kullanabilirsin.'}
-                </p>
-              </div>
-              
-              <div className="space-y-6">
-                <Card className="p-4 bg-card border-border">
-                  <label className="text-sm text-muted-foreground">Döngü Uzunluğu (gün)</label>
-                  <div className="flex items-center gap-4 mt-2">
-                    <Button variant="outline" size="icon" onClick={() => setCycleLength(Math.max(21, cycleLength - 1))}>-</Button>
-                    <span className="text-2xl font-bold text-foreground flex-1 text-center">{cycleLength}</span>
-                    <Button variant="outline" size="icon" onClick={() => setCycleLength(Math.min(40, cycleLength + 1))}>+</Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Bir reglin başlangıcından diğerine kadar geçen gün sayısı
-                  </p>
-                </Card>
-
-                <Card className="p-4 bg-card border-border">
-                  <label className="text-sm text-muted-foreground">Regl Süresi (gün)</label>
-                  <div className="flex items-center gap-4 mt-2">
-                    <Button variant="outline" size="icon" onClick={() => setPeriodLength(Math.max(2, periodLength - 1))}>-</Button>
-                    <span className="text-2xl font-bold text-foreground flex-1 text-center">{periodLength}</span>
-                    <Button variant="outline" size="icon" onClick={() => setPeriodLength(Math.min(10, periodLength + 1))}>+</Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Regl kanamasının sürdüğü ortalama gün sayısı
-                  </p>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {step === 'dataInfo' && (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-6">
-                <span className="text-5xl mb-4 block">📊</span>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Veri Toplama Hakkında</h2>
-                <p className="text-muted-foreground">
-                  Kişiselleştirilmiş tahminler için verilerine ihtiyacımız var.
-                </p>
-              </div>
-              
-              <div className="space-y-4">
-                <Card className="p-4 bg-amber/10 border-amber/30">
-                  <div className="flex gap-3">
-                    <span className="text-2xl">⏱️</span>
-                    <div>
-                      <p className="font-medium text-foreground">İlk 2-3 Döngü</p>
-                      <p className="text-sm text-muted-foreground">
-                        Uygulama, seni tanımak için ilk 2-3 regl döngünü takip etmeli. Bu süre yaklaşık <strong>2-3 ay</strong> sürer.
-                      </p>
+                  
+                  <Card className="p-4 bg-primary/5 border-primary/20">
+                    <div className="flex gap-3">
+                      <span className="text-2xl">🎯</span>
+                      <div>
+                        <p className="font-medium text-foreground">Daha Doğru Tahminler</p>
+                        <p className="text-sm text-muted-foreground">
+                          Ne kadar çok veri girersen, tahminler o kadar doğru olur. Günlük semptomlarm ve ruh halin özellikle yardımcı olur.
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4 bg-primary/5 border-primary/20">
-                  <div className="flex gap-3">
-                    <span className="text-2xl">🎯</span>
-                    <div>
-                      <p className="font-medium text-foreground">Daha Doğru Tahminler</p>
-                      <p className="text-sm text-muted-foreground">
-                        Ne kadar çok veri girersen, tahminler o kadar doğru olur. Günlük semptomlarm ve ruh halin özellikle yardımcı olur.
-                      </p>
+                  </Card>
+                  
+                  <Card className="p-4 bg-emerald/10 border-emerald/30">
+                    <div className="flex gap-3">
+                      <span className="text-2xl">✨</span>
+                      <div>
+                        <p className="font-medium text-foreground">Şimdilik Varsayılan Değerler</p>
+                        <p className="text-sm text-muted-foreground">
+                          Geçmiş döngü bilgilerini girmediysen, ortalama değerler (28 gün döngü, 5 gün regl) kullanılacak ve zamanla kişiselleştirilecek.
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4 bg-emerald/10 border-emerald/30">
-                  <div className="flex gap-3">
-                    <span className="text-2xl">✨</span>
-                    <div>
-                      <p className="font-medium text-foreground">Şimdilik Varsayılan Değerler</p>
-                      <p className="text-sm text-muted-foreground">
-                        Geçmiş döngü bilgilerini girmediysen, ortalama değerler (28 gün döngü, 5 gün regl) kullanılacak ve zamanla kişiselleştirilecek.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {step === 'notifications' && (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-6">
-                <Bell className="w-12 h-12 text-primary mb-4" />
-                <h2 className="text-2xl font-bold text-foreground mb-2">Bildirimler</h2>
-                <p className="text-muted-foreground">
-                  Döngün hakkında zamanında hatırlatmalar almak için bildirim iznine ihtiyacımız var.
-                </p>
-              </div>
-              
-              <Card className="p-5 bg-period-light border-0 mb-6">
-                <div className="space-y-3 text-sm">
-                  <p>✓ Regl yaklaşıyor bildirimi</p>
-                  <p>✓ Yumurtlama günü hatırlatması</p>
-                  <p>✓ PMS dönemi uyarısı</p>
-                  <p>✓ İlaç hatırlatmaları</p>
+                  </Card>
                 </div>
-              </Card>
+              </div>
+            )}
 
-              {/* Permission Request Button - Always visible if not granted */}
-              {notificationPermission !== 'granted' && (
-                <Button
-                  size="lg"
-                  onClick={async () => {
-                    setIsRequestingPermission(true);
-                    try {
-                      const granted = await requestNotificationPermissions();
-                      setNotificationPermission(granted ? 'granted' : 'denied');
-                    } catch (error) {
-                      console.error('Permission request error:', error);
-                      setNotificationPermission('denied');
-                    } finally {
-                      setIsRequestingPermission(false);
-                    }
-                  }}
-                  disabled={isRequestingPermission}
-                  className="w-full rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground"
+            {step === 'notifications' && (
+              <div className="flex-1 flex flex-col">
+                <div className="mb-6">
+                  <Bell className="w-12 h-12 text-primary mb-4" />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Bildirimler</h2>
+                  <p className="text-muted-foreground">
+                    Döngün hakkında zamanında hatırlatmalar almak için bildirim iznine ihtiyacımız var.
+                  </p>
+                </div>
+                
+                <Card className="p-5 bg-period-light border-0 mb-6">
+                  <div className="space-y-3 text-sm">
+                    <p>✓ Regl yaklaşıyor bildirimi</p>
+                    <p>✓ Yumurtlama günü hatırlatması</p>
+                    <p>✓ PMS dönemi uyarısı</p>
+                    <p>✓ İlaç hatırlatmaları</p>
+                  </div>
+                </Card>
+
+                {/* Permission Request Button - Always visible if not granted */}
+                {notificationPermission !== 'granted' && (
+                  <Button
+                    size="lg"
+                    onClick={async () => {
+                      setIsRequestingPermission(true);
+                      try {
+                        const granted = await requestNotificationPermissions();
+                        setNotificationPermission(granted ? 'granted' : 'denied');
+                      } catch (error) {
+                        console.error('Permission request error:', error);
+                        setNotificationPermission('denied');
+                      } finally {
+                        setIsRequestingPermission(false);
+                      }
+                    }}
+                    disabled={isRequestingPermission}
+                    className="w-full rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    {isRequestingPermission ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                      />
+                    ) : (
+                      <>
+                        <Bell className="w-5 h-5 mr-2" />
+                        {notificationPermission === 'denied' 
+                          ? 'Tekrar Dene' 
+                          : 'Bildirimlere İzin Ver'}
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {notificationPermission === 'granted' && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex items-center justify-center gap-2 p-4 bg-emerald/20 rounded-2xl text-emerald"
+                  >
+                    <CheckCircle2 className="w-6 h-6" />
+                    <span className="font-medium">Bildirimler açık!</span>
+                  </motion.div>
+                )}
+
+                {notificationPermission === 'denied' && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="p-3 bg-amber/20 rounded-xl text-amber text-center mt-2"
+                  >
+                    <p className="text-xs opacity-80">
+                      Bildirimlere izin verilmedi. Yukarıdaki butona tıklayarak tekrar deneyebilirsin.
+                    </p>
+                  </motion.div>
+                )}
+
+                <p className="mt-4 text-xs text-muted-foreground text-center">
+                  İstediğin zaman ayarlardan değiştirebilirsin.
+                </p>
+              </div>
+            )}
+
+            {step === 'complete' && (
+              <div className="flex-1 flex flex-col items-center justify-center text-center">
+                <motion.span 
+                  className="text-7xl mb-6"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', bounce: 0.5 }}
                 >
-                  {isRequestingPermission ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Bell className="w-5 h-5 mr-2" />
-                      {notificationPermission === 'denied' 
-                        ? 'Tekrar Dene' 
-                        : 'Bildirimlere İzin Ver'}
-                    </>
-                  )}
-                </Button>
-              )}
-
-              {notificationPermission === 'granted' && (
-                <div className="flex items-center justify-center gap-2 p-4 bg-emerald/20 rounded-2xl text-emerald animate-scale-in">
-                  <CheckCircle2 className="w-6 h-6" />
-                  <span className="font-medium">Bildirimler açık!</span>
-                </div>
-              )}
-
-              {notificationPermission === 'denied' && (
-                <div className="p-3 bg-amber/20 rounded-xl text-amber text-center mt-2 animate-scale-in">
-                  <p className="text-xs opacity-80">
-                    Bildirimlere izin verilmedi. Yukarıdaki butona tıklayarak tekrar deneyebilirsin.
-                  </p>
-                </div>
-              )}
-
-              <p className="mt-4 text-xs text-muted-foreground text-center">
-                İstediğin zaman ayarlardan değiştirebilirsin.
-              </p>
-            </div>
-          )}
-
-          {step === 'complete' && (
-            <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <span className="text-7xl mb-6 animate-bounce">
-                🎉
-              </span>
-              <h2 className="text-2xl font-bold text-foreground mb-3">Hazırsın!</h2>
-              <p className="text-muted-foreground max-w-xs">
-                Döngünü takip etmeye başlayabilirsin. Kendine iyi bak! 🌸
-              </p>
-              
-              {pastPeriods.some(p => p.startDate) && (
-                <Card className="mt-6 p-4 bg-primary/10 border-0 max-w-xs">
-                  <p className="text-sm text-foreground">
-                    📊 Geçmiş {pastPeriods.filter(p => p.startDate).length} döngüye göre tahminlerin kişiselleştirildi.
-                  </p>
-                </Card>
-              )}
-            </div>
-          )}
-        </div>
+                  🎉
+                </motion.span>
+                <h2 className="text-2xl font-bold text-foreground mb-3">Hazırsın!</h2>
+                <p className="text-muted-foreground max-w-xs">
+                  Döngünü takip etmeye başlayabilirsin. Kendine iyi bak! 🌸
+                </p>
+                
+                {pastPeriods.some(p => p.startDate) && (
+                  <Card className="mt-6 p-4 bg-primary/10 border-0 max-w-xs">
+                    <p className="text-sm text-foreground">
+                      📊 Geçmiş {pastPeriods.filter(p => p.startDate).length} döngüye göre tahminlerin kişiselleştirildi.
+                    </p>
+                  </Card>
+                )}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Navigation */}

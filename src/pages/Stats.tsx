@@ -1,5 +1,5 @@
 // 🌸 Statistics Page - Flo Inspired Design (Performance Optimized)
-import { useState, useMemo, useEffect, useRef, memo, useCallback } from 'react';
+import { useState, useMemo, useEffect, memo, useCallback } from 'react';
 import { TrendingUp, Calendar, BarChart3, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
   BarChart, 
@@ -37,13 +37,13 @@ const getChartColors = () => {
   };
   
   return {
-    primary: getHSL('--accent-rose'),
-    secondary: getHSL('--accent-violet'),
-    accent: getHSL('--accent-emerald'),
-    warning: getHSL('--accent-amber'),
-    line: getHSL('--accent-pink'),
-    blue: getHSL('--accent-blue'),
-    cyan: getHSL('--accent-cyan'),
+    primary: getHSL('--rose'),
+    secondary: getHSL('--violet'),
+    accent: getHSL('--emerald'),
+    warning: getHSL('--amber'),
+    line: getHSL('--pink'),
+    blue: getHSL('--blue'),
+    cyan: getHSL('--cyan'),
   };
 };
 
@@ -56,10 +56,10 @@ const getCyclePhaseColors = () => {
   };
   
   return {
-    period: getHSL('--accent-rose'),
-    follicular: getHSL('--accent-blue'),
-    ovulation: getHSL('--accent-violet'),
-    luteal: getHSL('--accent-amber'),
+    period: getHSL('--rose'),
+    follicular: getHSL('--blue'),
+    ovulation: getHSL('--violet'),
+    luteal: getHSL('--amber'),
   };
 };
 
@@ -123,98 +123,6 @@ const ChartCard = memo(({
 ));
 ChartCard.displayName = 'ChartCard';
 
-// Animated SVG Icons for Summary Cards
-const CalendarIcon = memo(() => (
-  <svg className="w-6 h-6 animate-pulse" viewBox="0 0 24 24" fill="none">
-    <rect x="3" y="4" width="18" height="18" rx="3" className="stroke-white" strokeWidth="2" />
-    <path d="M3 10h18" className="stroke-white" strokeWidth="2" />
-    <path d="M8 2v4M16 2v4" className="stroke-white" strokeWidth="2" strokeLinecap="round" />
-    <circle cx="12" cy="16" r="2" className="fill-white animate-ping" style={{ animationDuration: '2s' }} />
-  </svg>
-));
-CalendarIcon.displayName = 'CalendarIcon';
-
-const FlowerIcon = memo(() => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-    <g className="animate-spin" style={{ animationDuration: '8s', transformOrigin: 'center' }}>
-      <circle cx="12" cy="6" r="3" className="fill-white/80" />
-      <circle cx="18" cy="12" r="3" className="fill-white/80" />
-      <circle cx="12" cy="18" r="3" className="fill-white/80" />
-      <circle cx="6" cy="12" r="3" className="fill-white/80" />
-    </g>
-    <circle cx="12" cy="12" r="3" className="fill-white" />
-  </svg>
-));
-FlowerIcon.displayName = 'FlowerIcon';
-
-const OvulationIcon = memo(() => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="6" className="fill-white/30 animate-ping" style={{ animationDuration: '1.5s' }} />
-    <circle cx="12" cy="12" r="5" className="fill-white/50" />
-    <circle cx="12" cy="12" r="3" className="fill-white" />
-    <circle cx="13" cy="11" r="1" className="fill-white/80" />
-  </svg>
-));
-OvulationIcon.displayName = 'OvulationIcon';
-
-const FertileIcon = memo(() => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-    <path 
-      d="M12 3C12 3 4 10 4 15C4 19 7.5 21 12 21C16.5 21 20 19 20 15C20 10 12 3 12 3Z" 
-      className="fill-white/80 animate-bounce" 
-      style={{ animationDuration: '2s' }}
-    />
-    <circle cx="10" cy="14" r="2" className="fill-white/40" />
-    <circle cx="14" cy="12" r="1.5" className="fill-white/40" />
-  </svg>
-));
-FertileIcon.displayName = 'FertileIcon';
-
-const WaterIcon = memo(() => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-    <path 
-      d="M12 2C12 2 5 11 5 16C5 20 8 22 12 22C16 22 19 20 19 16C19 11 12 2 12 2Z" 
-      className="fill-white/80"
-    />
-    <path 
-      d="M12 6C12 6 8 11 8 14C8 16 9.5 17 12 17" 
-      className="stroke-white/40 animate-pulse" 
-      strokeWidth="1.5" 
-      fill="none"
-      style={{ animationDuration: '1.5s' }}
-    />
-  </svg>
-));
-WaterIcon.displayName = 'WaterIcon';
-
-const ScaleIcon = memo(() => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-    <rect x="4" y="16" width="16" height="4" rx="2" className="fill-white/80" />
-    <path d="M12 4v8" className="stroke-white" strokeWidth="2" strokeLinecap="round" />
-    <circle cx="12" cy="12" r="3" className="fill-white animate-pulse" style={{ animationDuration: '2s' }} />
-    <path d="M6 8L12 4L18 8" className="stroke-white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-));
-ScaleIcon.displayName = 'ScaleIcon';
-
-const InsightIcon = memo(() => (
-  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
-    <path 
-      d="M12 2C8 2 5 5 5 9C5 12 7 14 8 15V18C8 19 9 20 10 20H14C15 20 16 19 16 18V15C17 14 19 12 19 9C19 5 16 2 12 2Z" 
-      className="fill-primary/80"
-    />
-    <path d="M10 22h4" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
-    <circle 
-      cx="12" 
-      cy="9" 
-      r="2" 
-      className="fill-background animate-ping" 
-      style={{ animationDuration: '2s' }}
-    />
-  </svg>
-));
-InsightIcon.displayName = 'InsightIcon';
-
 // Summary Card Component - CSS transitions
 const SummaryCard = memo(({ 
   gradient, 
@@ -227,7 +135,7 @@ const SummaryCard = memo(({
 }: { 
   gradient: string;
   shadowColor: string;
-  icon: React.ReactNode;
+  icon: string;
   value: string | number;
   label: string;
   sublabel?: string;
@@ -240,7 +148,7 @@ const SummaryCard = memo(({
       <div className="flex items-start justify-between">
         <div>
           <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
-            {icon}
+            <span className="text-xl">{icon}</span>
           </div>
           <p className="text-3xl font-bold text-white">{value}</p>
           <p className="text-sm text-white/80">{label}</p>
@@ -250,7 +158,7 @@ const SummaryCard = memo(({
     ) : (
       <>
         <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
-          {icon}
+          <span className="text-xl">{icon}</span>
         </div>
         <p className="text-3xl font-bold text-white">{value}</p>
         <p className="text-sm text-white/80">{label}</p>
@@ -323,9 +231,6 @@ export default function StatsPage() {
   const { openUpdateSheet } = useUpdateSheet();
   const { cycleSettings, entries, userSettings } = useCycleData();
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
-  const [chartKey, setChartKey] = useState(0);
-  const [shouldAnimateCharts, setShouldAnimateCharts] = useState(false);
-  const chartsContainerRef = useRef<HTMLDivElement | null>(null);
   const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
   const [historyMonth, setHistoryMonth] = useState(new Date());
   
@@ -347,64 +252,6 @@ export default function StatsPage() {
   const handleTabChange = useCallback((tab: 'stats' | 'charts' | 'history') => {
     setActiveTab(tab);
   }, []);
-
-  // Ensure Recharts animations start ONLY after the charts container has a real size.
-  // In some WebViews/preview environments, charts mount when width/height is still 0,
-  // causing Recharts to skip animations and render the final state.
-  useEffect(() => {
-    if (activeTab !== 'charts') {
-      setShouldAnimateCharts(false);
-      return;
-    }
-
-    setShouldAnimateCharts(false);
-
-    const el = chartsContainerRef.current;
-    if (!el) {
-      // Fallback: if ref isn't ready yet, try once on next frame.
-      const raf = requestAnimationFrame(() => {
-        setChartKey((prev) => prev + 1);
-        setShouldAnimateCharts(true);
-      });
-      return () => cancelAnimationFrame(raf);
-    }
-
-    let raf1 = 0;
-    let raf2 = 0;
-    let didTrigger = false;
-
-    const trigger = () => {
-      if (didTrigger) return;
-      didTrigger = true;
-      raf1 = requestAnimationFrame(() => {
-        raf2 = requestAnimationFrame(() => {
-          // Remount charts after layout settles so animations reliably fire.
-          setChartKey((prev) => prev + 1);
-          setShouldAnimateCharts(true);
-        });
-      });
-    };
-
-    const ro = new ResizeObserver(() => {
-      const rect = el.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) trigger();
-    });
-    ro.observe(el);
-
-    // Immediate check (covers cases where size is already ready)
-    const rect = el.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) trigger();
-
-    // Hard fallback: don't get stuck if ResizeObserver is throttled.
-    const timeout = window.setTimeout(() => trigger(), 250);
-
-    return () => {
-      window.clearTimeout(timeout);
-      ro.disconnect();
-      if (raf1) cancelAnimationFrame(raf1);
-      if (raf2) cancelAnimationFrame(raf2);
-    };
-  }, [activeTab]);
 
   const handlePrevMonth = useCallback(() => {
     setHistoryMonth(prev => subMonths(prev, 1));
@@ -779,12 +626,12 @@ export default function StatsPage() {
                   <AreaChart data={weeklyOverviewData}>
                     <defs>
                       <linearGradient id="colorPeriodArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--accent-rose))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--accent-rose))" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--rose))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--rose))" stopOpacity={0.1}/>
                       </linearGradient>
                       <linearGradient id="colorSymptomArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--accent-violet))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--accent-violet))" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--violet))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--violet))" stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -811,25 +658,21 @@ export default function StatsPage() {
                       type="monotone" 
                       dataKey="periodDays" 
                       name="periodDays"
-                      stroke="hsl(var(--accent-rose))"
+                      stroke="hsl(var(--rose))"
                       fillOpacity={1}
                       fill="url(#colorPeriodArea)"
                       strokeWidth={2}
-                      isAnimationActive={true}
-                      animationDuration={800}
-                      animationEasing="ease-out"
+                      isAnimationActive={false}
                     />
                     <Area 
                       type="monotone" 
                       dataKey="symptomDays" 
                       name="symptomDays"
-                      stroke="hsl(var(--accent-violet))"
+                      stroke="hsl(var(--violet))"
                       fillOpacity={1}
                       fill="url(#colorSymptomArea)"
                       strokeWidth={2}
-                      isAnimationActive={true}
-                      animationDuration={800}
-                      animationEasing="ease-out"
+                      isAnimationActive={false}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -875,11 +718,7 @@ export default function StatsPage() {
         )}
 
         {activeTab === 'charts' && (
-          <div
-            ref={chartsContainerRef}
-            key={`charts-container-${chartKey}`}
-            className="space-y-5 animate-fade-in"
-          >
+          <div className="space-y-5 animate-fade-in">
             {/* Cycle Length Trend - Line Chart */}
             <ChartCard
               title={isEnglish ? 'Cycle Length Trend' : 'Döngü Uzunluğu Trendi'}
@@ -887,8 +726,8 @@ export default function StatsPage() {
               icon={<TrendingUp className="w-5 h-5 text-primary" />}
             >
               <div className="h-44">
-                <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                  <LineChart key={`cycle-length-${chartKey}`} data={cycleLengthData}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={cycleLengthData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis 
                       dataKey="month" 
@@ -910,15 +749,11 @@ export default function StatsPage() {
                     <Line 
                       type="monotone" 
                       dataKey="length" 
-                      stroke="hsl(var(--accent-pink))"
+                      stroke="hsl(var(--pink))"
                       strokeWidth={3}
-                      dot={{ fill: 'hsl(var(--accent-pink))', strokeWidth: 0, r: 5 }}
-                      activeDot={{ r: 7, fill: 'hsl(var(--accent-pink))' }}
-                      isAnimationActive={shouldAnimateCharts}
-                      animationId={chartKey}
-                      animationBegin={0}
-                      animationDuration={1000}
-                      animationEasing="ease-out"
+                      dot={{ fill: 'hsl(var(--pink))', strokeWidth: 0, r: 5 }}
+                      activeDot={{ r: 7, fill: 'hsl(var(--pink))' }}
+                      isAnimationActive={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -932,8 +767,8 @@ export default function StatsPage() {
               icon={<span className="text-lg">💧</span>}
             >
               <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                  <BarChart key={`water-${chartKey}`} data={waterData}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={waterData}>
                     <XAxis 
                       dataKey="day" 
                       axisLine={false}
@@ -954,12 +789,8 @@ export default function StatsPage() {
                     <Bar 
                       dataKey="glasses" 
                       radius={[6, 6, 0, 0]}
-                      fill="hsl(var(--accent-blue))"
-                      isAnimationActive={shouldAnimateCharts}
-                      animationId={chartKey}
-                      animationBegin={0}
-                      animationDuration={600}
-                      animationEasing="ease-out"
+                      fill="hsl(var(--blue))"
+                      isAnimationActive={false}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -989,12 +820,12 @@ export default function StatsPage() {
                   </div>
                 </div>
                 <div className="h-44">
-                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                    <AreaChart key={`weight-${chartKey}`} data={weightData}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={weightData}>
                     <defs>
                       <linearGradient id="colorWeightArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--accent-emerald))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--accent-emerald))" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--emerald))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--emerald))" stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -1016,28 +847,24 @@ export default function StatsPage() {
                       />
                       <ReferenceLine 
                         y={weightStats.target} 
-                        stroke="hsl(var(--accent-rose))" 
+                        stroke="hsl(var(--rose))" 
                         strokeDasharray="5 5" 
                         strokeWidth={2}
                         label={{ 
                           value: `${isEnglish ? 'Target' : 'Hedef'}: ${weightStats.target} kg`, 
                           position: 'insideTopRight',
-                          fill: 'hsl(var(--accent-rose))',
+                          fill: 'hsl(var(--rose))',
                           fontSize: 10
                         }}
                       />
                       <Area 
                         type="monotone" 
                         dataKey="weight" 
-                        stroke="hsl(var(--accent-emerald))"
+                        stroke="hsl(var(--emerald))"
                         fillOpacity={1}
                         fill="url(#colorWeightArea)"
                         strokeWidth={2}
-                        isAnimationActive={shouldAnimateCharts}
-                        animationId={chartKey}
-                        animationBegin={0}
-                        animationDuration={800}
-                        animationEasing="ease-out"
+                        isAnimationActive={false}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -1058,8 +885,8 @@ export default function StatsPage() {
               }
             >
               <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                  <BarChart key={`period-duration-${chartKey}`} data={periodDurationData}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={periodDurationData}>
                     <XAxis 
                       dataKey="month" 
                       axisLine={false}
@@ -1080,16 +907,12 @@ export default function StatsPage() {
                     <Bar 
                       dataKey="duration" 
                       radius={[8, 8, 0, 0]}
-                      isAnimationActive={shouldAnimateCharts}
-                      animationId={chartKey}
-                      animationBegin={0}
-                      animationDuration={600}
-                      animationEasing="ease-out"
+                      isAnimationActive={false}
                     >
                       {periodDurationData.map((_, index) => (
                         <Cell 
                           key={`duration-cell-${index}`} 
-                          fill={index % 2 === 0 ? 'hsl(var(--accent-rose))' : 'hsl(var(--accent-pink))'} 
+                          fill={index % 2 === 0 ? 'hsl(var(--rose))' : 'hsl(var(--pink))'} 
                         />
                       ))}
                     </Bar>
@@ -1112,8 +935,8 @@ export default function StatsPage() {
               <div className="flex items-center gap-6">
                 {/* Donut Chart */}
                 <div className="w-28 h-28 relative">
-                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                    <PieChart key={`phase-${chartKey}`}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
                       <Pie
                         data={phaseDistribution}
                         cx="50%"
@@ -1123,11 +946,7 @@ export default function StatsPage() {
                         paddingAngle={3}
                         dataKey="days"
                         strokeWidth={0}
-                        isAnimationActive={shouldAnimateCharts}
-                        animationId={chartKey}
-                        animationBegin={0}
-                        animationDuration={800}
-                        animationEasing="ease-out"
+                        isAnimationActive={false}
                       >
                         {phaseDistribution.map((entry, index) => (
                           <Cell key={`phase-cell-${index}`} fill={entry.color} />
@@ -1164,7 +983,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-rose to-pink"
                 shadowColor="shadow-rose/20"
-                icon={<CalendarIcon />}
+                icon="📅"
                 value={cycleSettings.cycleLength}
                 label={isEnglish ? 'Cycle Length' : 'Döngü Uzunluğu'}
                 sublabel={isEnglish ? 'avg. days' : 'gün ortalama'}
@@ -1173,7 +992,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-violet to-purple"
                 shadowColor="shadow-violet/20"
-                icon={<FlowerIcon />}
+                icon="🌸"
                 value={cycleSettings.periodLength}
                 label={isEnglish ? 'Period Duration' : 'Regl Süresi'}
                 sublabel={isEnglish ? 'avg. days' : 'gün ortalama'}
@@ -1182,7 +1001,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-cyan to-teal"
                 shadowColor="shadow-teal/20"
-                icon={<OvulationIcon />}
+                icon="🥚"
                 value={14}
                 label={isEnglish ? 'Ovulation' : 'Yumurtlama'}
                 sublabel={isEnglish ? 'cycle day' : 'döngü günü'}
@@ -1191,7 +1010,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-amber to-orange"
                 shadowColor="shadow-orange/20"
-                icon={<FertileIcon />}
+                icon="💐"
                 value={6}
                 label={isEnglish ? 'Fertile Days' : 'Doğurgan Gün'}
                 sublabel={isEnglish ? 'predicted' : 'tahmin edilen'}
@@ -1202,7 +1021,7 @@ export default function StatsPage() {
             <SummaryCard
               gradient="bg-gradient-to-br from-sky to-blue"
               shadowColor="shadow-blue/20"
-              icon={<WaterIcon />}
+              icon="💧"
               value={waterStats.todayGlasses}
               label={isEnglish ? 'Glasses Today' : 'Bugün Bardak'}
               rightContent={
@@ -1220,7 +1039,7 @@ export default function StatsPage() {
               <SummaryCard
                 gradient="bg-gradient-to-br from-emerald to-teal"
                 shadowColor="shadow-teal/20"
-                icon={<ScaleIcon />}
+                icon="⚖️"
                 value={weightStats.current}
                 label="kg"
                 rightContent={
@@ -1248,7 +1067,7 @@ export default function StatsPage() {
             <div className="bg-card rounded-3xl p-5 border border-border/50 animate-fade-in">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <InsightIcon />
+                  <span className="text-2xl">💡</span>
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">

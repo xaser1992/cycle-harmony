@@ -1,5 +1,6 @@
-// 🌸 Profile Page - Performance Optimized (No framer-motion)
+// 🌸 Profile Page - Flo Inspired Design
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   User, 
   Mail, 
@@ -7,6 +8,7 @@ import {
   ChevronLeft,
   Camera,
   Edit3,
+  LogOut,
   Heart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -62,17 +64,22 @@ export default function ProfilePage() {
         
         {/* Back button */}
         <div className="relative px-4 pt-4">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform"
+            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
           >
             <ChevronLeft className="w-5 h-5 text-white" />
-          </button>
+          </motion.button>
         </div>
 
         {/* Profile Avatar */}
         <div className="relative flex flex-col items-center pt-4 pb-20">
-          <div className="relative animate-scale-in">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative"
+          >
             <div className="w-28 h-28 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center overflow-hidden">
               {profile.avatar ? (
                 <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" />
@@ -80,55 +87,82 @@ export default function ProfilePage() {
                 <span className="text-5xl">👩</span>
               )}
             </div>
-            <button
-              className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center active:scale-90 transition-transform"
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center"
             >
               <Camera className="w-4 h-4 text-primary" />
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
-          <h1 className="mt-4 text-xl font-bold text-white animate-fade-in">
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mt-4 text-xl font-bold text-white"
+          >
             {profile.name || 'İsim Ekle'}
-          </h1>
-          <p className="text-white/80 text-sm animate-fade-in" style={{ animationDelay: '100ms' }}>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-white/80 text-sm"
+          >
             {profile.email || 'E-posta ekle'}
-          </p>
+          </motion.p>
         </div>
       </div>
 
       {/* Content */}
       <div className="relative -mt-10 px-4 space-y-4">
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3 animate-fade-in">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-3 gap-3"
+        >
           {stats.map((stat, index) => (
-            <div
+            <motion.div
               key={stat.label}
-              className="bg-card rounded-2xl p-4 shadow-lg border border-border/50 text-center animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * index }}
+              className="bg-card rounded-2xl p-4 shadow-lg border border-border/50 text-center"
             >
               <span className="text-2xl">{stat.icon}</span>
               <p className="text-lg font-bold text-foreground mt-1">{stat.value}</p>
               <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Profile Info Card */}
-        <div className="bg-card rounded-3xl p-5 shadow-lg border border-border/50 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-card rounded-3xl p-5 shadow-lg border border-border/50"
+        >
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-foreground">Profil Bilgileri</h2>
             {!isEditing && (
-              <button
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setIsEditing(true)}
-                className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center active:scale-90 transition-transform"
+                className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center"
               >
                 <Edit3 className="w-4 h-4 text-primary" />
-              </button>
+              </motion.button>
             )}
           </div>
 
           {isEditing ? (
-            <div className="space-y-4 animate-fade-in">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-4"
+            >
               <div>
                 <label className="text-xs text-muted-foreground mb-1 block">İsim</label>
                 <Input
@@ -173,7 +207,7 @@ export default function ProfilePage() {
                   Kaydet
                 </Button>
               </div>
-            </div>
+            </motion.div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-xl">
@@ -207,10 +241,15 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Google Sign In Card */}
-        <div className="bg-card rounded-3xl p-5 shadow-lg border border-border/50 animate-fade-in" style={{ animationDelay: '300ms' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-card rounded-3xl p-5 shadow-lg border border-border/50"
+        >
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue to-sky flex items-center justify-center">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24">
@@ -236,10 +275,15 @@ export default function ProfilePage() {
           <p className="text-xs text-muted-foreground text-center mt-3">
             Google ile giriş yaparak verilerinizi güvende tutabilir ve farklı cihazlarda senkronize edebilirsiniz.
           </p>
-        </div>
+        </motion.div>
 
         {/* Health Reminder */}
-        <div className="bg-gradient-to-r from-rose/10 to-pink/10 rounded-3xl p-5 border border-rose/20 animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-r from-rose/10 to-pink/10 rounded-3xl p-5 border border-rose/20"
+        >
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-rose/20 flex items-center justify-center shrink-0">
               <Heart className="w-5 h-5 text-rose" />
@@ -251,7 +295,7 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Spacer for bottom */}
         <div className="h-6" />

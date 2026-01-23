@@ -1,7 +1,7 @@
 // 🌸 Update Bottom Sheet Component - Flo Inspired Categorized Design
 import { useState, useEffect } from 'react';
-// Removed framer-motion to fix trembling issue on mobile
-import { X, Check, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Check, ChevronLeft, ChevronRight, Search, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,7 @@ const CATEGORIES = {
   flow: {
     title: { tr: 'Adet akışı', en: 'Period flow' },
     bgClass: 'bg-rose-light dark:bg-rose/20',
-    chipBase: 'bg-rose-light dark:bg-rose/30 text-foreground',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
     chipSelected: 'bg-rose text-white',
     items: [
       { id: 'none', emoji: '⚪', tr: 'Yok', en: 'None' },
@@ -46,7 +46,7 @@ const CATEGORIES = {
   mood: {
     title: { tr: 'Ruh hali', en: 'Mood' },
     bgClass: 'bg-amber-light dark:bg-amber/20',
-    chipBase: 'bg-amber-light dark:bg-amber/30 text-foreground',
+    chipBase: 'bg-amber-light dark:bg-amber/30 text-amber dark:text-amber-light',
     chipSelected: 'bg-amber text-white',
     items: [
       { id: 'calm', emoji: '😌', tr: 'Sakinim', en: 'Calm' },
@@ -69,7 +69,7 @@ const CATEGORIES = {
   sexual: {
     title: { tr: 'Cinsel ilişki ve cinsel ilişki isteği', en: 'Sex & sex drive' },
     bgClass: 'bg-pink-light dark:bg-pink/20',
-    chipBase: 'bg-pink-light dark:bg-pink/30 text-foreground',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
     chipSelected: 'bg-pink text-white',
     items: [
       { id: 'no_sex', emoji: '💔', tr: 'Yapmadım', en: 'Did not have sex' },
@@ -89,7 +89,7 @@ const CATEGORIES = {
   symptoms: {
     title: { tr: 'Belirtiler', en: 'Symptoms' },
     bgClass: 'bg-pink-light dark:bg-pink/20',
-    chipBase: 'bg-pink-light dark:bg-pink/30 text-foreground',
+    chipBase: 'bg-pink-light dark:bg-pink/30 text-pink dark:text-pink-light',
     chipSelected: 'bg-pink text-white',
     items: [
       { id: 'all_good', emoji: '👍', tr: 'Her şey yolunda', en: 'All good' },
@@ -109,7 +109,7 @@ const CATEGORIES = {
   discharge: {
     title: { tr: 'Vajinal akıntı', en: 'Vaginal discharge' },
     bgClass: 'bg-violet-light dark:bg-violet/20',
-    chipBase: 'bg-violet-light dark:bg-violet/30 text-foreground',
+    chipBase: 'bg-violet-light dark:bg-violet/30 text-violet dark:text-violet-light',
     chipSelected: 'bg-violet text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Akıntı yok', en: 'No discharge' },
@@ -126,7 +126,7 @@ const CATEGORIES = {
   digestion: {
     title: { tr: 'Sindirim ve dışkı', en: 'Digestion' },
     bgClass: 'bg-rose-light dark:bg-rose/20',
-    chipBase: 'bg-rose-light dark:bg-rose/30 text-foreground',
+    chipBase: 'bg-rose-light dark:bg-rose/30 text-rose dark:text-rose-light',
     chipSelected: 'bg-rose text-white',
     items: [
       { id: 'nausea', emoji: '🤢', tr: 'Bulantı', en: 'Nausea' },
@@ -138,7 +138,7 @@ const CATEGORIES = {
   pregnancy_test: {
     title: { tr: 'Gebelik testi', en: 'Pregnancy test' },
     bgClass: 'bg-orange-light dark:bg-orange/20',
-    chipBase: 'bg-orange-light dark:bg-orange/30 text-foreground',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
     chipSelected: 'bg-orange text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
@@ -151,7 +151,7 @@ const CATEGORIES = {
     title: { tr: 'Ovülasyon testi', en: 'Ovulation test' },
     subtitle: { tr: 'Ovülasyon zamanınızı öğrenmek için kaydedin', en: 'Track to learn your ovulation time' },
     bgClass: 'bg-teal-light dark:bg-teal/20',
-    chipBase: 'bg-teal-light dark:bg-teal/30 text-foreground',
+    chipBase: 'bg-teal-light dark:bg-teal/30 text-teal dark:text-teal-light',
     chipSelected: 'bg-teal text-white',
     items: [
       { id: 'not_taken', emoji: '🚫', tr: 'Test yapmadım', en: 'Did not take test' },
@@ -163,7 +163,7 @@ const CATEGORIES = {
   activity: {
     title: { tr: 'Fiziksel aktivite', en: 'Physical activity' },
     bgClass: 'bg-green-light dark:bg-green/20',
-    chipBase: 'bg-green-light dark:bg-green/30 text-foreground',
+    chipBase: 'bg-green-light dark:bg-green/30 text-green dark:text-green-light',
     chipSelected: 'bg-green text-white',
     items: [
       { id: 'none', emoji: '🚫', tr: 'Egzersiz yapmadım', en: 'No exercise' },
@@ -180,7 +180,7 @@ const CATEGORIES = {
   other: {
     title: { tr: 'Diğer', en: 'Other' },
     bgClass: 'bg-orange-light dark:bg-orange/20',
-    chipBase: 'bg-orange-light dark:bg-orange/30 text-foreground',
+    chipBase: 'bg-orange-light dark:bg-orange/30 text-orange dark:text-orange-light',
     chipSelected: 'bg-orange text-white',
     items: [
       { id: 'travel', emoji: '📍', tr: 'Seyahat', en: 'Travel' },
@@ -356,7 +356,11 @@ export function UpdateSheet({
     if (filteredItems.length === 0) return null;
 
     return (
-      <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
+      <motion.div
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
+      >
         <h3 className="font-medium text-foreground mb-2 text-sm">
           {language === 'tr' ? category.title.tr : category.title.en}
         </h3>
@@ -389,13 +393,17 @@ export function UpdateSheet({
             );
           })}
         </div>
-      </div>
+      </motion.div>
     );
   };
 
   // Water Tracking Card
   const WaterCard = () => (
-    <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
+    <motion.div
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
+    >
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <span className="text-lg">💧</span>
@@ -431,12 +439,14 @@ export function UpdateSheet({
         <span className="text-sm text-muted-foreground">/ {waterGoal.toFixed(2).replace('.', ',')} L</span>
       </div>
       <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-sky rounded-full transition-all duration-300"
-          style={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
+        <motion.div 
+          className="h-full bg-sky rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
+          transition={{ duration: 0.3 }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 
   // Weight Card - with +/- controls like water
@@ -456,7 +466,11 @@ export function UpdateSheet({
     const displayWeight = weight !== null ? weight.toFixed(1) : null;
 
     return (
-      <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
+      <motion.div
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
+      >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
             <span className="text-lg">⚖️</span>
@@ -495,7 +509,7 @@ export function UpdateSheet({
         <p className="text-xs text-center text-muted-foreground mt-2">
           {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
         </p>
-      </div>
+      </motion.div>
     );
   };
 
@@ -550,7 +564,7 @@ export function UpdateSheet({
               <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
             </div>
 
-            {/* Close button - Top Right */}
+            {/* Close button */}
             <button
               type="button"
               onClick={(e) => {
@@ -558,32 +572,51 @@ export function UpdateSheet({
                 e.stopPropagation();
                 onClose();
               }}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center z-50 active:scale-90 transition-transform"
+              className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center z-50 active:scale-90 transition-transform"
             >
-              <X className="w-6 h-6 text-foreground" />
+              <X className="w-6 h-6 text-foreground/70" />
             </button>
 
             {/* Date Navigation */}
-            <div className="flex items-center justify-center gap-4 px-8 mt-2">
-              <button
+            <div className="flex items-center justify-between px-8 mb-4">
+              <motion.button
                 type="button"
                 onClick={goToPreviousDay}
                 className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
+                whileTap={{ scale: 0.9 }}
               >
                 <ChevronLeft className="w-6 h-6 text-foreground/60" />
-              </button>
+              </motion.button>
               
-              <h2 className="text-lg font-semibold text-foreground">
+              <motion.h2 
+                className="text-lg font-semibold text-foreground"
+                key={currentDate.toISOString()}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 {format(currentDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
-              </h2>
+              </motion.h2>
               
-              <button
+              <motion.button
                 type="button"
                 onClick={goToNextDay}
                 className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
+                whileTap={{ scale: 0.9 }}
               >
                 <ChevronRight className="w-6 h-6 text-foreground/60" />
-              </button>
+              </motion.button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={language === 'tr' ? 'Arama' : 'Search'}
+                className="pl-9 h-10 rounded-xl bg-muted/50 border-0 text-sm"
+              />
             </div>
           </div>
 
@@ -694,7 +727,11 @@ export function UpdateSheet({
 
               {/* Notes Section */}
               {!searchQuery && (
-                <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-card rounded-xl p-3 shadow-sm border border-border/40"
+                >
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-sm">📝</span>
                     <h3 className="font-medium text-foreground text-sm">
@@ -708,21 +745,23 @@ export function UpdateSheet({
                     className="rounded-lg resize-none border-border/40 focus:border-primary min-h-[70px] bg-muted/30 text-sm"
                     rows={3}
                   />
-                </div>
+                </motion.div>
               )}
             </div>
           </ScrollArea>
 
           {/* Fixed Save Button */}
           <div className="absolute bottom-0 left-0 right-0 px-3 py-3 bg-gradient-to-t from-card via-card to-transparent safe-area-bottom">
-            <Button
-              onClick={handleSave}
-              size="lg"
-              className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose to-pink active:scale-[0.98] transition-transform"
-            >
-              <Check className="w-4 h-4 mr-2" />
-              {language === 'tr' ? 'Kaydet' : 'Save'}
-            </Button>
+            <motion.div whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={handleSave}
+                size="lg"
+                className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose to-pink"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                {language === 'tr' ? 'Kaydet' : 'Save'}
+              </Button>
+            </motion.div>
           </div>
         </div>
       </SheetContent>

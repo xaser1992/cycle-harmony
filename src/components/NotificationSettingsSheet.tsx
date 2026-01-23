@@ -1,16 +1,26 @@
-// 🔔 Notification Settings Sheet Component - Simplified Single List
+// 🔔 Notification Settings Sheet Component
 import { useState, useEffect, forwardRef } from 'react';
-import {
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
   X, 
   Bell, 
-  Pill
+  Clock, 
+  VolumeX, 
+  Eye,
+  TestTube,
+  Pill,
+  Check
 } from 'lucide-react';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import { TimePicker } from '@/components/TimePicker';
 import { useCycleData } from '@/hooks/useCycleData';
 import { App } from '@capacitor/app';
 import { toast } from 'sonner';
 import { 
+  sendTestNotification, 
   requestNotificationPermissions,
   checkNotificationPermissions 
 } from '@/lib/notifications';
@@ -19,122 +29,40 @@ import {
   cancelMedicationNotifications
 } from '@/lib/medicationNotifications';
 import { getMedications } from '@/lib/medicationStorage';
-import type { NotificationType } from '@/types/cycle';
+import type { NotificationType, PrivacyMode } from '@/types/cycle';
 
 interface NotificationSettingsSheetProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-// All notification types in one list with categories
-const allNotificationTypes: { 
-  key: NotificationType; 
-  label: { tr: string; en: string }; 
-  description: { tr: string; en: string };
-  category: 'cycle' | 'wellness';
-}[] = [
-  // Cycle notifications
-  { key: 'period_approaching', label: { tr: 'Regl Yaklaşıyor', en: 'Period Approaching' }, description: { tr: '2 gün önce hatırlatma', en: 'Reminder 2 days before' }, category: 'cycle' },
-  { key: 'period_expected', label: { tr: 'Regl Bugün', en: 'Period Today' }, description: { tr: 'Beklenen gün bildirimi', en: 'Expected day notification' }, category: 'cycle' },
-  { key: 'period_late', label: { tr: 'Regl Gecikti', en: 'Period Late' }, description: { tr: 'Gecikme uyarısı', en: 'Late warning' }, category: 'cycle' },
-  { key: 'fertile_start', label: { tr: 'Doğurgan Dönem', en: 'Fertile Window' }, description: { tr: 'Dönem başlangıcı', en: 'Window start' }, category: 'cycle' },
-  { key: 'ovulation_day', label: { tr: 'Yumurtlama Günü', en: 'Ovulation Day' }, description: { tr: 'Tahmini yumurtlama', en: 'Estimated ovulation' }, category: 'cycle' },
-  { key: 'fertile_ending', label: { tr: 'Dönem Bitiyor', en: 'Window Ending' }, description: { tr: 'Dönem sonu uyarısı', en: 'Window end warning' }, category: 'cycle' },
-  { key: 'pms_reminder', label: { tr: 'PMS Hatırlatması', en: 'PMS Reminder' }, description: { tr: 'PMS dönemi bildirimi', en: 'PMS period notification' }, category: 'cycle' },
-  { key: 'daily_checkin', label: { tr: 'Günlük Check-in', en: 'Daily Check-in' }, description: { tr: 'Durumunu kaydet', en: 'Log your status' }, category: 'cycle' },
-  // Wellness notifications
-  { key: 'water_reminder', label: { tr: 'Su İç', en: 'Drink Water' }, description: { tr: 'Günde 3 kez hatırlatma', en: '3 times a day reminder' }, category: 'wellness' },
-  { key: 'exercise_reminder', label: { tr: 'Egzersiz', en: 'Exercise' }, description: { tr: 'Günlük hareket', en: 'Daily movement' }, category: 'wellness' },
+const cycleNotificationTypes: { key: NotificationType; label: string; emoji: string; description: string }[] = [
+  { key: 'period_approaching', label: 'Regl Yaklaşıyor', emoji: '🌸', description: '2 gün önce hatırlatma' },
+  { key: 'period_expected', label: 'Regl Bugün', emoji: '📅', description: 'Beklenen gün bildirimi' },
+  { key: 'period_late', label: 'Regl Gecikti', emoji: '⏰', description: 'Gecikme uyarısı' },
+  { key: 'fertile_start', label: 'Doğurgan Dönem', emoji: '💐', description: 'Dönem başlangıcı' },
+  { key: 'ovulation_day', label: 'Yumurtlama Günü', emoji: '🥚', description: 'Tahmini yumurtlama' },
+  { key: 'fertile_ending', label: 'Dönem Bitiyor', emoji: '🌙', description: 'Dönem sonu uyarısı' },
+  { key: 'pms_reminder', label: 'PMS Hatırlatması', emoji: '⚡', description: 'PMS dönemi bildirimi' },
+  { key: 'daily_checkin', label: 'Günlük Check-in', emoji: '✅', description: 'Durumunu kaydet' },
 ];
 
-// Animated icon component for each notification type
-function NotificationIcon({ type, isEnabled }: { type: NotificationType; isEnabled: boolean }) {
-  const baseClass = `w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${isEnabled ? 'scale-100' : 'scale-95 opacity-70'}`;
-  
-  switch (type) {
-    case 'period_approaching':
-    case 'period_expected':
-    case 'period_late':
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-rose to-pink`}>
-          <svg className={`w-5 h-5 ${isEnabled ? 'animate-pulse' : ''}`} viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="8" className="fill-white/90" />
-            <path d="M12 8v8M8 12h8" stroke="hsl(var(--rose))" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="12" cy="12" r="3" className="fill-rose/40" />
-          </svg>
-        </div>
-      );
-    case 'fertile_start':
-    case 'fertile_ending':
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-teal to-cyan`}>
-          <svg className={`w-5 h-5 ${isEnabled ? 'animate-bounce' : ''}`} style={{ animationDuration: '2s' }} viewBox="0 0 24 24" fill="none">
-            <path d="M12 21c-1.5-1.5-6-5-6-10a6 6 0 1 1 12 0c0 5-4.5 8.5-6 10z" fill="white" opacity="0.9" />
-            <path d="M12 18c-1-1-4-3.5-4-7a4 4 0 1 1 8 0c0 3.5-3 6-4 7z" className="fill-teal/50" />
-            <circle cx="10" cy="10" r="1.5" fill="white" opacity="0.8" />
-          </svg>
-        </div>
-      );
-    case 'ovulation_day':
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-violet to-purple`}>
-          <svg className={`w-5 h-5 ${isEnabled ? 'animate-ping' : ''}`} style={{ animationDuration: '2s' }} viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
-            <circle cx="12" cy="12" r="5" className="fill-violet/60" />
-            <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
-          </svg>
-        </div>
-      );
-    case 'pms_reminder':
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-amber to-orange`}>
-          <svg className={`w-5 h-5 ${isEnabled ? 'animate-pulse' : ''}`} viewBox="0 0 24 24" fill="none">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" opacity="0.9" />
-          </svg>
-        </div>
-      );
-    case 'daily_checkin':
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-emerald to-green`}>
-          <svg className={`w-5 h-5 ${isEnabled ? 'animate-bounce' : ''}`} style={{ animationDuration: '1.5s' }} viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" fill="white" opacity="0.9" />
-            <path d="M9 12l2 2 4-4" stroke="hsl(var(--emerald))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      );
-    case 'water_reminder':
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-sky to-blue`}>
-          <svg className={`w-5 h-5 ${isEnabled ? 'animate-bounce' : ''}`} style={{ animationDuration: '2s' }} viewBox="0 0 24 24" fill="none">
-            <path d="M12 2c-4 6-7 9-7 13a7 7 0 1 0 14 0c0-4-3-7-7-13z" fill="white" opacity="0.9" />
-            <path d="M12 6c-2.5 4-4.5 6-4.5 8.5a4.5 4.5 0 1 0 9 0c0-2.5-2-4.5-4.5-8.5z" className="fill-sky/50" />
-          </svg>
-        </div>
-      );
-    case 'exercise_reminder':
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-orange to-red`}>
-          <svg className={`w-5 h-5 ${isEnabled ? 'animate-bounce' : ''}`} style={{ animationDuration: '1s' }} viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="5" r="2.5" fill="white" opacity="0.9" />
-            <path d="M12 8v5M9 10l3 3 3-3M8 18l4-5 4 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      );
-    default:
-      return (
-        <div className={`${baseClass} bg-gradient-to-br from-slate to-gray`}>
-          <Bell className="w-5 h-5 text-white" />
-        </div>
-      );
-  }
-}
+const wellnessNotificationTypes: { key: NotificationType; label: string; emoji: string; description: string }[] = [
+  { key: 'water_reminder', label: 'Su İç', emoji: '💧', description: 'Günde 3 kez hatırlatma' },
+  { key: 'exercise_reminder', label: 'Egzersiz', emoji: '🏃‍♀️', description: 'Günlük hareket' },
+];
+
+const privacyModes: { value: PrivacyMode; label: string; description: string; icon: string }[] = [
+  { value: 'off', label: 'Tam', description: 'Detaylı bildirim içeriği', icon: '👁️' },
+  { value: 'partial', label: 'Kısmi', description: 'Genel hatırlatma', icon: '👀' },
+  { value: 'full', label: 'Gizli', description: 'Sadece başlık göster', icon: '🔒' },
+];
 
 export const NotificationSettingsSheet = forwardRef<HTMLDivElement, NotificationSettingsSheetProps>(function NotificationSettingsSheet({ isOpen, onClose }, ref) {
   const { notificationPrefs, updateNotificationPrefs, userSettings } = useCycleData();
+  const [activeTab, setActiveTab] = useState<'cycle' | 'wellness' | 'medication' | 'settings'>('cycle');
   const [medicationNotificationsEnabled, setMedicationNotificationsEnabled] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
-  
-  const isEnglish = userSettings.language === 'en';
 
   // Check permissions on open
   useEffect(() => {
@@ -160,9 +88,18 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
     const granted = await requestNotificationPermissions();
     setHasPermission(granted);
     if (granted) {
-      toast.success(isEnglish ? 'Notification permission granted!' : 'Bildirim izni verildi!');
+      toast.success('Bildirim izni verildi!');
     } else {
-      toast.error(isEnglish ? 'Notification permission denied' : 'Bildirim izni reddedildi');
+      toast.error('Bildirim izni reddedildi');
+    }
+  };
+
+  const handleTestNotification = async () => {
+    try {
+      await sendTestNotification(userSettings.language);
+      toast.success('Test bildirimi gönderildi!');
+    } catch (error) {
+      toast.error('Bildirim gönderilemedi');
     }
   };
 
@@ -180,217 +117,334 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
     if (enabled) {
       const medications = await getMedications();
       await scheduleMedicationNotifications(medications.filter(m => m.isActive));
-      toast.success(isEnglish ? 'Medication reminders enabled' : 'İlaç hatırlatmaları açıldı');
+      toast.success('İlaç hatırlatmaları açıldı');
     } else {
       await cancelMedicationNotifications();
-      toast.success(isEnglish ? 'Medication reminders disabled' : 'İlaç hatırlatmaları kapatıldı');
+      toast.success('İlaç hatırlatmaları kapatıldı');
     }
   };
 
-  if (!isOpen) return null;
+  const tabs = [
+    { id: 'cycle', label: 'Döngü', icon: '🌸' },
+    { id: 'wellness', label: 'Wellness', icon: '💧' },
+    { id: 'medication', label: 'İlaç', icon: '💊' },
+    { id: 'settings', label: 'Ayarlar', icon: '⚙️' },
+  ] as const;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col h-full">
-      {/* Accessibility: Hidden title for screen readers */}
-      <div className="sr-only">
-        <h1>{isEnglish ? 'Notification Settings' : 'Bildirim Ayarları'}</h1>
-        <p>{isEnglish ? 'Manage your notification preferences' : 'Bildirim tercihlerinizi yönetin'}</p>
-      </div>
-
-      {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-violet to-purple px-6 pt-6 pb-6">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+    <Sheet open={isOpen} onOpenChange={() => {}}>
+      <SheetContent 
+        side="bottom" 
+        className="h-[90vh] rounded-t-[2rem] p-0 border-0"
+        aria-describedby={undefined}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
+        {/* Accessibility: Hidden title for screen readers */}
+        <VisuallyHidden.Root>
+          <SheetTitle>Bildirim Ayarları</SheetTitle>
+          <SheetDescription>Bildirim tercihlerinizi yönetin</SheetDescription>
+        </VisuallyHidden.Root>
         
-        {/* Close button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center z-50 active:scale-90 transition-transform"
-        >
-          <X className="w-5 h-5 text-white" />
-        </button>
-
-        <div className="relative">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Bell className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                {isEnglish ? 'Notifications' : 'Bildirimler'}
-              </h2>
-              <p className="text-sm text-white/80">
-                {hasPermission 
-                  ? (isEnglish ? 'Permission granted ✓' : 'İzin verildi ✓')
-                  : (isEnglish ? 'Permission required' : 'İzin gerekli')
-                }
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Master Toggle - Moved to top */}
-        <div className="flex items-center justify-between p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-          <span className="text-white font-medium">
-            {isEnglish ? 'All Notifications' : 'Tüm Bildirimler'}
-          </span>
-          <div
-            className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors ${
-              notificationPrefs.enabled ? 'bg-white' : 'bg-white/30'
-            }`}
-            onClick={() => updateNotificationPrefs({ enabled: !notificationPrefs.enabled })}
-          >
-            <div
-              className={`absolute top-1 w-6 h-6 rounded-full shadow-md transition-all ${
-                notificationPrefs.enabled ? 'bg-violet-500 left-[calc(100%-28px)]' : 'bg-white left-1'
-              }`}
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="relative overflow-hidden bg-gradient-to-r from-violet to-purple px-6 pt-6 pb-8">
+            <motion.div
+              className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
             />
-          </div>
-        </div>
-      </div>
-
-      {/* Content - Single scrollable list */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 pb-32 bg-background">
-        {!hasPermission && (
-          <div className="mb-4 p-4 bg-accent rounded-2xl">
-            <p className="text-sm text-accent-foreground mb-3">
-              {isEnglish 
-                ? 'You need to grant permission to receive notifications.'
-                : 'Bildirimleri almak için izin vermeniz gerekiyor.'
-              }
-            </p>
-            <Button
-              onClick={handleRequestPermissions}
-              className="w-full bg-amber hover:bg-amber/90"
+            
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center z-50 active:scale-90 transition-transform"
             >
-              {isEnglish ? 'Grant Permission' : 'İzin Ver'}
-            </Button>
-          </div>
-        )}
+              <X className="w-5 h-5 text-white" />
+            </button>
 
-        {/* All Notifications List */}
-        <div className="space-y-3">
-          {/* Cycle Section Header */}
-          <div className="flex items-center gap-2 pt-2 pb-1">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose to-pink flex items-center justify-center">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="8" className="fill-white/90" />
-                <circle cx="12" cy="12" r="4" className="fill-rose/50" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold text-foreground">
-              {isEnglish ? 'Cycle Notifications' : 'Döngü Bildirimleri'}
-            </span>
-          </div>
-
-          {allNotificationTypes.filter(t => t.category === 'cycle').map((type) => (
-            <div
-              key={type.key}
-              className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
-            >
-              <div className="flex items-center gap-3">
-                <NotificationIcon type={type.key} isEnabled={notificationPrefs.togglesByType[type.key] && notificationPrefs.enabled} />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Bell className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {isEnglish ? type.label.en : type.label.tr}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {isEnglish ? type.description.en : type.description.tr}
+                  <h2 className="text-xl font-bold text-white">Bildirim Ayarları</h2>
+                  <p className="text-sm text-white/80">
+                    {hasPermission ? 'İzin verildi ✓' : 'İzin gerekli'}
                   </p>
                 </div>
               </div>
-              <Switch
-                checked={notificationPrefs.togglesByType[type.key]}
-                onCheckedChange={(checked) => handleNotificationToggle(type.key, checked)}
-                disabled={!notificationPrefs.enabled}
-              />
             </div>
-          ))}
 
-          {/* Wellness Section Header */}
-          <div className="flex items-center gap-2 pt-4 pb-1">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky to-blue flex items-center justify-center">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2c-4 6-7 9-7 13a7 7 0 1 0 14 0c0-4-3-7-7-13z" fill="white" opacity="0.9" />
-              </svg>
+            {/* Master Toggle */}
+            <div className="flex items-center justify-between mt-4 p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+              <span className="text-white font-medium">Tüm Bildirimler</span>
+              <motion.div
+                className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors ${
+                  notificationPrefs.enabled ? 'bg-white' : 'bg-white/30'
+                }`}
+                onClick={() => updateNotificationPrefs({ enabled: !notificationPrefs.enabled })}
+                whileTap={{ scale: 0.95 }}
+              >
+                <motion.div
+                  className={`absolute top-1 w-6 h-6 rounded-full shadow-md ${
+                    notificationPrefs.enabled ? 'bg-violet-500' : 'bg-white'
+                  }`}
+                  animate={{ left: notificationPrefs.enabled ? 'calc(100% - 28px)' : '4px' }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              </motion.div>
             </div>
-            <span className="text-sm font-semibold text-foreground">
-              {isEnglish ? 'Wellness Reminders' : 'Sağlık Hatırlatmaları'}
-            </span>
+
+            {/* Tab Navigation */}
+            <div className="flex gap-2 mt-4">
+              {tabs.map((tab) => (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-2 px-2 rounded-xl text-xs font-medium transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-white text-foreground shadow-lg'
+                      : 'bg-white/20 text-white/90 hover:bg-white/30'
+                  }`}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <span className="mr-1">{tab.icon}</span>
+                  {tab.label}
+                </motion.button>
+              ))}
+            </div>
           </div>
 
-          {allNotificationTypes.filter(t => t.category === 'wellness').map((type) => (
-            <div
-              key={type.key}
-              className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
-            >
-              <div className="flex items-center gap-3">
-                <NotificationIcon type={type.key} isEnabled={notificationPrefs.togglesByType[type.key] && notificationPrefs.enabled} />
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {isEnglish ? type.label.en : type.label.tr}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {isEnglish ? type.description.en : type.description.tr}
-                  </p>
-                </div>
-              </div>
-              <Switch
-                checked={notificationPrefs.togglesByType[type.key]}
-                onCheckedChange={(checked) => handleNotificationToggle(type.key, checked)}
-                disabled={!notificationPrefs.enabled}
-              />
-            </div>
-          ))}
-
-          {/* Medication Section Header */}
-          <div className="flex items-center gap-2 pt-4 pb-1">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet to-purple flex items-center justify-center">
-              <Pill className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-sm font-semibold text-foreground">
-              {isEnglish ? 'Medication Reminders' : 'İlaç Hatırlatmaları'}
-            </span>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet/10 to-purple/10 rounded-2xl border border-violet-light/30">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-violet to-purple flex items-center justify-center transition-all ${medicationNotificationsEnabled ? 'scale-100' : 'scale-95 opacity-70'}`}>
-                <Pill className={`w-5 h-5 text-white ${medicationNotificationsEnabled ? 'animate-bounce' : ''}`} style={{ animationDuration: '2s' }} />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">
-                  {isEnglish ? 'Medication Alerts' : 'İlaç Bildirimleri'}
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto px-6 py-6 bg-background">
+            {!hasPermission && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-4 bg-accent rounded-2xl"
+              >
+                <p className="text-sm text-accent-foreground mb-3">
+                  Bildirimleri almak için izin vermeniz gerekiyor.
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {isEnglish 
-                    ? 'Auto-reminders for your medications'
-                    : 'Eklediğiniz ilaçlar için otomatik bildirim'
-                  }
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={medicationNotificationsEnabled}
-              onCheckedChange={handleMedicationNotificationsToggle}
-              disabled={!notificationPrefs.enabled}
-            />
-          </div>
+                <Button
+                  onClick={handleRequestPermissions}
+                  className="w-full bg-amber hover:bg-amber/90"
+                >
+                  İzin Ver
+                </Button>
+              </motion.div>
+            )}
 
-          <div className="p-4 bg-muted/50 rounded-xl mt-2">
-            <p className="text-sm text-muted-foreground">
-              💡 {isEnglish 
-                ? 'You will receive reminders at the times you set for each medication. Use the "Medications" tab to add medications.'
-                : 'Her ilaç için belirlediğiniz saatlerde hatırlatma alırsınız. İlaç eklemek için "İlaçlar" sekmesini kullanın.'
-              }
-            </p>
+            <AnimatePresence mode="wait">
+              {activeTab === 'cycle' && (
+                <motion.div
+                  key="cycle"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="space-y-3"
+                >
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Döngü bildirimleri ile önemli günleri kaçırmayın
+                  </p>
+                  {cycleNotificationTypes.map((type) => (
+                    <div
+                      key={type.key}
+                      className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{type.emoji}</span>
+                        <div>
+                          <p className="text-sm font-medium">{type.label}</p>
+                          <p className="text-xs text-muted-foreground">{type.description}</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notificationPrefs.togglesByType[type.key]}
+                        onCheckedChange={(checked) => handleNotificationToggle(type.key, checked)}
+                        disabled={!notificationPrefs.enabled}
+                      />
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+
+              {activeTab === 'wellness' && (
+                <motion.div
+                  key="wellness"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="space-y-3"
+                >
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Günlük sağlık alışkanlıkları için hatırlatmalar
+                  </p>
+                  {wellnessNotificationTypes.map((type) => (
+                    <div
+                      key={type.key}
+                      className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{type.emoji}</span>
+                        <div>
+                          <p className="text-sm font-medium">{type.label}</p>
+                          <p className="text-xs text-muted-foreground">{type.description}</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notificationPrefs.togglesByType[type.key]}
+                        onCheckedChange={(checked) => handleNotificationToggle(type.key, checked)}
+                        disabled={!notificationPrefs.enabled}
+                      />
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+
+              {activeTab === 'medication' && (
+                <motion.div
+                  key="medication"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="space-y-4"
+                >
+                  <p className="text-sm text-muted-foreground mb-4">
+                    İlaçlarınız için zamanında hatırlatmalar alın
+                  </p>
+                  
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet/10 to-purple/10 rounded-2xl border border-violet-light/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet to-purple flex items-center justify-center">
+                        <Pill className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">İlaç Hatırlatmaları</p>
+                        <p className="text-xs text-muted-foreground">
+                          Eklediğiniz ilaçlar için otomatik bildirim
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={medicationNotificationsEnabled}
+                      onCheckedChange={handleMedicationNotificationsToggle}
+                      disabled={!notificationPrefs.enabled}
+                    />
+                  </div>
+
+                  <div className="p-4 bg-muted/50 rounded-xl">
+                    <p className="text-sm text-muted-foreground">
+                      💡 Her ilaç için belirlediğiniz saatlerde hatırlatma alırsınız. 
+                      İlaç eklemek için "İlaçlar" sekmesini kullanın.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'settings' && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="space-y-4"
+                >
+                  {/* Time Settings */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-foreground">Zamanlama</h3>
+                    
+                    <div className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-violet" />
+                        <div>
+                          <p className="text-sm font-medium">Bildirim Saati</p>
+                          <p className="text-xs text-muted-foreground">Tercih edilen saat</p>
+                        </div>
+                      </div>
+                      <TimePicker
+                        value={notificationPrefs.preferredTime}
+                        onChange={(time) => updateNotificationPrefs({ preferredTime: time })}
+                        label=""
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50">
+                      <div className="flex items-center gap-3">
+                        <VolumeX className="w-5 h-5 text-violet" />
+                        <div>
+                          <p className="text-sm font-medium">Sessiz Saatler</p>
+                          <p className="text-xs text-muted-foreground">Bu saatlerde bildirim gelmez</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TimePicker
+                          value={notificationPrefs.quietHoursStart}
+                          onChange={(time) => updateNotificationPrefs({ quietHoursStart: time })}
+                          label=""
+                        />
+                        <span className="text-muted-foreground text-xs">-</span>
+                        <TimePicker
+                          value={notificationPrefs.quietHoursEnd}
+                          onChange={(time) => updateNotificationPrefs({ quietHoursEnd: time })}
+                          label=""
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Privacy Mode */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      Gizlilik Modu
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {privacyModes.map((mode) => (
+                        <motion.button
+                          key={mode.value}
+                          onClick={() => updateNotificationPrefs({ privacyMode: mode.value })}
+                          className={`p-3 rounded-xl text-center transition-all ${
+                            notificationPrefs.privacyMode === mode.value
+                              ? 'bg-gradient-to-r from-violet-400 to-purple-500 text-white shadow-md'
+                              : 'bg-card border border-border/50'
+                          }`}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          <span className="text-lg block mb-1">{mode.icon}</span>
+                          <p className="text-xs font-medium">{mode.label}</p>
+                        </motion.button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {privacyModes.find(m => m.value === notificationPrefs.privacyMode)?.description}
+                    </p>
+                  </div>
+
+                  {/* Test Notification */}
+                  <Button
+                    onClick={handleTestNotification}
+                    variant="outline"
+                    className="w-full"
+                    disabled={!hasPermission || !notificationPrefs.enabled}
+                  >
+                    <TestTube className="w-4 h-4 mr-2" />
+                    Test Bildirimi Gönder
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 });

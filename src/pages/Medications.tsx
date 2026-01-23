@@ -1,5 +1,6 @@
-// 💊 Medication Tracking Page - Flo Inspired Design (Performance Optimized)
-import { useState, useEffect } from 'react';
+// 💊 Medication Tracking Page - Flo Inspired Design
+import { useState, useEffect, forwardRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Check, X, Clock, Trash2, Edit2, ChevronRight, TrendingUp } from 'lucide-react';
 import { format, isToday } from 'date-fns';
 import { tr } from 'date-fns/locale';

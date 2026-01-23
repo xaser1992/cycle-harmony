@@ -1,5 +1,6 @@
-// 🌸 Time Picker Component - Performance Optimized
+// 🌸 Time Picker Component
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +34,7 @@ export function TimePicker({ value, onChange, label }: TimePickerProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors active:scale-95"
+        className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
       >
         <Clock className="w-4 h-4 text-muted-foreground" />
         <span className="font-medium">{value}</span>
@@ -51,7 +52,15 @@ export function TimePicker({ value, onChange, label }: TimePickerProps) {
               <span className="text-xs text-muted-foreground mb-2">Saat</span>
               <div className="relative h-48 overflow-hidden">
                 <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-10 bg-primary/10 rounded-lg pointer-events-none z-10" />
-                <div className="flex flex-col items-center overflow-y-auto h-full scroll-smooth">
+                <motion.div
+                  className="flex flex-col items-center"
+                  drag="y"
+                  dragConstraints={{ top: -(hours * 40), bottom: ((23 - hours) * 40) }}
+                  onDragEnd={(_, info) => {
+                    const offset = Math.round(info.offset.y / 40);
+                    setHours(Math.max(0, Math.min(23, hours - offset)));
+                  }}
+                >
                   <div className="h-20" />
                   {hourOptions.map((h) => (
                     <button
@@ -67,7 +76,7 @@ export function TimePicker({ value, onChange, label }: TimePickerProps) {
                     </button>
                   ))}
                   <div className="h-20" />
-                </div>
+                </motion.div>
               </div>
             </div>
 

@@ -1,5 +1,6 @@
-// 🌸 PIN Lock Screen Component with Biometric Support - Performance Optimized
+// 🌸 PIN Lock Screen Component with Biometric Support
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Delete, Fingerprint, ScanFace } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { verifyBiometric, checkBiometricAvailability, type BiometricStatus } from '@/lib/biometric';
@@ -109,9 +110,13 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin, t
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center safe-area-top safe-area-bottom">
       {/* Logo */}
-      <div className="text-6xl mb-8 animate-scale-in">
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        className="text-6xl mb-8"
+      >
         🌸
-      </div>
+      </motion.div>
 
       {/* Title */}
       <h1 className="text-xl font-bold text-foreground mb-2">
@@ -122,43 +127,53 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin, t
       </h1>
       
       {error && (
-        <p className="text-destructive text-sm mb-4 animate-fade-in">
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-destructive text-sm mb-4"
+        >
           {error}
-        </p>
+        </motion.p>
       )}
 
       {/* PIN Dots */}
-      <div 
-        className={`flex gap-4 my-8 ${shake ? 'animate-shake' : ''}`}
+      <motion.div 
+        className="flex gap-4 my-8"
+        animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
+        transition={{ duration: 0.4 }}
       >
         {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-          <div
+          <motion.div
             key={i}
-            className={`w-4 h-4 rounded-full border-2 transition-all duration-150 ${
+            className={`w-4 h-4 rounded-full border-2 transition-colors ${
               i < pin.length 
-                ? 'bg-primary border-primary scale-110' 
+                ? 'bg-primary border-primary' 
                 : 'border-muted-foreground'
             }`}
+            animate={i < pin.length ? { scale: [1, 1.2, 1] } : {}}
+            transition={{ duration: 0.15 }}
           />
         ))}
-      </div>
+      </motion.div>
 
       {/* Number Pad */}
       <div className="grid grid-cols-3 gap-4 w-64">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <button
+          <motion.button
             key={num}
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleNumberPress(num)}
-            className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-medium hover:bg-muted/80 active:scale-90 transition-all duration-150 mx-auto"
+            className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-medium hover:bg-muted/80 transition-colors mx-auto"
           >
             {num}
-          </button>
+          </motion.button>
         ))}
         
         {/* Biometric Button */}
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={handleBiometric}
-          className={`w-16 h-16 rounded-full flex items-center justify-center active:scale-90 transition-all duration-150 mx-auto ${
+          className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors mx-auto ${
             biometricStatus?.isAvailable && !isSettingPin
               ? 'bg-primary/10 hover:bg-primary/20'
               : 'bg-muted hover:bg-muted/80'
@@ -166,7 +181,11 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin, t
           disabled={isSettingPin || !biometricStatus?.isAvailable || isVerifying}
         >
           {isVerifying ? (
-            <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full"
+            />
           ) : biometricStatus?.biometryType === 'face' ? (
             <ScanFace className={`w-6 h-6 ${
               biometricStatus?.isAvailable && !isSettingPin 
@@ -180,23 +199,25 @@ export function PinLock({ onUnlock, onSetPin, isSettingPin = false, storedPin, t
                 : 'text-muted-foreground/50'
             }`} />
           )}
-        </button>
+        </motion.button>
         
         {/* Zero */}
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => handleNumberPress(0)}
-          className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-medium hover:bg-muted/80 active:scale-90 transition-all duration-150 mx-auto"
+          className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-medium hover:bg-muted/80 transition-colors mx-auto"
         >
           0
-        </button>
+        </motion.button>
         
         {/* Delete */}
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={handleDelete}
-          className="w-16 h-16 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-90 transition-all duration-150 mx-auto"
+          className="w-16 h-16 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors mx-auto"
         >
           <Delete className="w-6 h-6 text-muted-foreground" />
-        </button>
+        </motion.button>
       </div>
 
       {/* Cancel button for setting PIN */}
