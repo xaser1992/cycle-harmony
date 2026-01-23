@@ -1,4 +1,4 @@
-// 🌸 Bottom Navigation Component - Performance Optimized (No framer-motion)
+// 🌸 Bottom Navigation Component - Matching Original Video Design
 import { useCallback, forwardRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -40,17 +40,17 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
     <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Glass background */}
       <div 
-        className="absolute inset-0 border-t border-white/20"
+        className="absolute inset-0 border-t border-white/10"
         style={{
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         }}
       />
 
-      <div className="relative flex items-center justify-around h-[68px] px-1">
+      <div className="relative flex items-center justify-around h-16 px-2">
         {/* Left tabs */}
-        <div className="flex items-center justify-center flex-1 gap-0">
+        <div className="flex items-center justify-around flex-1">
           {leftTabs.map((tab) => (
             <TabItem
               key={tab.path}
@@ -62,12 +62,13 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
         </div>
 
         {/* Center FAB Button */}
-        <div className="relative -mt-8 mx-2">
+        <div className="relative -mt-6 mx-3">
           <button
             onClick={handleCenterPress}
-            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary via-period to-primary flex items-center justify-center active:scale-90 transition-all duration-200"
+            className="relative w-14 h-14 rounded-full flex items-center justify-center active:scale-95 transition-transform duration-150"
             style={{
-              boxShadow: '0 4px 20px -2px hsl(var(--primary) / 0.5)',
+              background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--period)) 100%)',
+              boxShadow: '0 4px 15px -2px hsl(var(--primary) / 0.4)',
             }}
           >
             <svg
@@ -86,7 +87,7 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
         </div>
 
         {/* Right tabs */}
-        <div className="flex items-center justify-center flex-1 gap-0">
+        <div className="flex items-center justify-around flex-1">
           {rightTabs.map((tab) => (
             <TabItem
               key={tab.path}
@@ -102,26 +103,33 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
 });
 
 // ============================================
-// Simple Tab Icons matching old design
+// Tab Icons - Original Video Design
 // ============================================
 
-// Home Icon - Flower/Lotus
+// Home Icon - Lotus Flower (Video style)
 function HomeIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
-      <div className="relative flex items-center justify-center w-11 h-11">
-        {/* Gradient background pill */}
+      <div className="relative flex items-center justify-center w-10 h-10">
+        {/* Gradient pill background */}
         <div 
-          className="absolute inset-0 rounded-xl animate-scale-in"
+          className="absolute inset-0 rounded-2xl animate-scale-in"
           style={{
-            background: 'linear-gradient(135deg, #f472b6 0%, #fb923c 100%)',
+            background: 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)',
           }}
         />
-        {/* Flower icon */}
-        <svg className="relative z-10 w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C12 2 8 6 8 10C8 14 12 16 12 16C12 16 16 14 16 10C16 6 12 2 12 2Z" />
-          <path d="M5 8C5 8 3 11 4 14C5 17 9 18 9 18C9 18 7 14 7 11C7 8 5 8 5 8Z" opacity="0.7" />
-          <path d="M19 8C19 8 21 11 20 14C19 17 15 18 15 18C15 18 17 14 17 11C17 8 19 8 19 8Z" opacity="0.7" />
+        {/* Lotus flower - filled */}
+        <svg className="relative z-10 w-5 h-5" viewBox="0 0 24 24" fill="white">
+          {/* Center petal */}
+          <ellipse cx="12" cy="10" rx="3" ry="6" />
+          {/* Left petal */}
+          <ellipse cx="7" cy="12" rx="2.5" ry="5" transform="rotate(-30 7 12)" opacity="0.85" />
+          {/* Right petal */}
+          <ellipse cx="17" cy="12" rx="2.5" ry="5" transform="rotate(30 17 12)" opacity="0.85" />
+          {/* Small outer left */}
+          <ellipse cx="4" cy="14" rx="2" ry="4" transform="rotate(-50 4 14)" opacity="0.6" />
+          {/* Small outer right */}
+          <ellipse cx="20" cy="14" rx="2" ry="4" transform="rotate(50 20 14)" opacity="0.6" />
         </svg>
       </div>
     );
@@ -129,32 +137,39 @@ function HomeIcon({ isActive }: { isActive: boolean }) {
   
   return (
     <div className="w-6 h-6">
-      <svg className="w-full h-full text-muted-foreground/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M12 3C12 3 8 7 8 11C8 15 12 17 12 17C12 17 16 15 16 11C16 7 12 3 12 3Z" />
-        <path d="M6 8C6 8 4 11 5 14C6 17 10 18 10 18" strokeLinecap="round" />
-        <path d="M18 8C18 8 20 11 19 14C18 17 14 18 14 18" strokeLinecap="round" />
+      <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--muted-foreground) / 0.5)" strokeWidth="1.5">
+        {/* Center petal */}
+        <ellipse cx="12" cy="10" rx="3" ry="6" />
+        {/* Left petal */}
+        <ellipse cx="7" cy="12" rx="2.5" ry="5" transform="rotate(-30 7 12)" />
+        {/* Right petal */}
+        <ellipse cx="17" cy="12" rx="2.5" ry="5" transform="rotate(30 17 12)" />
       </svg>
     </div>
   );
 }
 
-// Calendar Icon - Simple square calendar
+// Calendar Icon (Video style)
 function CalendarIcon({ isActive }: { isActive: boolean }) {
+  const day = new Date().getDate();
+  
   if (isActive) {
     return (
-      <div className="relative flex items-center justify-center w-11 h-11">
-        {/* Gradient background pill */}
+      <div className="relative flex items-center justify-center w-10 h-10">
+        {/* Gradient pill background */}
         <div 
-          className="absolute inset-0 rounded-xl animate-scale-in"
+          className="absolute inset-0 rounded-2xl animate-scale-in"
           style={{
-            background: 'linear-gradient(135deg, #2dd4bf 0%, #f472b6 100%)',
+            background: 'linear-gradient(135deg, #14b8a6 0%, #ec4899 100%)',
           }}
         />
-        {/* Calendar icon */}
-        <div className="relative z-10 w-5 h-6 flex flex-col rounded border-2 border-white overflow-hidden">
-          <div className="h-1.5 bg-white/90" />
+        {/* Calendar frame */}
+        <div className="relative z-10 w-5 h-5 flex flex-col rounded-sm border-[1.5px] border-white overflow-hidden bg-white/20">
+          {/* Header bar */}
+          <div className="h-1.5 bg-white" />
+          {/* Date number */}
           <div className="flex-1 flex items-center justify-center">
-            <span className="text-[8px] font-bold text-white">{new Date().getDate()}</span>
+            <span className="text-[9px] font-bold text-white leading-none">{day}</span>
           </div>
         </div>
       </div>
@@ -162,71 +177,73 @@ function CalendarIcon({ isActive }: { isActive: boolean }) {
   }
   
   return (
-    <div className="w-6 h-7">
-      <div className="w-full h-full flex flex-col rounded border-2 border-muted-foreground/40 overflow-hidden">
+    <div className="w-6 h-6">
+      <div className="w-full h-full flex flex-col rounded-sm border-[1.5px] border-muted-foreground/40 overflow-hidden">
         <div className="h-1.5 bg-muted-foreground/40" />
-        <div className="flex-1" />
+        <div className="flex-1 flex items-center justify-center">
+          <span className="text-[8px] font-medium text-muted-foreground/50 leading-none">{day}</span>
+        </div>
       </div>
     </div>
   );
 }
 
-// Stats Icon - Bar chart
+// Stats Icon - Bar Chart (Video style)
 function StatsIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
-      <div className="relative flex items-center justify-center w-11 h-11">
-        {/* Gradient background pill */}
+      <div className="relative flex items-center justify-center w-10 h-10">
+        {/* Gradient pill background */}
         <div 
-          className="absolute inset-0 rounded-xl animate-scale-in"
+          className="absolute inset-0 rounded-2xl animate-scale-in"
           style={{
-            background: 'linear-gradient(135deg, #818cf8 0%, #f472b6 100%)',
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
           }}
         />
-        {/* Bar chart icon */}
-        <div className="relative z-10 flex items-end gap-0.5 h-5">
-          <div className="w-1 h-2 bg-white rounded-t-sm animate-bar-1" style={{ transformOrigin: 'bottom' }} />
-          <div className="w-1 h-3.5 bg-white rounded-t-sm animate-bar-2" style={{ transformOrigin: 'bottom' }} />
-          <div className="w-1 h-2.5 bg-white rounded-t-sm animate-bar-3" style={{ transformOrigin: 'bottom' }} />
-          <div className="w-1 h-4.5 bg-white rounded-t-sm animate-bar-4" style={{ transformOrigin: 'bottom' }} />
+        {/* Bar chart */}
+        <div className="relative z-10 flex items-end gap-[3px] h-4">
+          <div className="w-1 h-[6px] bg-white rounded-t-[1px] animate-bar-1" />
+          <div className="w-1 h-[10px] bg-white rounded-t-[1px] animate-bar-2" />
+          <div className="w-1 h-[8px] bg-white rounded-t-[1px] animate-bar-3" />
+          <div className="w-1 h-[14px] bg-white rounded-t-[1px] animate-bar-4" />
         </div>
       </div>
     );
   }
   
   return (
-    <div className="flex items-end gap-0.5 h-5">
-      <div className="w-1 h-2 bg-muted-foreground/40 rounded-t-sm" />
-      <div className="w-1 h-3.5 bg-muted-foreground/40 rounded-t-sm" />
-      <div className="w-1 h-2.5 bg-muted-foreground/40 rounded-t-sm" />
-      <div className="w-1 h-4 bg-muted-foreground/40 rounded-t-sm" />
+    <div className="flex items-end gap-[3px] h-5">
+      <div className="w-1 h-[6px] bg-muted-foreground/40 rounded-t-[1px]" />
+      <div className="w-1 h-[10px] bg-muted-foreground/40 rounded-t-[1px]" />
+      <div className="w-1 h-[8px] bg-muted-foreground/40 rounded-t-[1px]" />
+      <div className="w-1 h-[14px] bg-muted-foreground/40 rounded-t-[1px]" />
     </div>
   );
 }
 
-// Medications Icon - Pill capsule
+// Medications Icon - Pill Capsule (Video style)
 function MedicationsIcon({ isActive }: { isActive: boolean }) {
   if (isActive) {
     return (
-      <div className="relative flex items-center justify-center w-11 h-11">
-        {/* Gradient background pill */}
+      <div className="relative flex items-center justify-center w-10 h-10">
+        {/* Gradient pill background */}
         <div 
-          className="absolute inset-0 rounded-xl animate-scale-in"
+          className="absolute inset-0 rounded-2xl animate-scale-in"
           style={{
-            background: 'linear-gradient(135deg, #fb923c 0%, #fbbf24 100%)',
+            background: 'linear-gradient(135deg, #f97316 0%, #eab308 100%)',
           }}
         />
-        {/* Capsule icon */}
-        <div className="relative z-10 w-6 h-3 flex rounded-full overflow-hidden">
-          <div className="w-1/2 h-full bg-gradient-to-br from-orange-500 to-red-500" />
-          <div className="w-1/2 h-full bg-gradient-to-bl from-yellow-400 to-amber-500" />
+        {/* Capsule pill */}
+        <div className="relative z-10 w-5 h-2.5 flex rounded-full overflow-hidden rotate-[-30deg]">
+          <div className="w-1/2 h-full bg-white" />
+          <div className="w-1/2 h-full bg-white/60" />
         </div>
       </div>
     );
   }
   
   return (
-    <div className="w-6 h-3">
+    <div className="w-5 h-2.5 rotate-[-30deg]">
       <div className="w-full h-full flex rounded-full overflow-hidden border border-muted-foreground/40">
         <div className="w-1/2 h-full bg-muted-foreground/40" />
         <div className="w-1/2 h-full bg-muted-foreground/20" />
@@ -258,17 +275,21 @@ function TabItem({
   return (
     <button
       onClick={() => onTap(tab.path)}
-      className={`relative flex flex-col items-center justify-center py-1 px-3 min-w-[72px] transition-all duration-200 active:scale-90 ${
-        isActive ? 'text-foreground' : 'text-muted-foreground/50'
-      }`}
+      className="relative flex flex-col items-center justify-center py-1 px-2 min-w-[60px] transition-transform duration-150 active:scale-95"
     >
       {/* Icon container */}
-      <div className="h-11 flex items-center justify-center">
+      <div className="h-10 flex items-center justify-center">
         {renderIcon()}
       </div>
       
       {/* Label */}
-      <span className={`text-[10px] font-medium mt-0.5 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+      <span 
+        className={`text-[10px] font-medium mt-0.5 transition-colors duration-200 ${
+          isActive 
+            ? 'text-foreground' 
+            : 'text-muted-foreground/50'
+        }`}
+      >
         {tab.label}
       </span>
     </button>
