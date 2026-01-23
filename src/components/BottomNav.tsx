@@ -1,5 +1,5 @@
 // src/components/BottomNav.tsx
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, forwardRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Home, CalendarDays, BarChart3, Pill, Plus } from "lucide-react";
 
@@ -17,7 +17,7 @@ type Item = {
   match?: (pathname: string) => boolean;
 };
 
-export const BottomNav = memo(function BottomNav({ onCenterPress }: BottomNavProps) {
+export const BottomNav = memo(forwardRef<HTMLDivElement, BottomNavProps>(function BottomNav({ onCenterPress }, ref) {
   const { pathname } = useLocation();
 
   const items: Item[] = useMemo(
@@ -57,7 +57,7 @@ export const BottomNav = memo(function BottomNav({ onCenterPress }: BottomNavPro
   const isActive = (it: Item) => (it.match ? it.match(pathname) : pathname === it.to);
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50">
+    <div ref={ref} className="fixed inset-x-0 bottom-0 z-50">
       {/* Safe-area spacer */}
       <div className="pointer-events-none h-[env(safe-area-inset-bottom)]" />
 
@@ -102,7 +102,9 @@ export const BottomNav = memo(function BottomNav({ onCenterPress }: BottomNavPro
       </div>
     </div>
   );
-});
+}));
+
+BottomNav.displayName = "BottomNav";
 
 function NavItem({ item, active }: { item: Item; active: boolean }) {
   return (
