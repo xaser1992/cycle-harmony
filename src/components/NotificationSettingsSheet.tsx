@@ -2,19 +2,13 @@
 import { useState, useEffect, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, 
   Bell, 
-  Clock, 
-  VolumeX, 
-  Eye,
   TestTube,
   Pill,
   ChevronLeft
 } from 'lucide-react';
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { TimePicker } from '@/components/TimePicker';
 import { useCycleData } from '@/hooks/useCycleData';
 import { App } from '@capacitor/app';
 import { toast } from 'sonner';
@@ -28,7 +22,7 @@ import {
   cancelMedicationNotifications
 } from '@/lib/medicationNotifications';
 import { getMedications } from '@/lib/medicationStorage';
-import type { NotificationType, PrivacyMode } from '@/types/cycle';
+import type { NotificationType } from '@/types/cycle';
 
 interface NotificationSettingsSheetProps {
   isOpen: boolean;
@@ -49,12 +43,6 @@ const cycleNotificationTypes: { key: NotificationType; label: string; emoji: str
 const wellnessNotificationTypes: { key: NotificationType; label: string; emoji: string; description: string }[] = [
   { key: 'water_reminder', label: 'Su İç', emoji: '💧', description: 'Günde 3 kez hatırlatma' },
   { key: 'exercise_reminder', label: 'Egzersiz', emoji: '🏃‍♀️', description: 'Günlük hareket' },
-];
-
-const privacyModes: { value: PrivacyMode; label: string; description: string; icon: string }[] = [
-  { value: 'off', label: 'Tam', description: 'Detaylı bildirim içeriği', icon: '👁️' },
-  { value: 'partial', label: 'Kısmi', description: 'Genel hatırlatma', icon: '👀' },
-  { value: 'full', label: 'Gizli', description: 'Sadece başlık göster', icon: '🔒' },
 ];
 
 export const NotificationSettingsSheet = forwardRef<HTMLDivElement, NotificationSettingsSheetProps>(function NotificationSettingsSheet({ isOpen, onClose }, ref) {
@@ -312,94 +300,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                 </motion.div>
               </div>
 
-              {/* Settings Section */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <span>⚙️</span> Zamanlama Ayarları
-                </h3>
-                <div className="space-y-2">
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35 }}
-                    className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-5 h-5 text-violet" />
-                      <div>
-                        <p className="text-sm font-medium">Bildirim Saati</p>
-                        <p className="text-xs text-muted-foreground">Tercih edilen saat</p>
-                      </div>
-                    </div>
-                    <TimePicker
-                      value={notificationPrefs.preferredTime}
-                      onChange={(time) => updateNotificationPrefs({ preferredTime: time })}
-                      label=""
-                    />
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.38 }}
-                    className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <VolumeX className="w-5 h-5 text-violet" />
-                      <div>
-                        <p className="text-sm font-medium">Sessiz Saatler</p>
-                        <p className="text-xs text-muted-foreground">Bu saatlerde bildirim gelmez</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TimePicker
-                        value={notificationPrefs.quietHoursStart}
-                        onChange={(time) => updateNotificationPrefs({ quietHoursStart: time })}
-                        label=""
-                      />
-                      <span className="text-muted-foreground text-xs">-</span>
-                      <TimePicker
-                        value={notificationPrefs.quietHoursEnd}
-                        onChange={(time) => updateNotificationPrefs({ quietHoursEnd: time })}
-                        label=""
-                      />
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-
-              {/* Privacy Mode Section */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  Gizlilik Modu
-                </h3>
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.42 }}
-                  className="grid grid-cols-3 gap-2"
-                >
-                  {privacyModes.map((mode) => (
-                    <motion.button
-                      key={mode.value}
-                      onClick={() => updateNotificationPrefs({ privacyMode: mode.value })}
-                      className={`p-3 rounded-xl text-center transition-all ${
-                        notificationPrefs.privacyMode === mode.value
-                          ? 'bg-gradient-to-r from-violet to-purple text-white shadow-md'
-                          : 'bg-card border border-border/50'
-                      }`}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <span className="text-lg block mb-1">{mode.icon}</span>
-                      <p className="text-xs font-medium">{mode.label}</p>
-                    </motion.button>
-                  ))}
-                </motion.div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {privacyModes.find(m => m.value === notificationPrefs.privacyMode)?.description}
-                </p>
-              </div>
+              {/* Test Button */}
 
               {/* Test Notification Button */}
               <motion.div
