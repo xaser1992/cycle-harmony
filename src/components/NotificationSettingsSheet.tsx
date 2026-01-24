@@ -108,39 +108,39 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-rose/20 to-pink/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-violet/15 to-purple/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
               
-              {/* Back button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClose();
-                }}
-                className="absolute top-4 left-4 w-10 h-10 rounded-full bg-muted/80 backdrop-blur-sm flex items-center justify-center z-50 active:scale-90 transition-transform border border-border/50"
-              >
-                <ChevronLeft className="w-5 h-5 text-foreground" />
-              </button>
+              {/* Header row with back button, centered icon/title, and status */}
+              <div className="relative flex items-center justify-center py-2">
+                {/* Back button - like Settings page */}
+                <motion.button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose();
+                  }}
+                  className="absolute left-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center z-50"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ChevronLeft className="w-5 h-5 text-foreground" />
+                </motion.button>
 
-              <div className="relative pt-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose to-pink flex items-center justify-center shadow-lg">
-                    <Bell className="w-7 h-7 text-white" />
+                {/* Centered icon and title */}
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose to-pink flex items-center justify-center shadow-lg mb-2">
+                    <Bell className="w-6 h-6 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-foreground">Bildirim Ayarları</h2>
-                    <div className="flex items-center gap-2 mt-1">
-                      {hasPermission ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald/20 text-emerald text-xs font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse" />
-                          İzin verildi
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/20 text-amber text-xs font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-                          İzin gerekli
-                        </span>
-                      )}
-                    </div>
+                  <h2 className="text-lg font-bold text-foreground">Bildirim Ayarları</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    {hasPermission ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald/20 text-emerald text-xs font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse" />
+                        İzin verildi
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/20 text-amber text-xs font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+                        İzin gerekli
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -153,30 +153,36 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
               transition={{ delay: 0.1 }}
               className="flex-1 overflow-y-auto px-6 py-6 bg-background pb-24"
             >
-              {/* Permission Warning */}
+              {/* Permission Warning - Compact */}
               {!hasPermission && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 bg-gradient-to-r from-amber/10 to-orange/10 border border-amber/30 rounded-2xl"
+                  className="mb-4 p-3 bg-gradient-to-r from-amber/10 to-orange/10 border border-amber/30 rounded-xl"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber/20 flex items-center justify-center flex-shrink-0">
-                      <Bell className="w-5 h-5 text-amber" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground mb-1">
-                        Bildirim İzni Gerekli
-                      </p>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        Hatırlatmaları almak için bildirim iznini aktifleştirin.
-                      </p>
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <Bell className="w-5 h-5 text-amber" />
+                    <p className="text-sm font-medium text-foreground">
+                      Hatırlatmalar için bildirim izni gerekli
+                    </p>
+                    <div className="flex gap-2 mt-1">
                       <Button
                         onClick={handleRequestPermissions}
                         size="sm"
-                        className="bg-gradient-to-r from-amber to-orange hover:opacity-90 text-white shadow-md"
+                        className="bg-gradient-to-r from-amber to-orange hover:opacity-90 text-white shadow-sm"
                       >
                         İzin Ver
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          // Try to open app settings - this is a native feature
+                          toast.info('Ayarlar > Uygulamalar > Luna Joy > Bildirimler yolunu izleyin');
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="border-amber/30 text-amber hover:bg-amber/10"
+                      >
+                        Uygulama Ayarları
                       </Button>
                     </div>
                   </div>
