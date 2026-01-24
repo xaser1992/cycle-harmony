@@ -27,19 +27,11 @@ const tourSteps: TourStep[] = [
   },
   {
     id: 'today',
-    emoji: '📅',
+    emoji: '🏠',
     titleTr: 'Bugün Sayfası',
     titleEn: 'Today Page',
     descriptionTr: 'Ana sayfada döngünüzün hangi aşamasında olduğunuzu ve bir sonraki regl tahmininizi görebilirsiniz.',
     descriptionEn: 'On the main page, you can see which phase of your cycle you\'re in and your next period prediction.',
-  },
-  {
-    id: 'log',
-    emoji: '➕',
-    titleTr: 'Günlük Kayıt',
-    titleEn: 'Daily Logging',
-    descriptionTr: 'Alt menüdeki + butonuna basarak regl durumu, belirtiler ve ruh halinizi kolayca kaydedin.',
-    descriptionEn: 'Tap the + button in the bottom menu to easily log your period, symptoms and mood.',
   },
   {
     id: 'calendar',
@@ -64,6 +56,14 @@ const tourSteps: TourStep[] = [
     titleEn: 'Medication Tracking',
     descriptionTr: 'İlaçlarınızı ekleyin ve hatırlatıcılar ayarlayın. Asla bir dozu kaçırmayın!',
     descriptionEn: 'Add your medications and set reminders. Never miss a dose!',
+  },
+  {
+    id: 'log',
+    emoji: '➕',
+    titleTr: 'Günlük Kayıt',
+    titleEn: 'Daily Logging',
+    descriptionTr: 'Alt menüdeki + butonuna basarak regl durumu, belirtiler ve ruh halinizi kolayca kaydedin.',
+    descriptionEn: 'Tap the + button in the bottom menu to easily log your period, symptoms and mood.',
   },
   {
     id: 'ready',
