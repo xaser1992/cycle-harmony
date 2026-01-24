@@ -83,6 +83,83 @@ const phaseDetails: Record<string, { tips: string[]; activities: string[]; nutri
   },
 };
 
+type PhaseDeepDive = {
+  sleep: string[];
+  skin: string[];
+  hormones: string[];
+};
+
+const getPhaseDeepDive = (phaseType: string, language: 'tr' | 'en'): PhaseDeepDive => {
+  const trContent: Record<string, PhaseDeepDive> = {
+    period: {
+      sleep: ['Daha fazla uyku ihtiyacı normal', 'Akşam kafeini azalt, erken yat'],
+      skin: ['Cilt daha hassas olabilir: nazik temizleyici + nemlendirici'],
+      hormones: ['Östrojen/progesteron düşük: yorgunluk ve hassasiyet artabilir'],
+    },
+    follicular: {
+      sleep: ['Enerji artar: düzenli uyku ritmi performansı yükseltir'],
+      skin: ['Cilt genelde daha dengeli: hafif eksfoliasyon iyi gelebilir'],
+      hormones: ['Östrojen yükselir: motivasyon ve odak artabilir'],
+    },
+    fertile: {
+      sleep: ['Enerjin yüksek: antrenmanı gündüze al, geceyi sakin tut'],
+      skin: ['Parlama artabilir: hafif jel nemlendirici tercih et'],
+      hormones: ['Östrojen zirveye yakın: sosyal/iletişim güçlü olabilir'],
+    },
+    ovulation: {
+      sleep: ['Bazılarında uyku hafifleşebilir: ekranı erkenden kapat'],
+      skin: ['Cilt daha canlı görünebilir: güneş korumasını aksatma'],
+      hormones: ['LH piki + östrojen yüksek: vücut ısısı artabilir'],
+    },
+    luteal: {
+      sleep: ['Uykun dalgalanabilir: magnezyum ve rutin yardımcı olur'],
+      skin: ['Akne eğilimi artabilir: ağır ürünleri azalt'],
+      hormones: ['Progesteron artar: şişkinlik/iştah değişebilir'],
+    },
+    pms: {
+      sleep: ['Uyku kalitesi düşebilir: ılık duş ve nefes egzersizi dene'],
+      skin: ['İltihap artabilir: minimal bakım + noktasal destek'],
+      hormones: ['Progesteron düşüşe geçer: ruh hali dalgalanabilir'],
+    },
+  };
+
+  const enContent: Record<string, PhaseDeepDive> = {
+    period: {
+      sleep: ['Needing more sleep is normal', 'Reduce evening caffeine and go to bed earlier'],
+      skin: ['Skin may be more sensitive: gentle cleanser + moisturizer'],
+      hormones: ['Low estrogen/progesterone: fatigue and sensitivity can increase'],
+    },
+    follicular: {
+      sleep: ['Energy rises: consistent sleep boosts performance'],
+      skin: ['Usually more balanced: light exfoliation can help'],
+      hormones: ['Estrogen rises: motivation and focus can improve'],
+    },
+    fertile: {
+      sleep: ['High energy: train earlier, keep nights calmer'],
+      skin: ['More oiliness possible: try a lightweight gel moisturizer'],
+      hormones: ['Estrogen near peak: social/communication can feel stronger'],
+    },
+    ovulation: {
+      sleep: ['Sleep can feel lighter: reduce screens earlier'],
+      skin: ['Often more “glowy”: don’t skip sunscreen'],
+      hormones: ['LH surge + high estrogen: body temperature may rise'],
+    },
+    luteal: {
+      sleep: ['Sleep may fluctuate: magnesium and a routine can help'],
+      skin: ['More acne-prone: avoid heavy products'],
+      hormones: ['Higher progesterone: bloating/appetite can change'],
+    },
+    pms: {
+      sleep: ['Sleep quality may drop: warm shower and breathing can help'],
+      skin: ['Inflammation may increase: minimal routine + spot care'],
+      hormones: ['Progesterone starts dropping: mood can fluctuate'],
+    },
+  };
+
+  const dict = language === 'tr' ? trContent : enContent;
+  return dict[phaseType] ?? dict.luteal;
+};
+
 // Circular progress component
 function CircularProgress({ progress, dayNumber, accentColor, language }: {
   progress: number;
@@ -164,6 +241,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
   const cycleLength = 28;
   const progress = (phase.dayNumber / cycleLength) * 100;
   const details = phaseDetails[phase.type];
+  const deepDive = getPhaseDeepDive(phase.type, language);
 
   return (
     <>
@@ -323,7 +401,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
 
             {/* Modal Content */}
             <motion.div
-              className={`fixed inset-x-4 top-1/2 z-50 rounded-[2rem] bg-gradient-to-br ${phaseGradients[phase.type]} p-6 overflow-hidden shadow-2xl max-h-[80vh] overflow-y-auto`}
+              className={`fixed inset-x-4 top-1/2 z-50 rounded-[2rem] bg-gradient-to-br ${phaseGradients[phase.type]} p-6 overflow-hidden shadow-2xl max-h-[80vh] overflow-y-auto relative`}
               initial={{ opacity: 0, scale: 0.9, y: '-40%' }}
               animate={{ opacity: 1, scale: 1, y: '-50%' }}
               exit={{ opacity: 0, scale: 0.9, y: '-40%' }}
@@ -335,7 +413,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
               </div>
 
-              {/* Close button - Fixed position */}
+              {/* Close button - keep anchored inside modal */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -343,13 +421,13 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                   e.stopPropagation();
                   setShowDetails(false);
                 }}
-                className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-10 active:scale-90 transition-transform"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
 
               {/* Header */}
-              <div className="relative z-10 flex items-center gap-4 mb-6">
+              <div className="relative z-10 flex items-center gap-4 mb-6 pt-8">
                 <span className="text-5xl">{phaseInfo.emoji}</span>
                 <div>
                   <h2 className="text-2xl font-bold text-white">{phaseInfo.title}</h2>
@@ -400,6 +478,49 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                       <span key={i} className="px-3 py-1.5 bg-white/20 rounded-full text-sm text-white font-medium">
                         {item}
                       </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Deep dive sections */}
+                <div>
+                  <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center gap-2">
+                    <span className="text-lg">😴</span>
+                    {language === 'tr' ? 'Uyku' : 'Sleep'}
+                  </h3>
+                  <div className="space-y-2">
+                    {deepDive.sleep.map((t, i) => (
+                      <div key={i} className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
+                        <p className="text-sm text-white">{t}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center gap-2">
+                    <span className="text-lg">✨</span>
+                    {language === 'tr' ? 'Cilt' : 'Skin'}
+                  </h3>
+                  <div className="space-y-2">
+                    {deepDive.skin.map((t, i) => (
+                      <div key={i} className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
+                        <p className="text-sm text-white">{t}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center gap-2">
+                    <span className="text-lg">🧬</span>
+                    {language === 'tr' ? 'Hormonlar' : 'Hormones'}
+                  </h3>
+                  <div className="space-y-2">
+                    {deepDive.hormones.map((t, i) => (
+                      <div key={i} className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
+                        <p className="text-sm text-white">{t}</p>
+                      </div>
                     ))}
                   </div>
                 </div>
