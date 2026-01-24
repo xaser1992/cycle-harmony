@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, 
   TestTube,
-  Pill,
   ChevronLeft
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
@@ -17,11 +16,6 @@ import {
   requestNotificationPermissions,
   checkNotificationPermissions 
 } from '@/lib/notifications';
-import { 
-  scheduleMedicationNotifications,
-  cancelMedicationNotifications
-} from '@/lib/medicationNotifications';
-import { getMedications } from '@/lib/medicationStorage';
 import type { NotificationType } from '@/types/cycle';
 
 interface NotificationSettingsSheetProps {
@@ -40,14 +34,8 @@ const cycleNotificationTypes: { key: NotificationType; label: string; emoji: str
   { key: 'daily_checkin', label: 'Günlük Check-in', emoji: '✅', description: 'Durumunu kaydet' },
 ];
 
-const wellnessNotificationTypes: { key: NotificationType; label: string; emoji: string; description: string }[] = [
-  { key: 'water_reminder', label: 'Su İç', emoji: '💧', description: 'Günde 3 kez hatırlatma' },
-  { key: 'exercise_reminder', label: 'Egzersiz', emoji: '🏃‍♀️', description: 'Günlük hareket' },
-];
-
 export const NotificationSettingsSheet = forwardRef<HTMLDivElement, NotificationSettingsSheetProps>(function NotificationSettingsSheet({ isOpen, onClose }, ref) {
   const { notificationPrefs, updateNotificationPrefs, userSettings } = useCycleData();
-  const [medicationNotificationsEnabled, setMedicationNotificationsEnabled] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
 
   // Check permissions on open
@@ -96,18 +84,6 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
         [type]: enabled,
       }
     });
-  };
-
-  const handleMedicationNotificationsToggle = async (enabled: boolean) => {
-    setMedicationNotificationsEnabled(enabled);
-    if (enabled) {
-      const medications = await getMedications();
-      await scheduleMedicationNotifications(medications.filter(m => m.isActive));
-      toast.success('İlaç hatırlatmaları açıldı');
-    } else {
-      await cancelMedicationNotifications();
-      toast.success('İlaç hatırlatmaları kapatıldı');
-    }
   };
 
   if (!isOpen) return null;
@@ -239,66 +215,6 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                 </div>
               </div>
 
-              {/* Wellness Notifications Section */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <span>💧</span> Wellness Bildirimleri
-                </h3>
-                <div className="space-y-2">
-                  {wellnessNotificationTypes.map((type, index) => (
-                    <motion.div
-                      key={type.key}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.24 + index * 0.03 }}
-                      className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{type.emoji}</span>
-                        <div>
-                          <p className="text-sm font-medium">{type.label}</p>
-                          <p className="text-xs text-muted-foreground">{type.description}</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={notificationPrefs.togglesByType[type.key]}
-                        onCheckedChange={(checked) => handleNotificationToggle(type.key, checked)}
-                        disabled={!notificationPrefs.enabled}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Medication Notifications Section */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <span>💊</span> İlaç Bildirimleri
-                </h3>
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-violet/10 to-purple/10 rounded-2xl border border-violet-light/30"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet to-purple flex items-center justify-center">
-                      <Pill className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">İlaç Hatırlatmaları</p>
-                      <p className="text-xs text-muted-foreground">
-                        Eklediğiniz ilaçlar için otomatik bildirim
-                      </p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={medicationNotificationsEnabled}
-                    onCheckedChange={handleMedicationNotificationsToggle}
-                    disabled={!notificationPrefs.enabled}
-                  />
-                </motion.div>
-              </div>
 
               {/* Test Button */}
 
