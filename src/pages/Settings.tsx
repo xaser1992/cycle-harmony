@@ -246,8 +246,8 @@ export default function SettingsPage() {
           id="cycle"
           collapsible
         >
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2.5 bg-background rounded-xl">
               <div>
                 <p className="text-sm font-medium">Döngü Uzunluğu</p>
                 <p className="text-xs text-muted-foreground">{cycleSettings.cycleLength} gün</p>
@@ -271,7 +271,7 @@ export default function SettingsPage() {
               </div>
             </div>
             
-            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
+            <div className="flex items-center justify-between p-2.5 bg-background rounded-xl">
               <div>
                 <p className="text-sm font-medium">Regl Süresi</p>
                 <p className="text-xs text-muted-foreground">{cycleSettings.periodLength} gün</p>
@@ -305,10 +305,10 @@ export default function SettingsPage() {
           id="wellness"
           collapsible
         >
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Target Weight */}
-            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between p-2.5 bg-background rounded-xl">
+              <div className="flex items-center gap-2.5">
                 <Scale className="w-5 h-5 text-emerald" />
                 <div>
                   <p className="text-sm font-medium">Hedef Ağırlık</p>
@@ -335,8 +335,8 @@ export default function SettingsPage() {
             </div>
             
             {/* Daily Water Goal */}
-            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between p-2.5 bg-background rounded-xl">
+              <div className="flex items-center gap-2.5">
                 <Droplets className="w-5 h-5 text-blue" />
                 <div>
                   <p className="text-sm font-medium">Günlük Su Hedefi</p>
@@ -362,25 +362,6 @@ export default function SettingsPage() {
                   <Plus className="w-4 h-4" />
                 </motion.button>
               </div>
-            </div>
-
-            {/* Water Reminder Toggle */}
-            <div className="flex items-center justify-between p-3 bg-background rounded-xl">
-              <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-blue" />
-                <div>
-                  <p className="text-sm font-medium">Su Hatırlatıcısı</p>
-                  <p className="text-xs text-muted-foreground">Günde 3 kez hatırlat</p>
-                </div>
-              </div>
-              <AnimatedSwitch 
-                checked={notificationGranted === true}
-                onChange={() => {
-                  if (notificationGranted !== true) {
-                    handleRequestNotification();
-                  }
-                }}
-              />
             </div>
           </div>
         </SectionCard>
