@@ -45,6 +45,7 @@ export default function SettingsPage() {
   } = useCycleData();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [backupModalOpen, setBackupModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
@@ -150,13 +151,13 @@ export default function SettingsPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-3xl overflow-hidden shadow-sm border border-border/50"
+        className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border/50"
       >
         <button
           onClick={() => collapsible && id && setExpandedSection(isExpanded ? null : id)}
-          className="w-full flex items-center gap-4 p-4"
+          className="w-full flex items-center gap-3 p-3"
         >
-          <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
             <Icon className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1 text-left">
@@ -181,7 +182,7 @@ export default function SettingsPage() {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="px-4 pb-4">
+              <div className="px-3 pb-3">
                 {children}
               </div>
             </motion.div>
@@ -209,17 +210,17 @@ export default function SettingsPage() {
   }) => (
     <motion.button
       onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 rounded-2xl bg-muted/50 hover:bg-muted transition-colors"
+      className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
       whileTap={onClick ? { scale: 0.98 } : undefined}
     >
-      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-        <Icon className="w-5 h-5 text-white" />
+      <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+        <Icon className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 text-left">
-        <p className="font-medium text-foreground">{label}</p>
+        <p className="text-sm font-medium text-foreground">{label}</p>
         {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </div>
-      {rightElement || (onClick && <ChevronRight className="w-5 h-5 text-muted-foreground" />)}
+      {rightElement || (onClick && <ChevronRight className="w-4 h-4 text-muted-foreground" />)}
     </motion.button>
   );
 
@@ -445,36 +446,21 @@ export default function SettingsPage() {
               className="hidden"
             />
             
-            {/* Backup & Restore Combined */}
-            <div className="bg-background rounded-xl p-3">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
-                  <Archive className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Veri Yedekleme</p>
-                  <p className="text-xs text-muted-foreground">ZIP formatında yedekle ve geri yükle</p>
-                </div>
+            {/* Backup & Restore Button */}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setBackupModalOpen(true)}
+              className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+            >
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald to-green flex items-center justify-center">
+                <Archive className="w-4 h-4 text-white" />
               </div>
-              <div className="flex gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleBackupData}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-emerald to-green text-white rounded-xl font-medium text-sm"
-                >
-                  <Download className="w-4 h-4" />
-                  Yedekle
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-muted hover:bg-muted/80 rounded-xl font-medium text-sm transition-colors"
-                >
-                  <Upload className="w-4 h-4" />
-                  Geri Yükle
-                </motion.button>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-foreground">Veri Yedekleme</p>
+                <p className="text-xs text-muted-foreground">Yedekle veya geri yükle</p>
               </div>
-            </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </motion.button>
             
             <SettingRow
               icon={Trash2}
@@ -532,6 +518,77 @@ export default function SettingsPage() {
             Bu uygulama tıbbi bir cihaz değildir. Sağlık kararlarınız için lütfen bir sağlık uzmanına danışın.
           </p>
         </motion.div>
+
+        {/* Backup Modal */}
+        <AnimatePresence>
+          {backupModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+              onClick={() => setBackupModalOpen(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-card rounded-2xl p-5 w-full max-w-sm shadow-xl border border-border"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
+                    <Archive className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Veri Yedekleme</h3>
+                    <p className="text-xs text-muted-foreground">ZIP formatında</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      handleBackupData();
+                      setBackupModalOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-emerald to-green text-white rounded-xl"
+                  >
+                    <Download className="w-5 h-5" />
+                    <div className="text-left">
+                      <p className="font-medium">Yedekle</p>
+                      <p className="text-xs opacity-80">Verilerini ZIP olarak indir</p>
+                    </div>
+                  </motion.button>
+                  
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      fileInputRef.current?.click();
+                      setBackupModalOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 bg-muted hover:bg-muted/80 rounded-xl transition-colors"
+                  >
+                    <Upload className="w-5 h-5 text-foreground" />
+                    <div className="text-left">
+                      <p className="font-medium text-foreground">Geri Yükle</p>
+                      <p className="text-xs text-muted-foreground">ZIP dosyasından geri yükle</p>
+                    </div>
+                  </motion.button>
+                </div>
+                
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setBackupModalOpen(false)}
+                  className="w-full mt-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  İptal
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <BottomNav onCenterPress={handleCenterPress} />
