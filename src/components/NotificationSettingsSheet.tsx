@@ -115,20 +115,22 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                 </button>
 
                 {/* Centered icon and title */}
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
-                    <Bell className="w-5 h-5 text-white" />
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
+                      <Bell className="w-5 h-5 text-white" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-foreground">Bildirim Ayarları</h2>
                   </div>
-                  <h2 className="text-lg font-semibold text-foreground">Bildirim Ayarları</h2>
                   {hasPermission ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald/20 text-emerald text-xs font-medium">
+                    <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-emerald/20 text-emerald text-xs font-medium">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse" />
-                      ✓
+                      Bildirimler aktif
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/20 text-amber text-xs font-medium">
+                    <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-amber/20 text-amber text-xs font-medium">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-                      !
+                      İzin gerekli
                     </span>
                   )}
                 </div>
@@ -142,25 +144,33 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
               transition={{ delay: 0.1 }}
               className="flex-1 overflow-y-auto px-6 py-6 bg-background pb-24"
             >
-              {/* Permission Warning - Balanced */}
+              {/* Permission Warning - Detailed */}
               {!hasPermission && (
-                <div className="mb-4 p-3 bg-amber/10 border border-amber/20 rounded-xl flex items-center justify-between gap-3">
-                  <p className="text-sm text-foreground">Bildirim izni gerekli</p>
+                <div className="mb-4 p-4 bg-amber/10 border border-amber/20 rounded-xl">
+                  <div className="flex items-start gap-3 mb-3">
+                    <Bell className="w-5 h-5 text-amber mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-1">Bildirim izni gerekli</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Hatırlatmalar alabilmek için bildirim iznini etkinleştirin. İzin verdikten sonra bildirimler çalışmazsa, telefon ayarlarından "Uygulama etkinliğini duraklat" seçeneğini kapatın.
+                      </p>
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       onClick={handleRequestPermissions}
                       size="sm"
-                      className="h-8 px-3 text-sm bg-amber hover:bg-amber/90 text-white"
+                      className="h-9 px-4 text-sm bg-amber hover:bg-amber/90 text-white"
                     >
                       İzin Ver
                     </Button>
                     <Button
-                      onClick={() => toast.info('Ayarlar > Uygulamalar > Luna Joy')}
+                      onClick={() => toast.info('Ayarlar > Uygulamalar > Luna Joy > Bildirimler yolunu izleyin. "Uygulama etkinliğini duraklat" kapalı olmalı.', { duration: 5000 })}
                       size="sm"
                       variant="outline"
-                      className="h-8 px-3 text-sm border-amber/30 text-amber"
+                      className="h-9 px-4 text-sm border-amber/30 text-amber"
                     >
-                      Ayarlar
+                      Ayarlar Yardımı
                     </Button>
                   </div>
                 </div>
