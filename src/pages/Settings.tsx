@@ -1,5 +1,5 @@
 // 🌸 Settings Page - Flo Inspired Design
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, 
@@ -9,15 +9,16 @@ import {
   Monitor,
   ChevronRight,
   Download,
+  Upload,
   Trash2,
   Bug,
   Minus,
   Plus,
   ArrowLeft,
-  Bell,
   Droplets,
   Scale,
   RotateCcw,
+  Archive,
   type LucideIcon
 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
@@ -26,9 +27,10 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAppLock } from '@/components/AppLockProvider';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useNavigate } from 'react-router-dom';
-import { checkNotificationPermissions, requestNotificationPermissions } from '@/lib/notifications';
 import { Preferences } from '@capacitor/preferences';
 import { toast } from 'sonner';
+import JSZip from 'jszip';
+import { exportData, importData } from '@/lib/storage';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -43,43 +45,63 @@ export default function SettingsPage() {
   } = useCycleData();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const [notificationGranted, setNotificationGranted] = useState<boolean | null>(null);
-  const [isRequestingNotification, setIsRequestingNotification] = useState(false);
-
-  // Check notification permission on mount
-  useEffect(() => {
-    checkNotificationPermissions().then(setNotificationGranted);
-  }, []);
-
-  const handleRequestNotification = async () => {
-    setIsRequestingNotification(true);
-    try {
-      const granted = await requestNotificationPermissions();
-      setNotificationGranted(granted);
-    } catch (error) {
-      console.error('Notification permission error:', error);
-    } finally {
-      setIsRequestingNotification(false);
-    }
-  };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
     openUpdateSheet({ initialTab: tab || 'flow' });
   };
 
-  const handleExportData = async () => {
-    const data = {
-      cycleSettings,
-      exportDate: new Date().toISOString(),
-    };
+  const handleBackupData = async () => {
+    try {
+      const jsonData = await exportData();
+      const zip = new JSZip();
+      zip.file('dongutakibi-backup.json', jsonData);
+      
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dongutakibi-yedek-${new Date().toISOString().split('T')[0]}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Yedek başarıyla indirildi!');
+    } catch (error) {
+      console.error('Backup error:', error);
+      toast.error('Yedekleme başarısız oldu');
+    }
+  };
+
+  const handleRestoreData = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const zip = await JSZip.loadAsync(file);
+      const jsonFile = zip.file('dongutakibi-backup.json');
+      
+      if (!jsonFile) {
+        toast.error('Geçersiz yedek dosyası');
+        return;
+      }
+
+      const jsonData = await jsonFile.async('string');
+      const success = await importData(jsonData);
+      
+      if (success) {
+        toast.success('Veriler başarıyla geri yüklendi!');
+        window.location.reload();
+      } else {
+        toast.error('Geri yükleme başarısız oldu');
+      }
+    } catch (error) {
+      console.error('Restore error:', error);
+      toast.error('Geçersiz dosya formatı');
+    }
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dongutakibi-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDeleteAllData = async () => {
@@ -391,53 +413,6 @@ export default function SettingsPage() {
           </div>
         </SectionCard>
 
-        {/* Notifications */}
-        <SectionCard
-          title="Bildirimler"
-          icon={Bell}
-          gradient="from-violet to-purple"
-        >
-          <div className="space-y-3">
-            {notificationGranted === false && (
-              <motion.button
-                onClick={handleRequestNotification}
-                disabled={isRequestingNotification}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-amber-light dark:bg-amber/20 border border-amber/30 dark:border-amber/40"
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber to-orange flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-amber dark:text-amber-light">Bildirimlere İzin Ver</p>
-                  <p className="text-xs text-amber/80 dark:text-amber-light/80">Hatırlatmalar için izin gerekli</p>
-                </div>
-                {isRequestingNotification ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-amber border-t-transparent rounded-full"
-                  />
-                ) : (
-                  <ChevronRight className="w-5 h-5 text-amber" />
-                )}
-              </motion.button>
-            )}
-            
-            {notificationGranted === true && (
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-green-light dark:bg-green/20">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green to-emerald flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-green dark:text-green-light">Bildirimler Açık</p>
-                  <p className="text-xs text-green/80 dark:text-green-light/80">Hatırlatmalar aktif</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </SectionCard>
-
         {/* Privacy & Data */}
         <SectionCard
           title="Gizlilik & Veri"
@@ -462,11 +437,28 @@ export default function SettingsPage() {
             </div>
             
             <SettingRow
-              icon={Download}
-              label="Verileri Dışa Aktar"
-              description="JSON formatında indir"
-              onClick={handleExportData}
+              icon={Archive}
+              label="Verileri Yedekle"
+              description="ZIP formatında indir"
+              onClick={handleBackupData}
               gradient="from-emerald to-green"
+            />
+
+            {/* Hidden file input for restore */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".zip"
+              onChange={handleRestoreData}
+              className="hidden"
+            />
+            
+            <SettingRow
+              icon={Upload}
+              label="Yedeği Geri Yükle"
+              description="ZIP dosyasından yükle"
+              onClick={() => fileInputRef.current?.click()}
+              gradient="from-blue to-cyan"
             />
             
             <SettingRow
