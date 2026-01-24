@@ -98,8 +98,8 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
           className="fixed inset-0 z-50 bg-background"
         >
           <div className="flex flex-col h-full safe-area-top">
-            {/* Header - Compact */}
-            <div className="relative bg-card border-b border-border px-4 pt-4 pb-3">
+            {/* Header - Balanced */}
+            <div className="relative bg-card border-b border-border px-5 pt-5 pb-4">
               {/* Header row with back button, centered icon/title, and status */}
               <div className="relative flex items-center justify-center">
                 {/* Back button */}
@@ -109,25 +109,25 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                     e.stopPropagation();
                     onClose();
                   }}
-                  className="absolute left-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center"
+                  className="absolute left-0 w-9 h-9 rounded-full bg-muted flex items-center justify-center"
                 >
-                  <ChevronLeft className="w-4 h-4 text-foreground" />
+                  <ChevronLeft className="w-5 h-5 text-foreground" />
                 </button>
 
                 {/* Centered icon and title */}
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
-                    <Bell className="w-4 h-4 text-white" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
+                    <Bell className="w-5 h-5 text-white" />
                   </div>
-                  <h2 className="text-base font-semibold text-foreground">Bildirim Ayarları</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Bildirim Ayarları</h2>
                   {hasPermission ? (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald/20 text-emerald text-[10px] font-medium">
-                      <span className="w-1 h-1 rounded-full bg-emerald animate-pulse" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald/20 text-emerald text-xs font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse" />
                       ✓
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber/20 text-amber text-[10px] font-medium">
-                      <span className="w-1 h-1 rounded-full bg-amber" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/20 text-amber text-xs font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber" />
                       !
                     </span>
                   )}
@@ -142,15 +142,15 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
               transition={{ delay: 0.1 }}
               className="flex-1 overflow-y-auto px-6 py-6 bg-background pb-24"
             >
-              {/* Permission Warning - Ultra Compact */}
+              {/* Permission Warning - Balanced */}
               {!hasPermission && (
-                <div className="mb-3 p-2 bg-amber/10 border border-amber/20 rounded-lg flex items-center justify-between gap-2">
-                  <p className="text-xs text-foreground">Bildirim izni gerekli</p>
-                  <div className="flex gap-1.5">
+                <div className="mb-4 p-3 bg-amber/10 border border-amber/20 rounded-xl flex items-center justify-between gap-3">
+                  <p className="text-sm text-foreground">Bildirim izni gerekli</p>
+                  <div className="flex gap-2">
                     <Button
                       onClick={handleRequestPermissions}
                       size="sm"
-                      className="h-7 px-2 text-xs bg-amber hover:bg-amber/90 text-white"
+                      className="h-8 px-3 text-sm bg-amber hover:bg-amber/90 text-white"
                     >
                       İzin Ver
                     </Button>
@@ -158,7 +158,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                       onClick={() => toast.info('Ayarlar > Uygulamalar > Luna Joy')}
                       size="sm"
                       variant="outline"
-                      className="h-7 px-2 text-xs border-amber/30 text-amber"
+                      className="h-8 px-3 text-sm border-amber/30 text-amber"
                     >
                       Ayarlar
                     </Button>
