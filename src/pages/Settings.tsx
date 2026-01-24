@@ -1,6 +1,5 @@
-// 🌸 Settings Page - Flo Inspired Design
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// 🌸 Settings Page - Flo Inspired Design (Zero Motion for Native Performance)
+import { useState, useRef } from 'react';
 import { 
   Calendar, 
   Shield, 
@@ -19,6 +18,7 @@ import {
   Scale,
   RotateCcw,
   Archive,
+  X,
   type LucideIcon
 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
@@ -127,7 +127,7 @@ export default function SettingsPage() {
     { value: 'system', icon: Monitor, label: 'Sistem' },
   ];
 
-  // Section Card Component
+  // Section Card Component (Zero Motion)
   const SectionCard = ({ 
     title, 
     icon: Icon, 
@@ -148,14 +148,10 @@ export default function SettingsPage() {
     const isExpanded = expandedSection === id;
     
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border/50"
-      >
+      <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border/50 animate-fade-in">
         <button
           onClick={() => collapsible && id && setExpandedSection(isExpanded ? null : id)}
-          className="w-full flex items-center gap-3 p-3"
+          className="w-full flex items-center gap-3 p-3 active:bg-muted/50 transition-colors"
         >
           <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
             <Icon className="w-5 h-5 text-white" />
@@ -165,34 +161,22 @@ export default function SettingsPage() {
           </div>
           {rightElement}
           {collapsible && (
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <div className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </motion.div>
+            </div>
           )}
         </button>
         
-        <AnimatePresence>
-          {(!collapsible || isExpanded) && (
-            <motion.div
-              initial={collapsible ? { height: 0, opacity: 0 } : false}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="px-3 pb-3">
-                {children}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+        {(!collapsible || isExpanded) && (
+          <div className="px-3 pb-3">
+            {children}
+          </div>
+        )}
+      </div>
     );
   };
 
-  // Setting Row Component
+  // Setting Row Component (Zero Motion)
   const SettingRow = ({ 
     icon: Icon, 
     label, 
@@ -208,10 +192,9 @@ export default function SettingsPage() {
     rightElement?: React.ReactNode;
     gradient?: string;
   }) => (
-    <motion.button
+    <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-      whileTap={onClick ? { scale: 0.98 } : undefined}
+      className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted active:scale-[0.98] transition-all"
     >
       <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center`}>
         <Icon className="w-4 h-4 text-white" />
@@ -221,24 +204,23 @@ export default function SettingsPage() {
         {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </div>
       {rightElement || (onClick && <ChevronRight className="w-4 h-4 text-muted-foreground" />)}
-    </motion.button>
+    </button>
   );
 
-  // Animated Toggle Component
+  // Toggle Component (Zero Motion - CSS only)
   const AnimatedSwitch = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
-    <motion.div
-      className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors ${
+    <div
+      className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors duration-200 active:scale-95 ${
         checked ? 'bg-gradient-to-r from-rose to-pink' : 'bg-muted'
       }`}
       onClick={() => onChange(!checked)}
-      whileTap={{ scale: 0.95 }}
     >
-      <motion.div
-        className="absolute top-1 w-6 h-6 rounded-full bg-white shadow-md"
-        animate={{ left: checked ? 'calc(100% - 28px)' : '4px' }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      <div
+        className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-200 ${
+          checked ? 'left-[calc(100%-28px)]' : 'left-1'
+        }`}
       />
-    </motion.div>
+    </div>
   );
 
   return (
@@ -246,13 +228,12 @@ export default function SettingsPage() {
       {/* Header with Back Button */}
       <header className="px-6 pt-6 pb-4">
         <div className="flex items-center gap-4 mb-2">
-          <motion.button
+          <button
             onClick={() => navigate('/')}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
-            whileTap={{ scale: 0.95 }}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
           >
             <ArrowLeft className="w-5 h-5 text-foreground" />
-          </motion.button>
+          </button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Ayarlar</h1>
             <p className="text-sm text-muted-foreground">Uygulama tercihlerini özelleştir</p>
@@ -276,21 +257,19 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">{cycleSettings.cycleLength} gün</p>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ cycleLength: Math.max(21, cycleSettings.cycleLength - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-8 text-center font-bold text-lg">{cycleSettings.cycleLength}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ cycleLength: Math.min(40, cycleSettings.cycleLength + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
             
@@ -300,21 +279,19 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">{cycleSettings.periodLength} gün</p>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ periodLength: Math.max(2, cycleSettings.periodLength - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-8 text-center font-bold text-lg">{cycleSettings.periodLength}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateCycleSettings({ periodLength: Math.min(10, cycleSettings.periodLength + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>
@@ -339,21 +316,19 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ targetWeight: Math.max(30, (userSettings?.targetWeight || 60) - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-10 text-center font-bold text-lg">{userSettings?.targetWeight || 60}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ targetWeight: Math.min(150, (userSettings?.targetWeight || 60) + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
             
@@ -369,21 +344,19 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ dailyWaterGoal: Math.max(4, (userSettings?.dailyWaterGoal || 9) - 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Minus className="w-4 h-4" />
-                </motion.button>
+                </button>
                 <span className="w-8 text-center font-bold text-lg">{userSettings?.dailyWaterGoal || 9}</span>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => updateUserSettings({ dailyWaterGoal: Math.min(20, (userSettings?.dailyWaterGoal || 9) + 1) })}
-                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>
@@ -397,19 +370,18 @@ export default function SettingsPage() {
         >
           <div className="grid grid-cols-3 gap-2">
             {themes.map((t) => (
-              <motion.button
+              <button
                 key={t.value}
                 onClick={() => setTheme(t.value)}
-                className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all ${
+                className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all active:scale-[0.97] ${
                   theme === t.value
                     ? 'bg-gradient-to-br from-amber to-orange text-white shadow-lg'
                     : 'bg-muted hover:bg-muted/80'
                 }`}
-                whileTap={{ scale: 0.97 }}
               >
                 <t.icon className="w-6 h-6" />
                 <span className="text-sm font-medium">{t.label}</span>
-              </motion.button>
+              </button>
             ))}
           </div>
         </SectionCard>
@@ -447,10 +419,9 @@ export default function SettingsPage() {
             />
             
             {/* Backup & Restore Button */}
-            <motion.button
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={() => setBackupModalOpen(true)}
-              className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+              className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted active:scale-[0.98] transition-all"
             >
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald to-green flex items-center justify-center">
                 <Archive className="w-4 h-4 text-white" />
@@ -460,7 +431,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">Yedekle veya geri yükle</p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </motion.button>
+            </button>
             
             <SettingRow
               icon={Trash2}
@@ -500,11 +471,7 @@ export default function SettingsPage() {
         </SectionCard>
 
         {/* About */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-rose-light to-pink-light dark:from-rose/20 dark:to-pink/20 rounded-3xl p-5 border border-rose/30 dark:border-rose/30"
-        >
+        <div className="bg-gradient-to-br from-rose-light to-pink-light dark:from-rose/20 dark:to-pink/20 rounded-3xl p-5 border border-rose/30 dark:border-rose/30 animate-fade-in">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose to-pink flex items-center justify-center shadow-lg">
               <span className="text-2xl">🌸</span>
@@ -517,78 +484,71 @@ export default function SettingsPage() {
           <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
             Bu uygulama tıbbi bir cihaz değildir. Sağlık kararlarınız için lütfen bir sağlık uzmanına danışın.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Backup Modal */}
-        <AnimatePresence>
-          {backupModalOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        {/* Backup Modal (Zero Motion) */}
+        {backupModalOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-50 bg-black/50 animate-fade-in"
               onClick={() => setBackupModalOpen(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
+            />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+              <div
                 onClick={(e) => e.stopPropagation()}
-                className="bg-card rounded-2xl p-5 w-full max-w-sm shadow-xl border border-border"
+                className="bg-card rounded-2xl p-5 w-full max-w-sm shadow-xl border border-border pointer-events-auto animate-scale-in"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
-                    <Archive className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
+                      <Archive className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Veri Yedekleme</h3>
+                      <p className="text-xs text-muted-foreground">ZIP formatında</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Veri Yedekleme</h3>
-                    <p className="text-xs text-muted-foreground">ZIP formatında</p>
-                  </div>
+                  <button
+                    onClick={() => setBackupModalOpen(false)}
+                    className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
                 </div>
                 
                 <div className="space-y-2">
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
+                  <button
                     onClick={() => {
                       handleBackupData();
                       setBackupModalOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-emerald to-green text-white rounded-xl"
+                    className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-emerald to-green text-white rounded-xl active:scale-[0.98] transition-transform"
                   >
                     <Download className="w-5 h-5" />
                     <div className="text-left">
                       <p className="font-medium">Yedekle</p>
                       <p className="text-xs opacity-80">Verilerini ZIP olarak indir</p>
                     </div>
-                  </motion.button>
+                  </button>
                   
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
+                  <button
                     onClick={() => {
                       fileInputRef.current?.click();
                       setBackupModalOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 p-3 bg-muted hover:bg-muted/80 rounded-xl transition-colors"
+                    className="w-full flex items-center gap-3 p-3 bg-muted hover:bg-muted/80 rounded-xl transition-colors active:scale-[0.98]"
                   >
                     <Upload className="w-5 h-5 text-foreground" />
                     <div className="text-left">
                       <p className="font-medium text-foreground">Geri Yükle</p>
                       <p className="text-xs text-muted-foreground">ZIP dosyasından geri yükle</p>
                     </div>
-                  </motion.button>
+                  </button>
                 </div>
-                
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setBackupModalOpen(false)}
-                  className="w-full mt-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  İptal
-                </motion.button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       <BottomNav onCenterPress={handleCenterPress} />

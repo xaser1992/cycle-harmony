@@ -95,12 +95,67 @@ export function useCycleData() {
     }
   }, [cycleSettings, entries, notificationPrefs, userSettings.language]);
 
-  // Save day entry
+  // Save day entry - recalculates predictions if flow level changes
   const saveDayEntry = useCallback(async (entry: DayEntry) => {
     await storage.saveDayEntry(entry);
     const updatedEntries = await storage.getDayEntries();
     setEntries(updatedEntries);
-  }, []);
+    
+    // Check if this is a period entry - recalculate predictions
+    if (entry.flowLevel && entry.flowLevel !== 'none') {
+      // Find the earliest period day in current cycle to use as lastPeriodStart
+      const periodEntries = updatedEntries
+        .filter(e => e.flowLevel && e.flowLevel !== 'none')
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      if (periodEntries.length > 0) {
+        // Find the most recent "first day" of a period (gap of more than 7 days from previous period)
+        let lastPeriodStartDate = periodEntries[0].date;
+        
+        for (let i = periodEntries.length - 1; i >= 0; i--) {
+          if (i === 0) {
+            lastPeriodStartDate = periodEntries[0].date;
+            break;
+          }
+          
+          const currentDate = new Date(periodEntries[i].date);
+          const prevDate = new Date(periodEntries[i - 1].date);
+          const daysDiff = Math.abs((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          // If gap is more than 7 days, this is a new cycle's first day
+          if (daysDiff > 7) {
+            lastPeriodStartDate = periodEntries[i].date;
+            break;
+          }
+        }
+        
+        // Update cycle settings with new lastPeriodStart
+        const updatedSettings = { ...cycleSettings, lastPeriodStart: lastPeriodStartDate };
+        setCycleSettings(updatedSettings);
+        await storage.saveCycleSettings(updatedSettings);
+        
+        // Recalculate predictions with updated settings
+        const history = await storage.getCycleHistory();
+        const pred = calculatePredictions(updatedSettings, history);
+        setPrediction(pred);
+        setCurrentPhase(getCyclePhase(new Date(), updatedSettings, pred, updatedEntries));
+        
+        // Reschedule notifications if enabled (only on native platforms)
+        if (notificationPrefs.enabled && Capacitor.isNativePlatform() && pred) {
+          try {
+            await scheduleNotifications(pred, notificationPrefs, userSettings.language);
+          } catch (error) {
+            console.warn('Could not reschedule notifications after period entry:', error);
+          }
+        }
+      }
+    } else {
+      // Still update current phase for non-period entries
+      if (prediction) {
+        setCurrentPhase(getCyclePhase(new Date(), cycleSettings, prediction, updatedEntries));
+      }
+    }
+  }, [cycleSettings, notificationPrefs, prediction, userSettings.language]);
 
   // Update notification preferences
   const updateNotificationPrefs = useCallback(async (newPrefs: Partial<NotificationPreferences>) => {
