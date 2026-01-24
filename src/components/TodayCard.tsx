@@ -288,16 +288,23 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
             </div>
           </div>
 
-          {/* Bottom tip */}
-          <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3">
+          {/* Bottom tip - Opens phase details */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDetails(true);
+            }}
+            className="mt-4 w-full bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3"
+          >
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               <span className="text-lg">💡</span>
             </div>
-            <p className={`text-xs ${phaseAccentColors[phase.type]} flex-1`}>
-              {language === 'tr' ? 'Detaylar için dokun' : 'Tap for details'}
+            <p className={`text-xs ${phaseAccentColors[phase.type]} flex-1 text-left`}>
+              {language === 'tr' ? 'Faz detayları ve öneriler' : 'Phase details & tips'}
             </p>
             <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
-          </div>
+          </motion.button>
         </div>
       </div>
 
@@ -423,14 +430,14 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                 'bg-gradient-to-br from-cyan-400 to-teal-400'
               }`}
             >
-              {/* Close Button - Fixed position with high z-index */}
+              {/* Close Button - Absolute position inside modal */}
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setActiveInfoCard(null);
                 }}
-                className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[102] active:scale-90 transition-transform"
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-10 active:scale-90 transition-transform"
               >
                 <X className="w-5 h-5 text-white" />
               </button>

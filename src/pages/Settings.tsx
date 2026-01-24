@@ -436,14 +436,6 @@ export default function SettingsPage() {
               />
             </div>
             
-            <SettingRow
-              icon={Archive}
-              label="Verileri Yedekle"
-              description="ZIP formatında indir"
-              onClick={handleBackupData}
-              gradient="from-emerald to-green"
-            />
-
             {/* Hidden file input for restore */}
             <input
               ref={fileInputRef}
@@ -453,13 +445,36 @@ export default function SettingsPage() {
               className="hidden"
             />
             
-            <SettingRow
-              icon={Upload}
-              label="Yedeği Geri Yükle"
-              description="ZIP dosyasından yükle"
-              onClick={() => fileInputRef.current?.click()}
-              gradient="from-blue to-cyan"
-            />
+            {/* Backup & Restore Combined */}
+            <div className="bg-background rounded-xl p-3">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
+                  <Archive className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Veri Yedekleme</p>
+                  <p className="text-xs text-muted-foreground">ZIP formatında yedekle ve geri yükle</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleBackupData}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-emerald to-green text-white rounded-xl font-medium text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  Yedekle
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-muted hover:bg-muted/80 rounded-xl font-medium text-sm transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  Geri Yükle
+                </motion.button>
+              </div>
+            </div>
             
             <SettingRow
               icon={Trash2}
