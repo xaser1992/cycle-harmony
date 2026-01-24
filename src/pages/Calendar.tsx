@@ -62,6 +62,7 @@ export default function CalendarPage() {
   const [medications, setMedications] = useState<Medication[]>([]);
   const [medicationLogs, setMedicationLogs] = useState<Record<string, MedicationLog[]>>({});
   const [activeInfoCard, setActiveInfoCard] = useState<'period' | 'ovulation' | 'fertile' | null>(null);
+  const [showPeriodConfirm, setShowPeriodConfirm] = useState(false);
 
   // Month navigation via buttons only (swipe disabled to allow tab switching)
 
@@ -164,6 +165,30 @@ export default function CalendarPage() {
       setShowDayDetail(false);
       openUpdateSheet({ date: selectedDate });
     }
+  };
+
+  const handleLogPastPeriod = async () => {
+    if (!selectedDate) return;
+    
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    const existingEntry = entries.find(e => e.date === dateStr);
+    const isOnPeriod = existingEntry?.flowLevel !== 'none' && existingEntry?.flowLevel !== undefined;
+    
+    // Toggle period status
+    const newEntry = {
+      date: dateStr,
+      flowLevel: isOnPeriod ? 'none' as const : 'medium' as const,
+      symptoms: existingEntry?.symptoms || [],
+      mood: existingEntry?.mood,
+      notes: existingEntry?.notes,
+    };
+    
+    await saveDayEntry(newEntry);
+    setShowPeriodConfirm(false);
+    toast.success(isOnPeriod 
+      ? (userSettings?.language === 'tr' ? 'Regl kaydı kaldırıldı' : 'Period log removed')
+      : (userSettings?.language === 'tr' ? 'Regl kaydedildi! Tahminler güncellendi.' : 'Period logged! Predictions updated.')
+    );
   };
 
   const handleCenterPress = (tab?: 'flow' | 'symptoms' | 'mood') => {
@@ -737,22 +762,54 @@ export default function CalendarPage() {
                 {/* Entry Summary */}
                 {(() => {
                   const entry = getEntryForDate(selectedDate);
+                  const isPastDate = selectedDate < new Date() && !isSameDay(selectedDate, new Date());
+                  const isOnPeriod = entry?.flowLevel !== 'none' && entry?.flowLevel !== undefined;
+                  
                   if (!entry && getMedicationProgress(selectedDate).total === 0) {
                     return (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <p className="text-sm">Bu gün için kayıt yok</p>
-                        <button
-                          onClick={handleEditDay}
-                          className="mt-3 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium active:scale-95 transition-transform"
-                        >
-                          Kayıt Ekle
-                        </button>
+                      <div className="space-y-4">
+                        {/* Quick Period Log for Past Dates */}
+                        {isPastDate && (
+                          <button
+                            onClick={() => setShowPeriodConfirm(true)}
+                            className="w-full p-4 rounded-2xl bg-gradient-to-r from-rose to-pink text-white flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-lg shadow-rose/30"
+                          >
+                            <span className="text-xl">🩸</span>
+                            <span className="font-semibold">Bu Gün Regl Başladı</span>
+                          </button>
+                        )}
+                        
+                        <div className="text-center py-4 text-muted-foreground">
+                          <p className="text-sm">Bu gün için kayıt yok</p>
+                          <button
+                            onClick={handleEditDay}
+                            className="mt-3 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium active:scale-95 transition-transform"
+                          >
+                            Detaylı Kayıt Ekle
+                          </button>
+                        </div>
                       </div>
                     );
                   }
 
                   return (
                     <div className="space-y-4">
+                      {/* Quick Period Toggle for Past Dates */}
+                      {isPastDate && (
+                        <button
+                          onClick={() => setShowPeriodConfirm(true)}
+                          className={`w-full p-3 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-lg ${
+                            isOnPeriod 
+                              ? 'bg-gradient-to-r from-emerald to-teal text-white shadow-emerald/30'
+                              : 'bg-gradient-to-r from-rose to-pink text-white shadow-rose/30'
+                          }`}
+                        >
+                          <span className="text-lg">{isOnPeriod ? '✓' : '🩸'}</span>
+                          <span className="font-medium text-sm">
+                            {isOnPeriod ? 'Regl Kaydını Kaldır' : 'Bu Gün Regl Başladı'}
+                          </span>
+                        </button>
+                      )}
                       {/* Flow Level */}
                       {entry && entry.flowLevel !== 'none' && (
                         <div className="flex items-center gap-3 p-3 rounded-2xl bg-rose-light dark:bg-rose/20">
@@ -954,6 +1011,67 @@ export default function CalendarPage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Period Confirmation Modal */}
+      {showPeriodConfirm && selectedDate && (
+        <>
+          <div
+            className="fixed inset-0 z-[200] bg-black/50 animate-fade-in"
+            onClick={() => setShowPeriodConfirm(false)}
+          />
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 pointer-events-none">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-card rounded-2xl p-5 w-full max-w-sm shadow-xl border border-border pointer-events-auto animate-scale-in"
+            >
+              <div className="text-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose to-pink mx-auto flex items-center justify-center mb-3">
+                  <span className="text-3xl">🩸</span>
+                </div>
+                <h3 className="font-bold text-lg text-foreground">
+                  {format(selectedDate, 'd MMMM yyyy', { locale: tr })}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {(() => {
+                    const entry = getEntryForDate(selectedDate);
+                    const isOnPeriod = entry?.flowLevel !== 'none' && entry?.flowLevel !== undefined;
+                    return isOnPeriod 
+                      ? 'Bu günün regl kaydını kaldırmak istiyor musunuz?'
+                      : 'Bu gün regl başladı olarak işaretlensin mi? Tahminler otomatik güncellenecek.';
+                  })()}
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowPeriodConfirm(false)}
+                  className="flex-1 py-3 rounded-xl bg-muted text-foreground font-medium active:scale-[0.98] transition-transform"
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={handleLogPastPeriod}
+                  className={`flex-1 py-3 rounded-xl font-medium active:scale-[0.98] transition-transform ${
+                    (() => {
+                      const entry = getEntryForDate(selectedDate);
+                      const isOnPeriod = entry?.flowLevel !== 'none' && entry?.flowLevel !== undefined;
+                      return isOnPeriod 
+                        ? 'bg-gradient-to-r from-emerald to-teal text-white'
+                        : 'bg-gradient-to-r from-rose to-pink text-white';
+                    })()
+                  }`}
+                >
+                  {(() => {
+                    const entry = getEntryForDate(selectedDate);
+                    const isOnPeriod = entry?.flowLevel !== 'none' && entry?.flowLevel !== undefined;
+                    return isOnPeriod ? 'Kaldır' : 'Onayla';
+                  })()}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <BottomNav onCenterPress={handleCenterPress} />
     </div>
