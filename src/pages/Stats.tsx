@@ -99,9 +99,39 @@ TabButton.displayName = 'TabButton';
 // Animated Icon Components for Chart Cards
 const AnimatedBarChartIcon = memo(() => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-    <rect x="4" y="14" width="4" height="6" rx="1" className="fill-rose animate-pulse" />
-    <rect x="10" y="10" width="4" height="10" rx="1" className="fill-rose opacity-80" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s' }} />
-    <rect x="16" y="6" width="4" height="14" rx="1" className="fill-rose opacity-60" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.4s' }} />
+    <rect
+      x="4"
+      y="14"
+      width="4"
+      height="6"
+      rx="1"
+      className="animate-pulse"
+      style={{ fill: 'hsl(var(--primary))' }}
+    />
+    <rect
+      x="10"
+      y="10"
+      width="4"
+      height="10"
+      rx="1"
+      style={{
+        fill: 'hsl(var(--primary))',
+        opacity: 0.8,
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s',
+      }}
+    />
+    <rect
+      x="16"
+      y="6"
+      width="4"
+      height="14"
+      rx="1"
+      style={{
+        fill: 'hsl(var(--primary))',
+        opacity: 0.6,
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.4s',
+      }}
+    />
   </svg>
 ));
 AnimatedBarChartIcon.displayName = 'AnimatedBarChartIcon';
@@ -110,19 +140,52 @@ const AnimatedWaterDropIcon = memo(() => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
     <path 
       d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" 
-      className="fill-blue stroke-blue animate-pulse"
+      className="animate-pulse"
       strokeWidth="1.5"
+      style={{
+        fill: 'hsl(var(--accent-blue))',
+        stroke: 'hsl(var(--accent-blue))',
+      }}
     />
-    <ellipse cx="12" cy="16" rx="4" ry="3" className="fill-sky/50" />
+    <ellipse
+      cx="12"
+      cy="16"
+      rx="4"
+      ry="3"
+      style={{ fill: 'hsl(var(--accent-sky) / 0.5)' }}
+    />
   </svg>
 ));
 AnimatedWaterDropIcon.displayName = 'AnimatedWaterDropIcon';
 
 const AnimatedScaleIcon = memo(() => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-    <rect x="4" y="18" width="16" height="3" rx="1" className="fill-emerald" />
-    <rect x="10" y="8" width="4" height="10" rx="1" className="fill-emerald animate-pulse" />
-    <circle cx="12" cy="5" r="2" className="fill-teal" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.3s' }} />
+    <rect
+      x="4"
+      y="18"
+      width="16"
+      height="3"
+      rx="1"
+      style={{ fill: 'hsl(var(--accent-emerald))' }}
+    />
+    <rect
+      x="10"
+      y="8"
+      width="4"
+      height="10"
+      rx="1"
+      className="animate-pulse"
+      style={{ fill: 'hsl(var(--accent-emerald))' }}
+    />
+    <circle
+      cx="12"
+      cy="5"
+      r="2"
+      style={{
+        fill: 'hsl(var(--accent-teal))',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.3s',
+      }}
+    />
   </svg>
 ));
 AnimatedScaleIcon.displayName = 'AnimatedScaleIcon';
@@ -131,45 +194,112 @@ const AnimatedTrendIcon = memo(() => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
     <path 
       d="M3 18 L8 13 L12 16 L21 6" 
-      className="stroke-pink animate-pulse" 
+      className="animate-pulse" 
       strokeWidth="2.5" 
       strokeLinecap="round" 
       strokeLinejoin="round"
       fill="none"
+      style={{ stroke: 'hsl(var(--accent-pink))' }}
     />
-    <circle cx="8" cy="13" r="2" className="fill-pink" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.1s' }} />
-    <circle cx="12" cy="16" r="2" className="fill-pink" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s' }} />
-    <circle cx="21" cy="6" r="2" className="fill-rose" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.3s' }} />
+    <circle
+      cx="8"
+      cy="13"
+      r="2"
+      style={{
+        fill: 'hsl(var(--accent-pink))',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.1s',
+      }}
+    />
+    <circle
+      cx="12"
+      cy="16"
+      r="2"
+      style={{
+        fill: 'hsl(var(--accent-pink))',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s',
+      }}
+    />
+    <circle
+      cx="21"
+      cy="6"
+      r="2"
+      style={{
+        fill: 'hsl(var(--primary))',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.3s',
+      }}
+    />
   </svg>
 ));
 AnimatedTrendIcon.displayName = 'AnimatedTrendIcon';
 
 const AnimatedPeriodBarIcon = memo(() => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-    <rect x="4" y="16" width="4" height="4" rx="1" className="fill-rose" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
-    <rect x="10" y="12" width="4" height="8" rx="1" className="fill-rose opacity-80" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.15s' }} />
-    <rect x="16" y="8" width="4" height="12" rx="1" className="fill-rose opacity-60" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.3s' }} />
+    <rect
+      x="4"
+      y="16"
+      width="4"
+      height="4"
+      rx="1"
+      style={{
+        fill: 'hsl(var(--primary))',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      }}
+    />
+    <rect
+      x="10"
+      y="12"
+      width="4"
+      height="8"
+      rx="1"
+      style={{
+        fill: 'hsl(var(--primary))',
+        opacity: 0.8,
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.15s',
+      }}
+    />
+    <rect
+      x="16"
+      y="8"
+      width="4"
+      height="12"
+      rx="1"
+      style={{
+        fill: 'hsl(var(--primary))',
+        opacity: 0.6,
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.3s',
+      }}
+    />
   </svg>
 ));
 AnimatedPeriodBarIcon.displayName = 'AnimatedPeriodBarIcon';
 
 const AnimatedDonutIcon = memo(() => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="8" className="stroke-muted" strokeWidth="3" fill="none" />
+    <circle
+      cx="12"
+      cy="12"
+      r="8"
+      strokeWidth="3"
+      fill="none"
+      style={{ stroke: 'hsl(var(--muted-foreground) / 0.35)' }}
+    />
     <path 
       d="M12 4 A8 8 0 0 1 20 12" 
-      className="stroke-rose animate-pulse" 
+      className="animate-pulse" 
       strokeWidth="3" 
       fill="none" 
       strokeLinecap="round"
+      style={{ stroke: 'hsl(var(--primary))' }}
     />
     <path 
       d="M20 12 A8 8 0 0 1 12 20" 
-      className="stroke-violet" 
       strokeWidth="3" 
       fill="none" 
       strokeLinecap="round"
-      style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s' }}
+      style={{
+        stroke: 'hsl(var(--accent-violet))',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s',
+      }}
     />
   </svg>
 ));
@@ -189,7 +319,7 @@ const ChartCard = memo(({
 }) => (
   <div className="bg-card rounded-3xl p-5 border border-border/50 shadow-sm animate-fade-in">
     <div className="flex items-center gap-3 mb-4">
-      <div className="w-10 h-10 rounded-2xl bg-rose/10 flex items-center justify-center">
+      <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
         {icon}
       </div>
       <div>
