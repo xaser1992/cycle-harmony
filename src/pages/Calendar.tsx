@@ -442,10 +442,10 @@ export default function CalendarPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 pt-12 shadow-2xl overflow-y-auto ${
-                  activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose to-pink' :
-                  activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet to-purple' :
-                  'bg-gradient-to-br from-cyan to-teal'
+                className={`fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 pt-12 shadow-2xl overflow-y-auto backdrop-blur-md ${
+                  activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose/85 to-pink/85' :
+                  activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet/85 to-purple/85' :
+                  'bg-gradient-to-br from-cyan/85 to-teal/85'
                 }`}
               >
 
@@ -708,7 +708,7 @@ export default function CalendarPage() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[101] bg-card rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden"
+              className="fixed bottom-0 left-0 right-0 z-[101] bg-card/90 backdrop-blur-md rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden"
             >
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-2">
