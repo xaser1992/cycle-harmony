@@ -357,24 +357,35 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={(e) => { e.stopPropagation(); setActiveInfoCard('period'); }}
-                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2"
+                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left"
                 >
-                  <motion.span 
-                    className="text-lg"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    🩸
-                  </motion.span>
-                  <div className="flex-1">
-                    <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
-                      {language === 'tr' ? 'Regl Dönemi' : 'Period'}
-                    </p>
-                    <p className="text-sm font-semibold text-white">
-                      {language === 'tr' ? `${phase.dayNumber}. gün` : `Day ${phase.dayNumber}`}
-                    </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <motion.span 
+                      className="text-lg"
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      🩸
+                    </motion.span>
+                    <div className="flex-1">
+                      <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
+                        {language === 'tr' ? 'Regl Dönemi' : 'Period'}
+                      </p>
+                      <p className="text-sm font-semibold text-white">
+                        {language === 'tr' ? `${phase.dayNumber}/${5} gün` : `Day ${phase.dayNumber}/5`}
+                      </p>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
                   </div>
-                  <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
+                  {/* Period Progress Bar */}
+                  <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-white/80 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(phase.dayNumber / 5) * 100}%` }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
+                  </div>
                 </motion.button>
               )}
             </div>
@@ -415,7 +426,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
 
             {/* Modal Content */}
             <motion.div
-              className={`fixed inset-x-3 top-1/2 z-[51] rounded-2xl bg-gradient-to-br ${phaseGradients[phase.type]} p-4 shadow-2xl max-h-[75vh] overflow-y-auto`}
+              className={`fixed inset-x-3 top-1/2 z-[51] rounded-2xl bg-gradient-to-br ${phaseGradients[phase.type].replace(/from-(\w+-\d+)/g, 'from-$1/85').replace(/via-(\w+-\d+)/g, 'via-$1/85').replace(/to-(\w+-\d+)/g, 'to-$1/85')} backdrop-blur-md p-4 shadow-2xl max-h-[75vh] overflow-y-auto`}
               initial={{ opacity: 0, scale: 0.95, y: '-45%' }}
               animate={{ opacity: 1, scale: 1, y: '-50%' }}
               exit={{ opacity: 0, scale: 0.95, y: '-45%' }}
@@ -522,10 +533,10 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className={`fixed inset-x-3 top-20 z-[101] rounded-2xl p-3 shadow-2xl max-h-[75vh] overflow-y-auto ${
-                activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose-400 to-pink-500' :
-                activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet-400 to-purple-500' :
-                'bg-gradient-to-br from-cyan-400 to-teal-400'
+              className={`fixed inset-x-3 top-20 z-[101] rounded-2xl p-3 shadow-2xl max-h-[75vh] overflow-y-auto backdrop-blur-md ${
+                activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose-400/85 to-pink-500/85' :
+                activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet-400/85 to-purple-500/85' :
+                'bg-gradient-to-br from-cyan-400/85 to-teal-400/85'
               }`}
             >
               {/* Close Button */}
