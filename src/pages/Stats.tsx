@@ -531,7 +531,8 @@ export default function StatsPage() {
     const sortedByDate = [...weightsWithData].sort((a, b) => 
       parseISO(b.date).getTime() - parseISO(a.date).getTime()
     );
-    const latestWeight = sortedByDate[0]?.weight || 0;
+    // Round to 1 decimal place to avoid floating point precision issues
+    const latestWeight = Math.round((sortedByDate[0]?.weight || 0) * 10) / 10;
     
     const oneWeekAgo = subWeeks(new Date(), 1);
     const weeklyWeights = weightsWithData.filter(e => parseISO(e.date) >= oneWeekAgo);
@@ -545,7 +546,7 @@ export default function StatsPage() {
       ? Math.round(monthlyWeights.reduce((sum, e) => sum + (e.weight || 0), 0) / monthlyWeights.length * 10) / 10
       : latestWeight;
     
-    const targetWeight = userSettings?.targetWeight || 60;
+    const targetWeight = Math.round((userSettings?.targetWeight || 60) * 10) / 10;
     
     return {
       current: latestWeight,
