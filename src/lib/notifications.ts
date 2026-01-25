@@ -249,6 +249,9 @@ export async function scheduleNotifications(
     return;
   }
   
+  // Ensure notification channels exist before scheduling (critical for Android)
+  await createNotificationChannels();
+  
   // Cancel existing notifications before rescheduling
   await cancelAllNotifications();
   

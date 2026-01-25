@@ -677,6 +677,100 @@ export default function StatsPage() {
     ];
   }, [cycleSettings.periodLength]);
 
+  // Monthly comparison data - this month vs last month
+  const monthlyComparison = useMemo(() => {
+    const now = new Date();
+    const thisMonthStart = startOfMonth(now);
+    const thisMonthEnd = endOfMonth(now);
+    const lastMonthStart = startOfMonth(subMonths(now, 1));
+    const lastMonthEnd = endOfMonth(subMonths(now, 1));
+    
+    // This month entries
+    const thisMonthEntries = entries.filter(e => {
+      const d = parseISO(e.date);
+      return d >= thisMonthStart && d <= thisMonthEnd;
+    });
+    
+    // Last month entries
+    const lastMonthEntries = entries.filter(e => {
+      const d = parseISO(e.date);
+      return d >= lastMonthStart && d <= lastMonthEnd;
+    });
+    
+    // Period days
+    const thisMonthPeriodDays = thisMonthEntries.filter(e => e.flowLevel !== 'none').length;
+    const lastMonthPeriodDays = lastMonthEntries.filter(e => e.flowLevel !== 'none').length;
+    
+    // Symptom days  
+    const thisMonthSymptomDays = thisMonthEntries.filter(e => (e.symptoms?.length || 0) > 0).length;
+    const lastMonthSymptomDays = lastMonthEntries.filter(e => (e.symptoms?.length || 0) > 0).length;
+    
+    // Total symptoms count
+    const thisMonthSymptomCount = thisMonthEntries.reduce((sum, e) => sum + (e.symptoms?.length || 0), 0);
+    const lastMonthSymptomCount = lastMonthEntries.reduce((sum, e) => sum + (e.symptoms?.length || 0), 0);
+    
+    // Water glasses
+    const thisMonthWater = thisMonthEntries.reduce((sum, e) => sum + (e.waterGlasses || 0), 0);
+    const lastMonthWater = lastMonthEntries.reduce((sum, e) => sum + (e.waterGlasses || 0), 0);
+    
+    // Logged days
+    const thisMonthLoggedDays = thisMonthEntries.length;
+    const lastMonthLoggedDays = lastMonthEntries.length;
+    
+    // Calculate percentage changes
+    const calcChange = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+    
+    return {
+      thisMonth: format(now, 'MMMM', { locale: tr }),
+      lastMonth: format(subMonths(now, 1), 'MMMM', { locale: tr }),
+      metrics: [
+        {
+          label: isEnglish ? 'Logged Days' : 'Kayıt Günü',
+          icon: '📝',
+          thisMonth: thisMonthLoggedDays,
+          lastMonth: lastMonthLoggedDays,
+          change: calcChange(thisMonthLoggedDays, lastMonthLoggedDays),
+          unit: isEnglish ? 'days' : 'gün',
+        },
+        {
+          label: isEnglish ? 'Period Days' : 'Regl Günü',
+          icon: '🩸',
+          thisMonth: thisMonthPeriodDays,
+          lastMonth: lastMonthPeriodDays,
+          change: calcChange(thisMonthPeriodDays, lastMonthPeriodDays),
+          unit: isEnglish ? 'days' : 'gün',
+        },
+        {
+          label: isEnglish ? 'Symptom Days' : 'Semptom Günü',
+          icon: '💫',
+          thisMonth: thisMonthSymptomDays,
+          lastMonth: lastMonthSymptomDays,
+          change: calcChange(thisMonthSymptomDays, lastMonthSymptomDays),
+          unit: isEnglish ? 'days' : 'gün',
+        },
+        {
+          label: isEnglish ? 'Total Symptoms' : 'Toplam Semptom',
+          icon: '📊',
+          thisMonth: thisMonthSymptomCount,
+          lastMonth: lastMonthSymptomCount,
+          change: calcChange(thisMonthSymptomCount, lastMonthSymptomCount),
+          unit: '',
+        },
+        {
+          label: isEnglish ? 'Water Intake' : 'Su Tüketimi',
+          icon: '💧',
+          thisMonth: thisMonthWater,
+          lastMonth: lastMonthWater,
+          change: calcChange(thisMonthWater, lastMonthWater),
+          unit: isEnglish ? 'glasses' : 'bardak',
+        },
+      ],
+    };
+  }, [entries, isEnglish]);
+
   // Calendar days calculation
   const calendarData = useMemo(() => {
     const monthStart = startOfMonth(historyMonth);
@@ -844,6 +938,63 @@ export default function StatsPage() {
                 </div>
               </ChartCard>
             )}
+
+            {/* Monthly Comparison Card */}
+            <ChartCard
+              title={isEnglish ? 'Monthly Comparison' : 'Aylık Karşılaştırma'}
+              subtitle={`${monthlyComparison.thisMonth} vs ${monthlyComparison.lastMonth}`}
+              icon={<AnimatedTrendIcon />}
+            >
+              <div className="space-y-3">
+                {monthlyComparison.metrics.map((metric, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-muted/30 rounded-xl"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{metric.icon}</span>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{metric.label}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {metric.lastMonth} {metric.unit} → {metric.thisMonth} {metric.unit}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                      metric.change > 0 
+                        ? 'bg-emerald/20 text-emerald' 
+                        : metric.change < 0 
+                          ? 'bg-rose/20 text-rose' 
+                          : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {metric.change > 0 ? '+' : ''}{metric.change}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Visual Comparison Bar */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                  <span>{monthlyComparison.lastMonth}</span>
+                  <span>{monthlyComparison.thisMonth}</span>
+                </div>
+                <div className="flex gap-2">
+                  <div 
+                    className="h-3 rounded-full bg-gradient-to-r from-violet to-purple transition-all duration-500"
+                    style={{ width: `${Math.min(50, (monthlyComparison.metrics[0]?.lastMonth || 0) * 2)}%` }}
+                  />
+                  <div 
+                    className="h-3 rounded-full bg-gradient-to-r from-rose to-pink transition-all duration-500 ml-auto"
+                    style={{ width: `${Math.min(50, (monthlyComparison.metrics[0]?.thisMonth || 0) * 2)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                  <span>{monthlyComparison.metrics[0]?.lastMonth || 0} {isEnglish ? 'days' : 'gün'}</span>
+                  <span>{monthlyComparison.metrics[0]?.thisMonth || 0} {isEnglish ? 'days' : 'gün'}</span>
+                </div>
+              </div>
+            </ChartCard>
 
             {/* Weekly Overview */}
             <ChartCard
