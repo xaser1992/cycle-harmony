@@ -37,13 +37,13 @@ const getChartColors = () => {
   };
   
   return {
-    primary: getHSL('--rose'),
-    secondary: getHSL('--violet'),
-    accent: getHSL('--emerald'),
-    warning: getHSL('--amber'),
-    line: getHSL('--pink'),
-    blue: getHSL('--blue'),
-    cyan: getHSL('--cyan'),
+    primary: getHSL('--accent-rose'),
+    secondary: getHSL('--accent-violet'),
+    accent: getHSL('--accent-emerald'),
+    warning: getHSL('--accent-amber'),
+    line: getHSL('--accent-pink'),
+    blue: getHSL('--accent-blue'),
+    cyan: getHSL('--accent-cyan'),
   };
 };
 
@@ -56,10 +56,10 @@ const getCyclePhaseColors = () => {
   };
   
   return {
-    period: getHSL('--rose'),
-    follicular: getHSL('--blue'),
-    ovulation: getHSL('--violet'),
-    luteal: getHSL('--amber'),
+    period: getHSL('--accent-rose'),
+    follicular: getHSL('--accent-blue'),
+    ovulation: getHSL('--accent-violet'),
+    luteal: getHSL('--accent-amber'),
   };
 };
 
@@ -442,9 +442,17 @@ export default function StatsPage() {
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
   const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
   const [historyMonth, setHistoryMonth] = useState(new Date());
+  const [chartsAnimKey, setChartsAnimKey] = useState(0);
   
   const language = userSettings?.language;
   const isEnglish = language === 'en';
+
+  const prefersReducedMotion = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+  }, []);
+
+  const allowChartAnimations = !prefersReducedMotion;
   
   // Swipe navigation - tab arası geçiş için
   useSwipeNavigation({ threshold: 60 });
@@ -453,6 +461,11 @@ export default function StatsPage() {
   useEffect(() => {
     getCycleHistory().then(setCycleHistory);
   }, []);
+
+  // Sekme açılınca grafiklerin animasyonla çizilmesi için bir kere remount ediyoruz.
+  useEffect(() => {
+    if (activeTab === 'charts') setChartsAnimKey((k) => k + 1);
+  }, [activeTab]);
 
   const handleCenterPress = useCallback((tab?: 'flow' | 'symptoms' | 'mood') => {
     openUpdateSheet({ initialTab: tab || 'flow' });
@@ -835,12 +848,12 @@ export default function StatsPage() {
                   <AreaChart data={weeklyOverviewData}>
                     <defs>
                       <linearGradient id="colorPeriodArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--rose))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--rose))" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--accent-rose))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--accent-rose))" stopOpacity={0.1}/>
                       </linearGradient>
                       <linearGradient id="colorSymptomArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--violet))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--violet))" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--accent-violet))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--accent-violet))" stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -867,21 +880,21 @@ export default function StatsPage() {
                       type="monotone" 
                       dataKey="periodDays" 
                       name="periodDays"
-                      stroke="hsl(var(--rose))"
+                      stroke="hsl(var(--accent-rose))"
                       fillOpacity={1}
                       fill="url(#colorPeriodArea)"
                       strokeWidth={2}
-                      isAnimationActive={false}
+                      isAnimationActive={allowChartAnimations}
                     />
                     <Area 
                       type="monotone" 
                       dataKey="symptomDays" 
                       name="symptomDays"
-                      stroke="hsl(var(--violet))"
+                      stroke="hsl(var(--accent-violet))"
                       fillOpacity={1}
                       fill="url(#colorSymptomArea)"
                       strokeWidth={2}
-                      isAnimationActive={false}
+                      isAnimationActive={allowChartAnimations}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -927,7 +940,7 @@ export default function StatsPage() {
         )}
 
         {activeTab === 'charts' && (
-          <div className="space-y-5 animate-fade-in">
+          <div key={chartsAnimKey} className="space-y-5 animate-fade-in">
             {/* Cycle Length Trend - Line Chart */}
             <ChartCard
               title={isEnglish ? 'Cycle Length Trend' : 'Döngü Uzunluğu Trendi'}
@@ -958,11 +971,11 @@ export default function StatsPage() {
                     <Line 
                       type="monotone" 
                       dataKey="length" 
-                      stroke="hsl(var(--pink))"
+                      stroke="hsl(var(--accent-pink))"
                       strokeWidth={3}
-                      dot={{ fill: 'hsl(var(--pink))', strokeWidth: 0, r: 5 }}
-                      activeDot={{ r: 7, fill: 'hsl(var(--pink))' }}
-                      isAnimationActive={false}
+                      dot={{ fill: 'hsl(var(--accent-pink))', strokeWidth: 0, r: 5 }}
+                      activeDot={{ r: 7, fill: 'hsl(var(--accent-pink))' }}
+                      isAnimationActive={allowChartAnimations}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -998,8 +1011,8 @@ export default function StatsPage() {
                     <Bar 
                       dataKey="glasses" 
                       radius={[6, 6, 0, 0]}
-                      fill="hsl(var(--blue))"
-                      isAnimationActive={false}
+                      fill="hsl(var(--accent-blue))"
+                      isAnimationActive={allowChartAnimations}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -1033,8 +1046,8 @@ export default function StatsPage() {
                     <AreaChart data={weightData}>
                     <defs>
                       <linearGradient id="colorWeightArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--emerald))" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="hsl(var(--emerald))" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor="hsl(var(--accent-emerald))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--accent-emerald))" stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -1056,24 +1069,24 @@ export default function StatsPage() {
                       />
                       <ReferenceLine 
                         y={weightStats.target} 
-                        stroke="hsl(var(--rose))" 
+                        stroke="hsl(var(--accent-rose))" 
                         strokeDasharray="5 5" 
                         strokeWidth={2}
                         label={{ 
                           value: `${isEnglish ? 'Target' : 'Hedef'}: ${weightStats.target} kg`, 
                           position: 'insideTopRight',
-                          fill: 'hsl(var(--rose))',
+                          fill: 'hsl(var(--accent-rose))',
                           fontSize: 10
                         }}
                       />
                       <Area 
                         type="monotone" 
                         dataKey="weight" 
-                        stroke="hsl(var(--emerald))"
+                        stroke="hsl(var(--accent-emerald))"
                         fillOpacity={1}
                         fill="url(#colorWeightArea)"
                         strokeWidth={2}
-                        isAnimationActive={false}
+                        isAnimationActive={allowChartAnimations}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -1110,12 +1123,12 @@ export default function StatsPage() {
                     <Bar 
                       dataKey="duration" 
                       radius={[8, 8, 0, 0]}
-                      isAnimationActive={false}
+                      isAnimationActive={allowChartAnimations}
                     >
                       {periodDurationData.map((_, index) => (
                         <Cell 
                           key={`duration-cell-${index}`} 
-                          fill={index % 2 === 0 ? 'hsl(var(--rose))' : 'hsl(var(--pink))'} 
+                          fill={index % 2 === 0 ? 'hsl(var(--accent-rose))' : 'hsl(var(--accent-pink))'} 
                         />
                       ))}
                     </Bar>
@@ -1144,7 +1157,7 @@ export default function StatsPage() {
                         paddingAngle={3}
                         dataKey="days"
                         strokeWidth={0}
-                        isAnimationActive={false}
+                        isAnimationActive={allowChartAnimations}
                       >
                         {phaseDistribution.map((entry, index) => (
                           <Cell key={`phase-cell-${index}`} fill={entry.color} />
