@@ -20,19 +20,26 @@ export const NOTIFICATION_CHANNELS = {
   WELLNESS: 'wellness',
 } as const;
 
-// Notification ID ranges for different types
-const NOTIFICATION_ID_BASE = {
-  period_approaching: 1000,
-  period_expected: 2000,
-  period_late: 3000,
-  fertile_start: 4000,
-  ovulation_day: 5000,
-  fertile_ending: 6000,
-  pms_reminder: 7000,
-  daily_checkin: 8000,
-  water_reminder: 9000,
-  exercise_reminder: 10000,
-} as const;
+// Notification ID multiplier for each type (100,000 blocks to prevent overlap)
+// Each type gets its own 100,000 ID block to guarantee no collisions
+const TYPE_ID_MULTIPLIER: Record<NotificationType, number> = {
+  period_approaching: 1,
+  period_expected: 2,
+  period_late: 3,
+  fertile_start: 4,
+  ovulation_day: 5,
+  fertile_ending: 6,
+  pms_reminder: 7,
+  daily_checkin: 8,
+  water_reminder: 9,
+  exercise_reminder: 10,
+};
+
+// Generate a unique notification ID that won't collide
+// Each type has its own 100,000 block (e.g., water: 900000-999999, exercise: 1000000-1099999)
+const makeNotificationId = (type: NotificationType, index: number): number => {
+  return TYPE_ID_MULTIPLIER[type] * 100000 + index;
+};
 
 // Get notification content based on type and privacy mode
 export function getNotificationContent(
@@ -248,6 +255,13 @@ export async function scheduleNotifications(
   const notifications: LocalNotificationSchema[] = [];
   const now = new Date();
   
+  // Track sequence index per notification type
+  const seqByType: Record<string, number> = {};
+  const nextIndex = (type: NotificationType): number => {
+    seqByType[type] = (seqByType[type] ?? 0) + 1;
+    return seqByType[type];
+  };
+  
   // Helper to add notification if enabled and in future
   const addNotification = (
     type: NotificationType,
@@ -269,7 +283,7 @@ export async function scheduleNotifications(
     const content = getNotificationContent(type, language, prefs.privacyMode, extraData);
     
     notifications.push({
-      id: NOTIFICATION_ID_BASE[type] + notifications.length,
+      id: makeNotificationId(type, nextIndex(type)),
       title: content.title,
       body: content.body,
       schedule: { at: scheduleTime },
@@ -308,8 +322,9 @@ export async function scheduleNotifications(
   addNotification('pms_reminder', pmsDate);
   
   // Schedule daily check-ins for next 30 days
+  // IMPORTANT: Start from i=0 (today) to include today's check-in if time hasn't passed
   if (prefs.togglesByType.daily_checkin) {
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 0; i <= 30; i++) {
       const checkInDate = addDays(now, i);
       addNotification('daily_checkin', checkInDate);
     }
@@ -320,13 +335,15 @@ export async function scheduleNotifications(
   if (prefs.togglesByType.water_reminder) {
     for (let i = 0; i <= 30; i++) {
       const baseDate = addDays(now, i);
-      [10, 14, 18].forEach((hour) => {
+      [10, 14, 18].forEach((hour, slotIndex) => {
         const waterTime = setMinutes(setHours(baseDate, hour), 0);
         // Only schedule if in the future AND not in quiet hours
         if (isAfter(waterTime, now) && !isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd)) {
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
+          // Use day*10 + slotIndex for unique index within water type
+          const idx = i * 10 + slotIndex;
           notifications.push({
-            id: NOTIFICATION_ID_BASE.water_reminder + (i * 100) + hour,
+            id: makeNotificationId('water_reminder', idx),
             title: content.title,
             body: content.body,
             schedule: { at: waterTime },
@@ -348,7 +365,7 @@ export async function scheduleNotifications(
       if (isAfter(exerciseDate, now) && !isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd)) {
         const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
         notifications.push({
-          id: NOTIFICATION_ID_BASE.exercise_reminder + i,
+          id: makeNotificationId('exercise_reminder', i),
           title: content.title,
           body: content.body,
           schedule: { at: exerciseDate },
@@ -364,12 +381,25 @@ export async function scheduleNotifications(
   if (notifications.length > 0) {
     try {
       await LocalNotifications.schedule({ notifications });
-      console.log(`✅ Scheduled ${notifications.length} notifications`);
-      // Log first few water reminders for debugging
-      const waterNotifs = notifications.filter(n => n.id >= 9000 && n.id < 10000);
-      console.log(`💧 Water notifications: ${waterNotifs.length}`);
+      console.log(`✅ Scheduled ${notifications.length} total notifications`);
+      
+      // Detailed breakdown by type (using 100,000 block ranges)
+      const waterNotifs = notifications.filter(n => n.id >= 900000 && n.id < 1000000);
+      const exerciseNotifs = notifications.filter(n => n.id >= 1000000 && n.id < 1100000);
+      const checkInNotifs = notifications.filter(n => n.id >= 800000 && n.id < 900000);
+      
+      console.log(`💧 Water reminders: ${waterNotifs.length}`);
+      console.log(`🏃 Exercise reminders: ${exerciseNotifs.length}`);
+      console.log(`📝 Daily check-ins: ${checkInNotifs.length}`);
+      
       if (waterNotifs.length > 0) {
-        console.log(`💧 First water notification at: ${waterNotifs[0].schedule?.at}`);
+        console.log(`💧 First water at: ${waterNotifs[0].schedule?.at}`);
+      }
+      if (exerciseNotifs.length > 0) {
+        console.log(`🏃 First exercise at: ${exerciseNotifs[0].schedule?.at}`);
+      }
+      if (checkInNotifs.length > 0) {
+        console.log(`📝 First check-in at: ${checkInNotifs[0].schedule?.at}`);
       }
     } catch (error) {
       console.error('❌ Error scheduling notifications:', error);
