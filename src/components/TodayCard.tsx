@@ -354,14 +354,28 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
               )}
 
               {phase.type === 'period' && (
-                <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-3">
-                  <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
-                    {language === 'tr' ? 'Regl Dönemi' : 'Period'}
-                  </p>
-                  <p className="text-sm font-semibold text-white">
-                    {language === 'tr' ? `${phase.dayNumber}. gün` : `Day ${phase.dayNumber}`}
-                  </p>
-                </div>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => { e.stopPropagation(); setActiveInfoCard('period'); }}
+                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2"
+                >
+                  <motion.span 
+                    className="text-lg"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    🩸
+                  </motion.span>
+                  <div className="flex-1">
+                    <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
+                      {language === 'tr' ? 'Regl Dönemi' : 'Period'}
+                    </p>
+                    <p className="text-sm font-semibold text-white">
+                      {language === 'tr' ? `${phase.dayNumber}. gün` : `Day ${phase.dayNumber}`}
+                    </p>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
+                </motion.button>
               )}
             </div>
           </div>
@@ -508,7 +522,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className={`fixed inset-x-3 top-16 bottom-16 z-[101] rounded-2xl p-4 shadow-2xl overflow-y-auto ${
+              className={`fixed inset-x-3 top-20 z-[101] rounded-2xl p-3 shadow-2xl max-h-[75vh] overflow-y-auto ${
                 activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose-400 to-pink-500' :
                 activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet-400 to-purple-500' :
                 'bg-gradient-to-br from-cyan-400 to-teal-400'
@@ -525,36 +539,44 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
 
               {/* Period Info */}
               {activeInfoCard === 'period' && (
-                <div className="space-y-3 pr-8">
-                  <div className="flex items-center gap-3">
-                    <span className="text-4xl">🌸</span>
+                <div className="space-y-2 pt-8">
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xl">🌸</span>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{language === 'tr' ? 'Sonraki Regl' : 'Next Period'}</h3>
-                      <p className="text-sm text-white/80">{format(parseISO(prediction.nextPeriodStart), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
+                      <h3 className="text-lg font-bold text-white">
+                        {phase?.type === 'period' 
+                          ? (language === 'tr' ? 'Regl Dönemi' : 'Period') 
+                          : (language === 'tr' ? 'Sonraki Regl' : 'Next Period')}
+                      </h3>
+                      <p className="text-xs text-white/80">
+                        {phase?.type === 'period'
+                          ? (language === 'tr' ? `${phase.dayNumber}. gün` : `Day ${phase.dayNumber}`)
+                          : format(parseISO(prediction.nextPeriodStart), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}
+                      </p>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="bg-white/15 rounded-xl p-3">
-                      <h4 className="font-semibold text-white text-sm mb-1.5">📋 {language === 'tr' ? 'Ne Beklemeli?' : 'What to Expect?'}</h4>
-                      <ul className="text-xs text-white/90 space-y-0.5">
-                        <li>• {language === 'tr' ? 'Adet kanaması ortalama 3-7 gün sürer' : 'Period bleeding lasts 3-7 days on average'}</li>
-                        <li>• {language === 'tr' ? 'İlk 1-2 gün akış daha yoğun olabilir' : 'Flow may be heavier in the first 1-2 days'}</li>
-                        <li>• {language === 'tr' ? 'Kramp, yorgunluk ve ruh hali değişimleri normal' : 'Cramps, fatigue and mood changes are normal'}</li>
+                  <div className="space-y-1.5">
+                    <div className="bg-white/15 rounded-xl p-2.5">
+                      <h4 className="font-semibold text-white text-xs mb-1">📋 {language === 'tr' ? 'Ne Beklemeli?' : 'What to Expect?'}</h4>
+                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                        <li>• {language === 'tr' ? 'Adet kanaması ortalama 3-7 gün sürer' : 'Period bleeding lasts 3-7 days'}</li>
+                        <li>• {language === 'tr' ? 'İlk 1-2 gün akış daha yoğun olabilir' : 'Flow may be heavier first 1-2 days'}</li>
+                        <li>• {language === 'tr' ? 'Kramp ve yorgunluk normal' : 'Cramps and fatigue are normal'}</li>
                       </ul>
                     </div>
-                    <div className="bg-white/15 rounded-xl p-3">
-                      <h4 className="font-semibold text-white text-sm mb-1.5">💡 {language === 'tr' ? 'İpuçları' : 'Tips'}</h4>
-                      <ul className="text-xs text-white/90 space-y-0.5">
-                        <li>• {language === 'tr' ? 'Bol su için ve demir açısından zengin gıdalar tüketin' : 'Drink plenty of water and eat iron-rich foods'}</li>
-                        <li>• {language === 'tr' ? 'Sıcak kompres ağrıları hafifletebilir' : 'A warm compress can relieve pain'}</li>
-                        <li>• {language === 'tr' ? 'Hafif egzersiz ve yoga faydalı olabilir' : 'Light exercise and yoga can be helpful'}</li>
+                    <div className="bg-white/15 rounded-xl p-2.5">
+                      <h4 className="font-semibold text-white text-xs mb-1">💡 {language === 'tr' ? 'İpuçları' : 'Tips'}</h4>
+                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                        <li>• {language === 'tr' ? 'Bol su ve demir zengin gıdalar tüketin' : 'Drink water and eat iron-rich foods'}</li>
+                        <li>• {language === 'tr' ? 'Sıcak kompres ağrıları hafifletir' : 'Warm compress relieves pain'}</li>
+                        <li>• {language === 'tr' ? 'Hafif egzersiz faydalı olabilir' : 'Light exercise can help'}</li>
                       </ul>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => handleNavigateToCalendar(prediction.nextPeriodStart)}
-                      className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors"
+                      className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
                     >
                       <CalendarDays className="w-4 h-4 text-white" />
                       <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
@@ -563,7 +585,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                       onClick={async () => {
                         const success = await scheduleCustomReminder(
                           language === 'tr' ? 'Regl Yaklaşıyor 🌸' : 'Period Approaching 🌸',
-                          language === 'tr' ? 'Regl dönemin yarın başlayabilir. Hazırlıklı ol!' : 'Your period may start tomorrow. Be prepared!',
+                          language === 'tr' ? 'Regl dönemin yarın başlayabilir!' : 'Period may start tomorrow!',
                           addDays(parseISO(prediction.nextPeriodStart), -1),
                           language
                         );
@@ -573,7 +595,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                           toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
                         }
                       }}
-                      className="bg-white/20 active:bg-white/30 rounded-xl px-4 py-2.5 flex items-center justify-center transition-colors"
+                      className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
                     >
                       <Bell className="w-4 h-4 text-white" />
                     </button>
@@ -583,40 +605,40 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
 
               {/* Ovulation Info */}
               {activeInfoCard === 'ovulation' && (
-                <div className="space-y-3 pr-8">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none">
+                <div className="space-y-2 pt-8">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
                       <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
                       <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
                     </svg>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{language === 'tr' ? 'Yumurtlama Günü' : 'Ovulation Day'}</h3>
-                      <p className="text-sm text-white/80">{format(parseISO(prediction.ovulationDate), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
+                      <h3 className="text-lg font-bold text-white">{language === 'tr' ? 'Yumurtlama Günü' : 'Ovulation Day'}</h3>
+                      <p className="text-xs text-white/80">{format(parseISO(prediction.ovulationDate), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="bg-white/15 rounded-xl p-3">
-                      <h4 className="font-semibold text-white text-sm mb-1.5">🥚 {language === 'tr' ? 'Yumurtlama Nedir?' : 'What is Ovulation?'}</h4>
-                      <ul className="text-xs text-white/90 space-y-0.5">
-                        <li>• {language === 'tr' ? 'Yumurtalıktan olgun bir yumurta salınır' : 'A mature egg is released from the ovary'}</li>
-                        <li>• {language === 'tr' ? 'En verimli gününüz - hamilelik şansı en yüksek' : 'Your most fertile day - highest chance of pregnancy'}</li>
-                        <li>• {language === 'tr' ? 'Yumurta 12-24 saat boyunca döllenebilir' : 'The egg can be fertilized for 12-24 hours'}</li>
+                  <div className="space-y-1.5">
+                    <div className="bg-white/15 rounded-xl p-2.5">
+                      <h4 className="font-semibold text-white text-xs mb-1">🥚 {language === 'tr' ? 'Yumurtlama Nedir?' : 'What is Ovulation?'}</h4>
+                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                        <li>• {language === 'tr' ? 'Yumurtalıktan olgun bir yumurta salınır' : 'A mature egg is released'}</li>
+                        <li>• {language === 'tr' ? 'En verimli gün - hamilelik şansı en yüksek' : 'Most fertile day - highest pregnancy chance'}</li>
+                        <li>• {language === 'tr' ? 'Yumurta 12-24 saat döllenebilir' : 'Egg can be fertilized for 12-24 hours'}</li>
                       </ul>
                     </div>
-                    <div className="bg-white/15 rounded-xl p-3">
-                      <h4 className="font-semibold text-white text-sm mb-1.5">✨ {language === 'tr' ? 'Belirtiler' : 'Symptoms'}</h4>
-                      <ul className="text-xs text-white/90 space-y-0.5">
-                        <li>• {language === 'tr' ? 'Vücut sıcaklığında hafif artış' : 'Slight increase in body temperature'}</li>
-                        <li>• {language === 'tr' ? 'Servikal mukus yumurta akı kıvamında' : 'Cervical mucus like egg white consistency'}</li>
-                        <li>• {language === 'tr' ? 'Bazı kadınlarda hafif kasık ağrısı' : 'Some women may experience mild pelvic pain'}</li>
+                    <div className="bg-white/15 rounded-xl p-2.5">
+                      <h4 className="font-semibold text-white text-xs mb-1">✨ {language === 'tr' ? 'Belirtiler' : 'Symptoms'}</h4>
+                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                        <li>• {language === 'tr' ? 'Vücut sıcaklığında hafif artış' : 'Slight body temperature increase'}</li>
+                        <li>• {language === 'tr' ? 'Servikal mukus yumurta akı kıvamında' : 'Egg white cervical mucus'}</li>
+                        <li>• {language === 'tr' ? 'Hafif kasık ağrısı olabilir' : 'Mild pelvic pain possible'}</li>
                       </ul>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => handleNavigateToCalendar(prediction.ovulationDate)}
-                      className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors"
+                      className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
                     >
                       <CalendarDays className="w-4 h-4 text-white" />
                       <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
@@ -625,7 +647,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                       onClick={async () => {
                         const success = await scheduleCustomReminder(
                           language === 'tr' ? 'Yumurtlama Günü 🥚' : 'Ovulation Day 🥚',
-                          language === 'tr' ? 'Bugün tahmini yumurtlama günün!' : 'Today is your estimated ovulation day!',
+                          language === 'tr' ? 'Bugün tahmini yumurtlama günün!' : 'Estimated ovulation day!',
                           parseISO(prediction.ovulationDate),
                           language
                         );
@@ -635,7 +657,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                           toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
                         }
                       }}
-                      className="bg-white/20 active:bg-white/30 rounded-xl px-4 py-2.5 flex items-center justify-center transition-colors"
+                      className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
                     >
                       <Bell className="w-4 h-4 text-white" />
                     </button>
@@ -651,63 +673,63 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                 const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
                 
                 return (
-                  <div className="space-y-3 pr-8">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none">
+                  <div className="space-y-2 pt-8">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
                         <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
-                        <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" className="fill-teal" opacity="0.5" />
+                        <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
                         <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
                       </svg>
                       <div>
-                        <h3 className="text-xl font-bold text-white">{language === 'tr' ? 'Doğurgan Dönem' : 'Fertile Window'}</h3>
-                        <p className="text-sm text-white/80">
+                        <h3 className="text-lg font-bold text-white">{language === 'tr' ? 'Doğurgan Dönem' : 'Fertile Window'}</h3>
+                        <p className="text-xs text-white/80">
                           {format(fertileStart, 'd MMM', { locale: language === 'tr' ? tr : undefined })} - {format(fertileEnd, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
                         </p>
                       </div>
                     </div>
                     
                     {/* Compact chance display */}
-                    <div className="bg-white/15 rounded-xl p-3">
-                      <h4 className="font-semibold text-white text-sm mb-2">📊 {language === 'tr' ? 'Hamilelik Şansı' : 'Pregnancy Chance'}</h4>
-                      <div className="space-y-1.5">
+                    <div className="bg-white/15 rounded-xl p-2.5">
+                      <h4 className="font-semibold text-white text-xs mb-1.5">📊 {language === 'tr' ? 'Hamilelik Şansı' : 'Pregnancy Chance'}</h4>
+                      <div className="space-y-1">
                         {fertileDays.map((day) => {
                           const daysFromOvulation = differenceInDays(day, ovulationDate);
                           const chance = getFertilityChance(daysFromOvulation);
                           const isOvulationDay = daysFromOvulation === 0;
                           
                           return (
-                            <div key={day.toISOString()} className="flex items-center gap-2">
-                              <div className="w-12 text-[10px] text-white/80">
+                            <div key={day.toISOString()} className="flex items-center gap-1.5">
+                              <div className="w-10 text-[9px] text-white/80">
                                 {format(day, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
                               </div>
-                              <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
+                              <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all ${isOvulationDay ? 'bg-gradient-to-r from-violet-400 to-purple-500' : 'bg-white/60'}`}
                                   style={{ width: `${chance}%` }}
                                 />
                               </div>
-                              <div className={`w-8 text-right text-xs font-bold ${isOvulationDay ? 'text-white' : 'text-white/80'}`}>
+                              <div className={`w-7 text-right text-[10px] font-bold ${isOvulationDay ? 'text-white' : 'text-white/80'}`}>
                                 {chance}%
                               </div>
-                              {isOvulationDay && <span className="text-[10px]">🥚</span>}
+                              {isOvulationDay && <span className="text-[9px]">🥚</span>}
                             </div>
                           );
                         })}
                       </div>
                     </div>
                     
-                    <div className="bg-white/15 rounded-xl p-3">
-                      <h4 className="font-semibold text-white text-sm mb-1.5">🎯 {language === 'tr' ? 'Bilgi' : 'Info'}</h4>
-                      <ul className="text-xs text-white/90 space-y-0.5">
-                        <li>• {language === 'tr' ? 'Yumurtlama günü en yüksek şans (%33)' : 'Ovulation day has highest chance (33%)'}</li>
+                    <div className="bg-white/15 rounded-xl p-2.5">
+                      <h4 className="font-semibold text-white text-xs mb-1">🎯 {language === 'tr' ? 'Bilgi' : 'Info'}</h4>
+                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                        <li>• {language === 'tr' ? 'Yumurtlama günü en yüksek şans (%33)' : 'Ovulation day: highest chance (33%)'}</li>
                         <li>• {language === 'tr' ? 'Sperm 5 güne kadar canlı kalabilir' : 'Sperm can survive up to 5 days'}</li>
                       </ul>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-1">
                       <button
                         onClick={() => handleNavigateToCalendar(prediction.fertileWindowStart)}
-                        className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors"
+                        className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
                       >
                         <CalendarDays className="w-4 h-4 text-white" />
                         <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
@@ -716,7 +738,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                         onClick={async () => {
                           const success = await scheduleCustomReminder(
                             language === 'tr' ? 'Doğurgan Dönem Başlıyor 💐' : 'Fertile Window Starting 💐',
-                            language === 'tr' ? 'Yumurtlama dönemin başlıyor!' : 'Your fertile window is starting!',
+                            language === 'tr' ? 'Yumurtlama dönemin başlıyor!' : 'Fertile window is starting!',
                             fertileStart,
                             language
                           );
@@ -726,7 +748,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                             toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
                           }
                         }}
-                        className="bg-white/20 active:bg-white/30 rounded-xl px-4 py-2.5 flex items-center justify-center transition-colors"
+                        className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
                       >
                         <Bell className="w-4 h-4 text-white" />
                       </button>
