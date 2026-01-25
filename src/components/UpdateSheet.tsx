@@ -1,5 +1,6 @@
 // 🌸 Update Bottom Sheet Component - Flo Inspired Categorized Design
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { Dispatch, SetStateAction, MouseEvent } from 'react';
 import { X, Check, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -272,11 +273,11 @@ export function UpdateSheet({
     };
   }, [isOpen, onClose]);
 
-  const toggleSelection = (
-    e: React.MouseEvent,
+  const toggleSelection = useCallback((
+    e: MouseEvent,
     id: string, 
     selected: string[], 
-    setSelected: React.Dispatch<React.SetStateAction<string[]>>,
+    setSelected: Dispatch<SetStateAction<string[]>>,
     singleSelect = false
   ) => {
     e.preventDefault();
@@ -290,7 +291,7 @@ export function UpdateSheet({
           : [...prev, id]
       );
     }
-  };
+  }, []);
 
   const handleSave = () => {
     const entry: DayEntry = {
@@ -318,26 +319,52 @@ export function UpdateSheet({
     onClose();
   };
 
-  const goToPreviousDay = () => setCurrentDate(prev => subDays(prev, 1));
-  const goToNextDay = () => setCurrentDate(prev => addDays(prev, 1));
+  const goToPreviousDay = useCallback(() => setCurrentDate(prev => subDays(prev, 1)), []);
+  const goToNextDay = useCallback(() => setCurrentDate(prev => addDays(prev, 1)), []);
 
-  // Filter items - no search, always return all
-  const filterItems = (items: typeof CATEGORIES.mood.items) => items;
+  // Memoized weight handlers
+  const incrementWeight = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWeight(prev => (prev ?? 60) + 0.1);
+  }, []);
+  
+  const decrementWeight = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWeight(prev => Math.max(30, (prev ?? 60) - 0.1));
+  }, []);
 
-  // Category Card Component
-  const CategoryCard = ({ 
-    category, 
-    selected, 
-    setSelected,
+  const clearWeight = useCallback(() => setWeight(null), []);
+
+  // Memoized water handlers
+  const incrementWater = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWaterGlasses(prev => prev + 1);
+  }, []);
+
+  const decrementWater = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWaterGlasses(prev => Math.max(0, prev - 1));
+  }, []);
+
+  // Computed values
+  const displayWeight = weight !== null ? weight.toFixed(1) : null;
+  const waterProgress = Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100);
+  const waterLiters = (waterGlasses * 0.25).toFixed(2).replace('.', ',');
+  const waterGoalFormatted = waterGoal.toFixed(2).replace('.', ',');
+
+  // Render category card inline to avoid unnecessary component recreation
+  const renderCategoryCard = (
+    category: typeof CATEGORIES.mood,
+    selected: string[],
+    setSelected: Dispatch<SetStateAction<string[]>>,
     singleSelect = false
-  }: { 
-    category: typeof CATEGORIES.mood;
-    selected: string[];
-    setSelected: React.Dispatch<React.SetStateAction<string[]>>;
-    singleSelect?: boolean;
-  }) => {
-    const filteredItems = filterItems(category.items);
-    if (filteredItems.length === 0) return null;
+  ) => {
+    const items = category.items;
+    if (items.length === 0) return null;
 
     return (
       <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
@@ -350,7 +377,7 @@ export function UpdateSheet({
           </p>
         )}
         <div className="flex flex-wrap gap-1.5">
-          {filteredItems.map((item) => {
+          {items.map((item) => {
             const isSelected = selected.includes(item.id);
             return (
               <button
@@ -373,112 +400,6 @@ export function UpdateSheet({
             );
           })}
         </div>
-      </div>
-    );
-  };
-
-  // Water Tracking Card
-  const WaterCard = () => (
-    <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-lg">💧</span>
-          <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Su' : 'Water'}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setWaterGlasses(prev => Math.max(0, prev - 1));
-            }}
-            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-          >
-            <Minus className="w-4 h-4 text-foreground/70" />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setWaterGlasses(prev => prev + 1);
-            }}
-            className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-          >
-            <Plus className="w-4 h-4 text-foreground/70" />
-          </button>
-        </div>
-      </div>
-      <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-bold text-foreground">{(waterGlasses * 0.25).toFixed(2).replace('.', ',')}</span>
-        <span className="text-sm text-muted-foreground">/ {waterGoal.toFixed(2).replace('.', ',')} L</span>
-      </div>
-      <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-sky rounded-full transition-all duration-300"
-          style={{ width: `${Math.min(100, (waterGlasses * 0.25 / waterGoal) * 100)}%` }}
-        />
-      </div>
-    </div>
-  );
-
-  // Weight Card - with +/- controls like water
-  const WeightCard = () => {
-    const incrementWeight = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setWeight(prev => (prev ?? 60) + 0.1);
-    };
-    
-    const decrementWeight = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setWeight(prev => Math.max(30, (prev ?? 60) - 0.1));
-    };
-
-    const displayWeight = weight !== null ? weight.toFixed(1) : null;
-
-    return (
-      <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <span className="text-lg">⚖️</span>
-            <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setWeight(null)}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {language === 'tr' ? 'Temizle' : 'Clear'}
-          </button>
-        </div>
-        <div className="flex items-center justify-center gap-4">
-          <button
-            type="button"
-            onClick={decrementWeight}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
-          >
-            −
-          </button>
-          <div className="flex items-baseline gap-1 min-w-[80px] justify-center">
-            <span className="text-3xl font-bold text-foreground">
-              {displayWeight ?? '--'}
-            </span>
-            <span className="text-base text-muted-foreground">kg</span>
-          </div>
-          <button
-            type="button"
-            onClick={incrementWeight}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
-          >
-            +
-          </button>
-        </div>
-        <p className="text-xs text-center text-muted-foreground mt-2">
-          {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
-        </p>
       </div>
     );
   };
@@ -575,86 +496,120 @@ export function UpdateSheet({
           <ScrollArea className="flex-1 px-3">
             <div className="py-3 space-y-2.5 pb-24">
               {/* Flow Category */}
-              <CategoryCard 
-                category={CATEGORIES.flow}
-                selected={[flowLevel]}
-                setSelected={(val) => {
+              {renderCategoryCard(
+                CATEGORIES.flow,
+                [flowLevel],
+                (val) => {
                   const newVal = typeof val === 'function' ? val([flowLevel]) : val;
                   setFlowLevel((newVal[0] as FlowLevel) || 'none');
-                }}
-                singleSelect
-              />
+                },
+                true
+              )}
 
               {/* Mood Category */}
-              <CategoryCard 
-                category={CATEGORIES.mood}
-                selected={selectedMoods}
-                setSelected={setSelectedMoods}
-              />
+              {renderCategoryCard(CATEGORIES.mood, selectedMoods, setSelectedMoods)}
 
               {/* Sexual Activity Category */}
-              <CategoryCard 
-                category={CATEGORIES.sexual}
-                selected={selectedSexual}
-                setSelected={setSelectedSexual}
-              />
+              {renderCategoryCard(CATEGORIES.sexual, selectedSexual, setSelectedSexual)}
 
               {/* Symptoms Category */}
-              <CategoryCard 
-                category={CATEGORIES.symptoms}
-                selected={selectedSymptoms}
-                setSelected={setSelectedSymptoms}
-              />
+              {renderCategoryCard(CATEGORIES.symptoms, selectedSymptoms, setSelectedSymptoms)}
 
               {/* Discharge Category */}
-              <CategoryCard 
-                category={CATEGORIES.discharge}
-                selected={selectedDischarge}
-                setSelected={setSelectedDischarge}
-              />
+              {renderCategoryCard(CATEGORIES.discharge, selectedDischarge, setSelectedDischarge)}
 
               {/* Digestion Category */}
-              <CategoryCard 
-                category={CATEGORIES.digestion}
-                selected={selectedDigestion}
-                setSelected={setSelectedDigestion}
-              />
+              {renderCategoryCard(CATEGORIES.digestion, selectedDigestion, setSelectedDigestion)}
 
               {/* Pregnancy Test Category */}
-              <CategoryCard 
-                category={CATEGORIES.pregnancy_test}
-                selected={selectedPregnancyTest}
-                setSelected={setSelectedPregnancyTest}
-                singleSelect
-              />
+              {renderCategoryCard(CATEGORIES.pregnancy_test, selectedPregnancyTest, setSelectedPregnancyTest, true)}
 
               {/* Ovulation Test Category */}
-              <CategoryCard 
-                category={CATEGORIES.ovulation_test}
-                selected={selectedOvulationTest}
-                setSelected={setSelectedOvulationTest}
-                singleSelect
-              />
+              {renderCategoryCard(CATEGORIES.ovulation_test, selectedOvulationTest, setSelectedOvulationTest, true)}
 
               {/* Activity Category */}
-              <CategoryCard 
-                category={CATEGORIES.activity}
-                selected={selectedActivity}
-                setSelected={setSelectedActivity}
-              />
+              {renderCategoryCard(CATEGORIES.activity, selectedActivity, setSelectedActivity)}
 
               {/* Other Category */}
-              <CategoryCard 
-                category={CATEGORIES.other}
-                selected={selectedOther}
-                setSelected={setSelectedOther}
-              />
+              {renderCategoryCard(CATEGORIES.other, selectedOther, setSelectedOther)}
 
-              {/* Water Tracking */}
-              <WaterCard />
+              {/* Water Tracking - Inline */}
+              <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">💧</span>
+                    <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Su' : 'Water'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={decrementWater}
+                      className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                      <Minus className="w-4 h-4 text-foreground/70" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={incrementWater}
+                      className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                      <Plus className="w-4 h-4 text-foreground/70" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-foreground">{waterLiters}</span>
+                  <span className="text-sm text-muted-foreground">/ {waterGoalFormatted} L</span>
+                </div>
+                <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-sky rounded-full transition-all duration-300"
+                    style={{ width: `${waterProgress}%` }}
+                  />
+                </div>
+              </div>
 
-              {/* Weight Tracking */}
-              <WeightCard />
+              {/* Weight Tracking - Inline */}
+              <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">⚖️</span>
+                    <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearWeight}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {language === 'tr' ? 'Temizle' : 'Clear'}
+                  </button>
+                </div>
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    type="button"
+                    onClick={decrementWeight}
+                    className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
+                  >
+                    −
+                  </button>
+                  <div className="flex items-baseline gap-1 min-w-[80px] justify-center">
+                    <span className="text-3xl font-bold text-foreground">
+                      {displayWeight ?? '--'}
+                    </span>
+                    <span className="text-base text-muted-foreground">kg</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={incrementWeight}
+                    className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
+                  >
+                    +
+                  </button>
+                </div>
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
+                </p>
+              </div>
 
               {/* Notes Section */}
               <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
