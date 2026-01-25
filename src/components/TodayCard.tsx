@@ -32,6 +32,16 @@ interface TodayCardProps {
   onTap?: () => void;
 }
 
+// Phase gradient RGBA colors for glassmorphism
+const phaseGradientStyles: Record<string, string> = {
+  period: 'linear-gradient(to bottom right, rgba(251, 113, 133, 0.75), rgba(236, 72, 153, 0.75), rgba(225, 29, 72, 0.75))',
+  follicular: 'linear-gradient(to bottom right, rgba(52, 211, 153, 0.75), rgba(20, 184, 166, 0.75), rgba(6, 182, 212, 0.75))',
+  fertile: 'linear-gradient(to bottom right, rgba(251, 191, 36, 0.75), rgba(251, 146, 60, 0.75), rgba(250, 204, 21, 0.75))',
+  ovulation: 'linear-gradient(to bottom right, rgba(167, 139, 250, 0.75), rgba(168, 85, 247, 0.75), rgba(217, 70, 239, 0.75))',
+  luteal: 'linear-gradient(to bottom right, rgba(148, 163, 184, 0.75), rgba(100, 116, 139, 0.75), rgba(107, 114, 128, 0.75))',
+  pms: 'linear-gradient(to bottom right, rgba(251, 146, 60, 0.75), rgba(245, 158, 11, 0.75), rgba(250, 204, 21, 0.75))',
+};
+
 const phaseGradients = {
   period: 'from-rose-400 via-pink-500 to-rose-600',
   follicular: 'from-emerald-400 via-teal-500 to-cyan-500',
@@ -426,7 +436,8 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
 
             {/* Modal Content */}
             <motion.div
-              className={`fixed inset-x-3 top-1/2 z-[51] rounded-2xl bg-gradient-to-br ${phaseGradients[phase.type].replace(/from-(\w+-\d+)/g, 'from-$1/85').replace(/via-(\w+-\d+)/g, 'via-$1/85').replace(/to-(\w+-\d+)/g, 'to-$1/85')} backdrop-blur-md p-4 shadow-2xl max-h-[75vh] overflow-y-auto`}
+              className="fixed inset-x-3 top-1/2 z-[51] rounded-2xl backdrop-blur-xl p-4 shadow-2xl max-h-[75vh] overflow-y-auto"
+              style={{ background: phaseGradientStyles[phase.type] }}
               initial={{ opacity: 0, scale: 0.95, y: '-45%' }}
               animate={{ opacity: 1, scale: 1, y: '-50%' }}
               exit={{ opacity: 0, scale: 0.95, y: '-45%' }}
@@ -533,11 +544,14 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className={`fixed inset-x-3 top-20 z-[101] rounded-2xl p-3 shadow-2xl max-h-[75vh] overflow-y-auto backdrop-blur-md ${
-                activeInfoCard === 'period' ? 'bg-gradient-to-br from-rose-400/85 to-pink-500/85' :
-                activeInfoCard === 'ovulation' ? 'bg-gradient-to-br from-violet-400/85 to-purple-500/85' :
-                'bg-gradient-to-br from-cyan-400/85 to-teal-400/85'
-              }`}
+              className="fixed inset-x-3 top-20 z-[101] rounded-2xl p-3 shadow-2xl max-h-[75vh] overflow-y-auto backdrop-blur-xl"
+              style={{
+                background: activeInfoCard === 'period' 
+                  ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.75), rgba(236, 72, 153, 0.75))' 
+                  : activeInfoCard === 'ovulation' 
+                  ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.75), rgba(168, 85, 247, 0.75))'
+                  : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.75), rgba(20, 184, 166, 0.75))'
+              }}
             >
               {/* Close Button */}
               <button

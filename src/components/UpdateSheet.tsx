@@ -487,7 +487,7 @@ export function UpdateSheet({
     <Sheet open={isOpen} onOpenChange={() => {}}>
       <SheetContent 
         side="bottom" 
-        className="h-[92vh] rounded-t-[2rem] p-0 border-0 bg-background/90 backdrop-blur-md"
+        className="h-[92vh] rounded-t-[2rem] p-0 border-0 backdrop-blur-xl bg-glass"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
