@@ -487,7 +487,7 @@ export function UpdateSheet({
     <Sheet open={isOpen} onOpenChange={() => {}}>
       <SheetContent 
         side="bottom" 
-        className="h-[92vh] rounded-t-[2rem] p-0 border-0"
+        className="h-[92vh] rounded-t-[2rem] p-0 border-0 bg-background/90 backdrop-blur-md"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -501,10 +501,10 @@ export function UpdateSheet({
           <SheetDescription>Bugünkü sağlık verilerinizi kaydedin</SheetDescription>
         </VisuallyHidden.Root>
         
-        <div className="flex flex-col h-full bg-muted/30">
+        <div className="flex flex-col h-full bg-muted/20">
           {/* Header with Date Navigation - Pull to dismiss */}
           <div 
-            className="bg-card border-b border-border/30 px-4 pt-4 pb-3 rounded-t-[2rem] cursor-grab active:cursor-grabbing touch-pan-y"
+            className="bg-card/80 backdrop-blur-sm border-b border-border/30 px-4 pt-4 pb-3 rounded-t-[2rem] cursor-grab active:cursor-grabbing touch-pan-y"
             onTouchStart={(e) => {
               const touch = e.touches[0];
               (e.currentTarget as HTMLElement).dataset.startY = String(touch.clientY);
