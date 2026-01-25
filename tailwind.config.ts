@@ -131,6 +131,11 @@ export default {
           DEFAULT: "hsl(var(--accent-slate))",
           light: "hsl(var(--accent-slate-light))",
         },
+        // Glassmorphism
+        glass: {
+          DEFAULT: "var(--glass-light)",
+          card: "var(--glass-card)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

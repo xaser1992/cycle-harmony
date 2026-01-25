@@ -110,6 +110,10 @@ html.light {
     --accent-sky-light: 200 55% 90%;
     --accent-slate: 220 15% 45%;
     --accent-slate-light: 220 12% 90%;
+    
+    /* Glassmorphism backgrounds */
+    --glass-light: rgba(255, 255, 255, 0.85);
+    --glass-card: rgba(255, 255, 255, 0.80);
   }
 
   .dark {
@@ -193,6 +197,10 @@ html.light {
     --accent-sky-light: 200 45% 18%;
     --accent-slate: 220 12% 40%;
     --accent-slate-light: 220 10% 18%;
+    
+    /* Glassmorphism backgrounds - Dark Mode */
+    --glass-light: rgba(30, 30, 35, 0.85);
+    --glass-card: rgba(30, 30, 35, 0.80);
   }
 }
 

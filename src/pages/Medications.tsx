@@ -353,7 +353,7 @@ export default function Medications() {
       <Sheet open={isAddSheetOpen} onOpenChange={() => {}}>
         <SheetContent 
           side="bottom" 
-          className="h-[85vh] rounded-t-3xl bg-background/90 backdrop-blur-md"
+          className="h-[85vh] rounded-t-3xl backdrop-blur-xl bg-glass"
           aria-describedby={undefined}
           onPointerDownOutside={(e) => e.preventDefault()}
           onInteractOutside={(e) => e.preventDefault()}
