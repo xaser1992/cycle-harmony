@@ -1,5 +1,5 @@
 // 🌸 Statistics Page - Flo Inspired Design (Performance Optimized)
-import { useState, useMemo, useEffect, memo, useCallback } from 'react';
+import { useState, useMemo, useEffect, memo, useCallback, type ReactNode } from 'react';
 import { Calendar, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
   BarChart, 
@@ -314,8 +314,8 @@ const ChartCard = memo(({
 }: { 
   title: string; 
   subtitle: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  icon: ReactNode;
+  children: ReactNode;
 }) => (
   <div className="bg-card rounded-3xl p-5 border border-border/50 shadow-sm animate-fade-in">
     <div className="flex items-center gap-3 mb-4">
@@ -348,7 +348,7 @@ const SummaryCard = memo(({
   value: string | number;
   label: string;
   sublabel?: string;
-  rightContent?: React.ReactNode;
+  rightContent?: ReactNode;
 }) => (
   <div 
     className={`${gradient} rounded-3xl p-5 shadow-lg ${shadowColor} transition-transform duration-200 hover:scale-[1.02] active:scale-95`}
@@ -461,6 +461,13 @@ export default function StatsPage() {
   useEffect(() => {
     getCycleHistory().then(setCycleHistory);
   }, []);
+
+  // Create a Map for O(1) entry lookups (performance optimization)
+  const entriesByDate = useMemo(() => {
+    const m = new Map<string, typeof entries[number]>();
+    entries.forEach(e => m.set(e.date, e));
+    return m;
+  }, [entries]);
 
   // Sekme açılınca grafiklerin animasyonla çizilmesi için bir kere remount ediyoruz.
   useEffect(() => {
@@ -598,14 +605,14 @@ export default function StatsPage() {
       
       const periodDays = daysInWeek.filter(day => {
         const dateStr = format(day, 'yyyy-MM-dd');
-        const entry = entries.find(e => e.date === dateStr);
+        const entry = entriesByDate.get(dateStr);
         return entry && entry.flowLevel !== 'none';
       }).length;
 
       const symptomDays = daysInWeek.filter(day => {
         const dateStr = format(day, 'yyyy-MM-dd');
-        const entry = entries.find(e => e.date === dateStr);
-        return entry && entry.symptoms.length > 0;
+        const entry = entriesByDate.get(dateStr);
+        return !!entry?.symptoms?.length;
       }).length;
 
       weeks.push({
@@ -615,18 +622,18 @@ export default function StatsPage() {
         symptomDays,
         loggedDays: daysInWeek.filter(day => {
           const dateStr = format(day, 'yyyy-MM-dd');
-          return entries.some(e => e.date === dateStr);
+          return entriesByDate.has(dateStr);
         }).length,
       });
     }
     return weeks;
-  }, [entries]);
+  }, [entriesByDate]);
 
   // Monthly symptom frequency
   const monthlySymptomData = useMemo(() => {
     const symptoms: Record<string, number> = {};
     entries.forEach(entry => {
-      entry.symptoms.forEach(symptom => {
+      entry.symptoms?.forEach(symptom => {
         symptoms[symptom] = (symptoms[symptom] || 0) + 1;
       });
     });
@@ -680,7 +687,7 @@ export default function StatsPage() {
 
     const isPeriodDay = (date: Date): boolean => {
       const dateStr = format(date, 'yyyy-MM-dd');
-      const entry = entries.find(e => e.date === dateStr);
+      const entry = entriesByDate.get(dateStr);
       if (entry && entry.flowLevel !== 'none') return true;
       
       return cycleHistory.some(record => {
@@ -700,7 +707,7 @@ export default function StatsPage() {
       isToday: isSameDay(day, new Date()),
       isPeriod: isPeriodDay(day),
     }));
-  }, [historyMonth, entries, cycleHistory]);
+  }, [historyMonth, entriesByDate, cycleHistory]);
 
   const isCurrentMonth = isSameMonth(historyMonth, new Date());
 
