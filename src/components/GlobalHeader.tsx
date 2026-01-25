@@ -39,7 +39,7 @@ export const GlobalHeader = forwardRef<HTMLDivElement, {}>(function GlobalHeader
             onClick={() => setIsNotificationSheetOpen(true)}
             className={`pointer-events-auto w-11 h-11 rounded-full backdrop-blur-xl border shadow-lg flex items-center justify-center transition-colors ${
               notificationPrefs.enabled 
-                ? 'bg-gradient-to-br from-violet-400 to-purple-500 border-violet-400/50' 
+                ? 'bg-primary border-primary/50' 
                 : 'bg-card/90 border-border/50'
             }`}
           >
@@ -52,7 +52,7 @@ export const GlobalHeader = forwardRef<HTMLDivElement, {}>(function GlobalHeader
                   exit={{ scale: 0, rotate: 30 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                 >
-                  <Bell className="w-5 h-5 text-white" />
+                  <Bell className="w-5 h-5 text-primary-foreground" />
                 </motion.div>
               ) : (
                 <motion.div
