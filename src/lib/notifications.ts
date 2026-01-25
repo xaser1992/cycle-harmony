@@ -316,20 +316,23 @@ export async function scheduleNotifications(
   }
   
   // Schedule water reminders for next 30 days (3 times per day: 10:00, 14:00, 18:00)
+  // IMPORTANT: Start from i=0 (today) to include today's remaining reminders
   if (prefs.togglesByType.water_reminder) {
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 0; i <= 30; i++) {
       const baseDate = addDays(now, i);
       [10, 14, 18].forEach((hour) => {
         const waterTime = setMinutes(setHours(baseDate, hour), 0);
-        if (!isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd) && isAfter(waterTime, now)) {
+        // Only schedule if in the future AND not in quiet hours
+        if (isAfter(waterTime, now) && !isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd)) {
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
           notifications.push({
-            id: NOTIFICATION_ID_BASE.water_reminder + (i * 10) + hour,
+            id: NOTIFICATION_ID_BASE.water_reminder + (i * 100) + hour,
             title: content.title,
             body: content.body,
             schedule: { at: waterTime },
             channelId: NOTIFICATION_CHANNELS.WELLNESS,
             smallIcon: 'ic_stat_icon',
+            sound: 'notification.wav',
           });
         }
       });
@@ -337,10 +340,12 @@ export async function scheduleNotifications(
   }
   
   // Schedule exercise reminders for next 30 days (once per day at 17:00)
+  // IMPORTANT: Start from i=0 (today) to include today's reminder if not passed
   if (prefs.togglesByType.exercise_reminder) {
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 0; i <= 30; i++) {
       const exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
-      if (!isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd) && isAfter(exerciseDate, now)) {
+      // Only schedule if in the future AND not in quiet hours
+      if (isAfter(exerciseDate, now) && !isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd)) {
         const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
         notifications.push({
           id: NOTIFICATION_ID_BASE.exercise_reminder + i,
@@ -349,6 +354,7 @@ export async function scheduleNotifications(
           schedule: { at: exerciseDate },
           channelId: NOTIFICATION_CHANNELS.WELLNESS,
           smallIcon: 'ic_stat_icon',
+          sound: 'notification.wav',
         });
       }
     }
@@ -358,10 +364,18 @@ export async function scheduleNotifications(
   if (notifications.length > 0) {
     try {
       await LocalNotifications.schedule({ notifications });
-      console.log(`Scheduled ${notifications.length} notifications`);
+      console.log(`✅ Scheduled ${notifications.length} notifications`);
+      // Log first few water reminders for debugging
+      const waterNotifs = notifications.filter(n => n.id >= 9000 && n.id < 10000);
+      console.log(`💧 Water notifications: ${waterNotifs.length}`);
+      if (waterNotifs.length > 0) {
+        console.log(`💧 First water notification at: ${waterNotifs[0].schedule?.at}`);
+      }
     } catch (error) {
-      console.error('Error scheduling notifications:', error);
+      console.error('❌ Error scheduling notifications:', error);
     }
+  } else {
+    console.warn('⚠️ No notifications to schedule');
   }
 }
 
