@@ -28,8 +28,55 @@ import { FLOW_LABELS, SYMPTOM_LABELS, MOOD_LABELS } from '@/types/cycle';
 import type { DayEntry } from '@/types/cycle';
 import type { Medication, MedicationLog } from '@/types/medication';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const WEEKDAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+
+// Skeleton Loader for Calendar
+const CalendarSkeleton = () => (
+  <div className="min-h-screen bg-background pb-24 safe-area-top animate-fade-in">
+    {/* Header Skeleton */}
+    <header className="relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
+      <div className="relative px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="w-10 h-10 rounded-full" />
+          <div className="text-center space-y-2">
+            <Skeleton className="h-7 w-24 mx-auto" />
+            <Skeleton className="h-4 w-12 mx-auto" />
+          </div>
+          <Skeleton className="w-10 h-10 rounded-full" />
+        </div>
+      </div>
+    </header>
+
+    <main className="px-4 pt-2">
+      {/* Calendar Grid Skeleton */}
+      <div className="bg-card/80 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-lg">
+        {/* Weekday Headers */}
+        <div className="grid grid-cols-7 gap-1 mb-3">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-8 mx-auto" />
+          ))}
+        </div>
+        {/* Calendar Days */}
+        <div className="grid grid-cols-7 gap-1">
+          {Array.from({ length: 35 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-square rounded-2xl" />
+          ))}
+        </div>
+      </div>
+
+      {/* Upcoming Events Skeleton */}
+      <div className="mt-6 space-y-3">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-20 w-full rounded-2xl" />
+        <Skeleton className="h-20 w-full rounded-2xl" />
+        <Skeleton className="h-20 w-full rounded-2xl" />
+      </div>
+    </main>
+  </div>
+);
 
 // Fertility chance by days relative to ovulation
 const getFertilityChance = (daysFromOvulation: number): number => {
@@ -52,7 +99,8 @@ export default function CalendarPage() {
     prediction, 
     entries, 
     saveDayEntry,
-    userSettings 
+    userSettings,
+    isLoading 
   } = useCycleData();
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -206,6 +254,16 @@ export default function CalendarPage() {
       default: return { label: 'Normal Gün', color: 'from-muted to-muted' };
     }
   };
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return (
+      <>
+        <CalendarSkeleton />
+        <BottomNav onCenterPress={handleCenterPress} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24 safe-area-top">

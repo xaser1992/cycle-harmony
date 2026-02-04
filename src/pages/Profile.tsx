@@ -1,20 +1,20 @@
-// 🌸 Profile Page - Flo Inspired Design
+// 🌸 Profile Page - Flo Inspired Design (Performance Optimized)
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
+import {
   User, 
   Mail, 
   Calendar, 
   ChevronLeft,
   Camera,
   Edit3,
-  LogOut,
   Heart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useCycleData } from '@/hooks/useCycleData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface UserProfile {
   name: string;
@@ -23,9 +23,35 @@ interface UserProfile {
   avatar?: string;
 }
 
+// Profile Skeleton Loader
+const ProfileSkeleton = () => (
+  <div className="min-h-screen bg-background safe-area-top animate-fade-in">
+    <div className="relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-rose via-pink to-rose h-56" />
+      <div className="relative px-4 pt-4">
+        <Skeleton className="w-10 h-10 rounded-full bg-white/20" />
+      </div>
+      <div className="relative flex flex-col items-center pt-4 pb-20">
+        <Skeleton className="w-28 h-28 rounded-full bg-white/20" />
+        <Skeleton className="h-6 w-24 mt-4 bg-white/20" />
+        <Skeleton className="h-4 w-32 mt-2 bg-white/20" />
+      </div>
+    </div>
+    <div className="relative -mt-10 px-4 space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        <Skeleton className="h-24 rounded-2xl" />
+        <Skeleton className="h-24 rounded-2xl" />
+        <Skeleton className="h-24 rounded-2xl" />
+      </div>
+      <Skeleton className="h-64 rounded-3xl" />
+      <Skeleton className="h-40 rounded-3xl" />
+    </div>
+  </div>
+);
+
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { cycleSettings } = useCycleData();
+  const { cycleSettings, isLoading } = useCycleData();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('userProfile');
@@ -55,6 +81,11 @@ export default function ProfilePage() {
     { label: 'Takip Edilen', value: '3 ay', icon: '📊' },
     { label: 'Kayıt', value: '45+', icon: '✍️' },
   ];
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background safe-area-top">
