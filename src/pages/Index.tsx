@@ -61,11 +61,33 @@ const Index = forwardRef<HTMLDivElement, {}>(function Index(props, ref) {
   };
 
   if (isLoading) {
+    // Skeleton loading state - matches layout structure for smooth transition
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
-          <span className="text-2xl">🌸</span>
+      <div className="relative min-h-screen bg-background pb-24 safe-area-top">
+        <div className="px-6 pt-20 pb-4">
+          <div className="flex items-center justify-center">
+            <div className="text-center space-y-2">
+              <div className="h-4 w-20 bg-muted rounded animate-pulse mx-auto" />
+              <div className="h-7 w-28 bg-muted rounded animate-pulse mx-auto" />
+            </div>
+          </div>
         </div>
+        <main className="px-6 space-y-6">
+          {/* TodayCard skeleton */}
+          <div className="rounded-[2rem] bg-muted p-6 h-52 animate-pulse" />
+          {/* PhaseTimeline skeleton */}
+          <div className="bg-card rounded-2xl p-4 border border-border">
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+              </div>
+              <div className="h-3 bg-muted rounded-full animate-pulse" />
+            </div>
+          </div>
+          {/* Button skeleton */}
+          <div className="h-14 bg-muted rounded-2xl animate-pulse" />
+        </main>
       </div>
     );
   }

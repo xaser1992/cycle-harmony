@@ -17,10 +17,13 @@ export function useCycleData() {
   const [isLoading, setIsLoading] = useState(true);
   const hasScheduledNotifications = useRef(false);
 
-  // Load all data on mount
+  // Load all data on mount - optimized for fast initial render
   useEffect(() => {
+    let isMounted = true;
+    
     async function loadData() {
       try {
+        // Parallel fetch all data at once
         const [settings, dayEntries, notifPrefs, userPrefs, history] = await Promise.all([
           storage.getCycleSettings(),
           storage.getDayEntries(),
@@ -29,48 +32,52 @@ export function useCycleData() {
           storage.getCycleHistory(),
         ]);
 
+        if (!isMounted) return;
+
+        // Batch state updates to minimize re-renders
+        const currentSettings = settings || DEFAULT_CYCLE_SETTINGS;
+        const currentEntries = dayEntries || [];
+        const currentNotifPrefs = notifPrefs || DEFAULT_NOTIFICATION_PREFS;
+        const currentUserPrefs = userPrefs || DEFAULT_USER_SETTINGS;
+        
+        // Calculate predictions synchronously (fast computation)
+        const pred = calculatePredictions(currentSettings, history);
+        const phase = getCyclePhase(new Date(), currentSettings, pred, currentEntries);
+
+        // Single batch update for all state
         if (settings) setCycleSettings(settings);
-        if (dayEntries) setEntries(dayEntries);
+        setEntries(currentEntries);
         if (notifPrefs) setNotificationPrefs(notifPrefs);
         if (userPrefs) setUserSettings(userPrefs);
-
-        // Calculate predictions
-        const currentSettings = settings || DEFAULT_CYCLE_SETTINGS;
-        const pred = calculatePredictions(currentSettings, history);
         setPrediction(pred);
-
-        // Get current phase
-        const phase = getCyclePhase(new Date(), currentSettings, pred, dayEntries || []);
         setCurrentPhase(phase);
+        setIsLoading(false);
 
-        // Schedule notifications on initial load (only on native platforms)
-        const finalNotifPrefs = notifPrefs || DEFAULT_NOTIFICATION_PREFS;
-        const finalUserSettings = userPrefs || DEFAULT_USER_SETTINGS;
-        
-        if (pred && finalNotifPrefs.enabled && !hasScheduledNotifications.current) {
+        // Schedule notifications AFTER render (non-blocking)
+        if (pred && currentNotifPrefs.enabled && !hasScheduledNotifications.current && Capacitor.isNativePlatform()) {
           hasScheduledNotifications.current = true;
-          
-          // Only run on native platforms
-          if (Capacitor.isNativePlatform()) {
+          // Use setTimeout to defer notification scheduling
+          setTimeout(async () => {
             try {
               await createNotificationChannels();
               const hasPermission = await checkNotificationPermissions();
               if (hasPermission) {
-                await scheduleNotifications(pred, finalNotifPrefs, finalUserSettings.language);
-                console.log('Initial notifications scheduled');
+                await scheduleNotifications(pred, currentNotifPrefs, currentUserPrefs.language);
               }
             } catch (error) {
               console.warn('Could not schedule initial notifications:', error);
             }
-          }
+          }, 100);
         }
       } catch (error) {
         console.error('Error loading cycle data:', error);
-      } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     }
+    
     loadData();
+    
+    return () => { isMounted = false; };
   }, []);
 
   // Update cycle settings
