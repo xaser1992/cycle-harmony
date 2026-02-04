@@ -26,6 +26,38 @@ import { getCycleHistory, type CycleRecord } from '@/lib/storage';
 import { format, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks, startOfMonth, endOfMonth, addMonths, isSameMonth, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Stats Skeleton Loader
+const StatsSkeleton = () => (
+  <div className="min-h-screen bg-background pb-24 safe-area-top animate-fade-in">
+    <header className="px-6 pt-6 pb-4">
+      <Skeleton className="h-8 w-32 mb-4" />
+      <div className="flex gap-1 p-1 bg-muted/50 rounded-full">
+        <Skeleton className="flex-1 h-10 rounded-full" />
+        <Skeleton className="flex-1 h-10 rounded-full" />
+        <Skeleton className="flex-1 h-10 rounded-full" />
+      </div>
+    </header>
+
+    <main className="px-6 space-y-5">
+      {/* Summary Cards Skeleton */}
+      <div className="grid grid-cols-2 gap-4">
+        <Skeleton className="h-32 rounded-3xl" />
+        <Skeleton className="h-32 rounded-3xl" />
+      </div>
+      
+      {/* Comparison Card Skeleton */}
+      <Skeleton className="h-64 w-full rounded-3xl" />
+      
+      {/* Chart Cards Skeleton */}
+      <div className="space-y-4">
+        <Skeleton className="h-48 w-full rounded-3xl" />
+        <Skeleton className="h-48 w-full rounded-3xl" />
+      </div>
+    </main>
+  </div>
+);
 
 // Semantic chart colors using CSS variables
 const getChartColors = () => {
@@ -438,7 +470,7 @@ SymptomBar.displayName = 'SymptomBar';
 
 export default function StatsPage() {
   const { openUpdateSheet } = useUpdateSheet();
-  const { cycleSettings, entries, userSettings } = useCycleData();
+  const { cycleSettings, entries, userSettings, isLoading } = useCycleData();
   const [activeTab, setActiveTab] = useState<'stats' | 'charts' | 'history'>('stats');
   const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
   const [historyMonth, setHistoryMonth] = useState(new Date());
@@ -804,6 +836,16 @@ export default function StatsPage() {
   }, [historyMonth, entriesByDate, cycleHistory]);
 
   const isCurrentMonth = isSameMonth(historyMonth, new Date());
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return (
+      <>
+        <StatsSkeleton />
+        <BottomNav onCenterPress={handleCenterPress} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24 safe-area-top">

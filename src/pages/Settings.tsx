@@ -31,7 +31,29 @@ import { Preferences } from '@capacitor/preferences';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { exportData, importData } from '@/lib/storage';
+import { Skeleton } from '@/components/ui/skeleton';
 
+// Settings Skeleton Loader
+const SettingsSkeleton = () => (
+  <div className="min-h-screen bg-background pb-24 safe-area-top animate-fade-in">
+    <header className="px-6 pt-6 pb-4">
+      <div className="flex items-center gap-4 mb-2">
+        <Skeleton className="w-10 h-10 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-24" />
+          <Skeleton className="h-4 w-40" />
+        </div>
+      </div>
+    </header>
+    <main className="px-4 space-y-4">
+      <Skeleton className="h-16 w-full rounded-2xl" />
+      <Skeleton className="h-16 w-full rounded-2xl" />
+      <Skeleton className="h-32 w-full rounded-2xl" />
+      <Skeleton className="h-40 w-full rounded-2xl" />
+      <Skeleton className="h-16 w-full rounded-2xl" />
+    </main>
+  </div>
+);
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { openUpdateSheet } = useUpdateSheet();
@@ -42,6 +64,7 @@ export default function SettingsPage() {
     updateCycleSettings,
     userSettings,
     updateUserSettings,
+    isLoading,
   } = useCycleData();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -222,6 +245,16 @@ export default function SettingsPage() {
       />
     </div>
   );
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return (
+      <>
+        <SettingsSkeleton />
+        <BottomNav onCenterPress={handleCenterPress} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24 safe-area-top">
