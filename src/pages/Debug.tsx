@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useCycleData } from '@/hooks/useCycleData';
 import { 
@@ -27,9 +28,43 @@ import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import type { LocalNotificationSchema } from '@capacitor/local-notifications';
 
+// Skeleton component for loading state
+function DebugSkeleton() {
+  return (
+    <div className="min-h-screen bg-background safe-area-top safe-area-bottom">
+      <header className="px-6 pt-6 pb-4 flex items-center gap-4">
+        <Skeleton className="w-10 h-10 rounded-full" />
+        <Skeleton className="h-6 w-40" />
+      </header>
+      <main className="px-6 pb-6 space-y-6">
+        <div>
+          <Skeleton className="h-4 w-24 mb-2" />
+          <div className="rounded-xl border border-border/50 p-4 space-y-3">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+          </div>
+        </div>
+        <div>
+          <Skeleton className="h-4 w-24 mb-2" />
+          <div className="rounded-xl border border-border/50 p-4 space-y-2">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-16 rounded-xl" />
+          <Skeleton className="h-16 rounded-xl" />
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function DebugPage() {
   const navigate = useNavigate();
-  const { prediction, notificationPrefs, userSettings, cycleSettings } = useCycleData();
+  const { prediction, notificationPrefs, userSettings, cycleSettings, isLoading: dataLoading } = useCycleData();
   
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [pendingNotifications, setPendingNotifications] = useState<LocalNotificationSchema[]>([]);
@@ -110,6 +145,10 @@ export default function DebugPage() {
     checkPermissions();
     loadPendingNotifications();
   }, []);
+
+  if (dataLoading) {
+    return <DebugSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background safe-area-top safe-area-bottom">

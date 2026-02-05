@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, Bell, Calendar, Heart, CheckCircle2, User, Stethoscope, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCycleData } from '@/hooks/useCycleData';
 import { format, subDays, differenceInDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -12,6 +13,37 @@ import { addCycleRecord } from '@/lib/storage';
 import type { HealthCondition, ContraceptiveMethod } from '@/types/cycle';
 
 const STEPS = ['welcome', 'personalInfo', 'healthInfo', 'cycleHistory', 'lastPeriod', 'cycleInfo', 'dataInfo', 'notifications', 'complete'] as const;
+
+// Skeleton component for loading state
+function OnboardingSkeleton() {
+  return (
+    <div className="min-h-screen bg-background flex flex-col safe-area-top safe-area-bottom">
+      {/* Progress Bar */}
+      <div className="px-6 pt-4">
+        <Skeleton className="h-1 w-full rounded-full" />
+        <div className="flex justify-center mt-2">
+          <Skeleton className="h-3 w-12" />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-6">
+        <Skeleton className="w-20 h-20 rounded-full mb-6" />
+        <Skeleton className="h-8 w-48 mb-3" />
+        <Skeleton className="h-5 w-64 mb-2" />
+        <Skeleton className="h-5 w-56" />
+        <div className="mt-8 w-full max-w-xs">
+          <Skeleton className="h-20 w-full rounded-xl" />
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="px-6 pb-8">
+        <Skeleton className="h-14 w-full rounded-2xl" />
+      </div>
+    </div>
+  );
+}
 type Step = typeof STEPS[number];
 
 interface PastPeriod {
@@ -39,7 +71,7 @@ const CONTRACEPTIVE_METHODS: { id: ContraceptiveMethod; label: string }[] = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { updateCycleSettings, updateUserSettings, completeOnboarding } = useCycleData();
+  const { updateCycleSettings, updateUserSettings, completeOnboarding, isLoading } = useCycleData();
   const [step, setStep] = useState<Step>('welcome');
   
   // Personal info
@@ -194,6 +226,10 @@ export default function Onboarding() {
     return true;
   };
 
+  // Show skeleton while loading initial data
+  if (isLoading) {
+    return <OnboardingSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col safe-area-top safe-area-bottom">
