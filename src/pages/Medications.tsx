@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { App } from '@capacitor/app';
 import { scheduleMedicationNotifications } from '@/lib/medicationNotifications';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   getMedications,
   saveMedication,
@@ -38,6 +39,60 @@ import {
   MEDICATION_ICONS,
 } from '@/types/medication';
 
+// Skeleton component for loading state
+function MedicationsSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-24">
+      {/* Header */}
+      <div className="px-5 pt-16 pb-4">
+        <Skeleton className="h-8 w-40 mb-2" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+
+      {/* Progress Card */}
+      <div className="px-5 mb-6">
+        <div className="rounded-xl border border-border/50 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-6 w-12" />
+          </div>
+          <Skeleton className="h-2.5 w-full rounded-full" />
+          <Skeleton className="h-3 w-24 mt-2" />
+        </div>
+      </div>
+
+      {/* Medications List */}
+      <div className="px-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-8 w-16" />
+        </div>
+        
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border border-border/50 p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-12 h-12 rounded-xl" />
+                  <div>
+                    <Skeleton className="h-5 w-32 mb-1" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="w-5 h-5" />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Skeleton className="h-8 w-16 rounded-full" />
+                <Skeleton className="h-8 w-16 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Medications() {
   const { openUpdateSheet } = useUpdateSheet();
   const [medications, setMedications] = useState<Medication[]>([]);
@@ -46,6 +101,7 @@ export default function Medications() {
   const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
   const [medicationStats, setMedicationStats] = useState<Record<string, number>>({});
+  const [isLoading, setIsLoading] = useState(true);
   const today = format(new Date(), 'yyyy-MM-dd');
   
   // Swipe navigation - tab arası geçiş için
@@ -85,22 +141,26 @@ export default function Medications() {
     };
   }, [isAddSheetOpen, selectedMedication]);
   const loadData = async () => {
-    const [meds, logs] = await Promise.all([
-      getMedications(),
-      getMedicationLogsForDate(today),
-    ]);
-    setMedications(meds.filter(m => m.isActive));
-    setTodayLogs(logs);
+    try {
+      const [meds, logs] = await Promise.all([
+        getMedications(),
+        getMedicationLogsForDate(today),
+      ]);
+      setMedications(meds.filter(m => m.isActive));
+      setTodayLogs(logs);
 
-    // Load stats for each medication
-    const statsPromises = meds.map(async (med) => {
-      const stats = await getMedicationStats(med.id, 7);
-      return { id: med.id, rate: stats.adherenceRate };
-    });
-    const statsResults = await Promise.all(statsPromises);
-    const statsMap: Record<string, number> = {};
-    statsResults.forEach(s => { statsMap[s.id] = s.rate; });
-    setMedicationStats(statsMap);
+      // Load stats for each medication
+      const statsPromises = meds.map(async (med) => {
+        const stats = await getMedicationStats(med.id, 7);
+        return { id: med.id, rate: stats.adherenceRate };
+      });
+      const statsResults = await Promise.all(statsPromises);
+      const statsMap: Record<string, number> = {};
+      statsResults.forEach(s => { statsMap[s.id] = s.rate; });
+      setMedicationStats(statsMap);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleToggleMedication = async (medication: Medication, time: string, currentlyTaken: boolean) => {
@@ -211,6 +271,15 @@ export default function Medications() {
       reminderTimes: prev.reminderTimes.map((t, i) => i === index ? value : t),
     }));
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <MedicationsSkeleton />
+        <BottomNav onCenterPress={() => openUpdateSheet()} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-24">
