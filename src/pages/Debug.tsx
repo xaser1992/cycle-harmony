@@ -9,7 +9,9 @@ import {
   CheckCircle, 
   XCircle,
   Clock,
-  Smartphone
+  Smartphone,
+  AlertTriangle,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,11 +24,13 @@ import {
   sendTestNotification,
   getPendingNotifications,
   scheduleNotifications,
-  cancelAllNotifications
+  cancelAllNotifications,
+  diagnoseNotifications
 } from '@/lib/notifications';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import type { LocalNotificationSchema } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
 
 // Skeleton component for loading state
 function DebugSkeleton() {
@@ -62,6 +66,14 @@ function DebugSkeleton() {
   );
 }
 
+interface DiagnosticResult {
+  isNative: boolean;
+  hasPermission: boolean;
+  pendingCount: number;
+  channelsCreated: boolean;
+  errors: string[];
+}
+
 export default function DebugPage() {
   const navigate = useNavigate();
   const { prediction, notificationPrefs, userSettings, cycleSettings, isLoading: dataLoading } = useCycleData();
@@ -70,9 +82,25 @@ export default function DebugPage() {
   const [pendingNotifications, setPendingNotifications] = useState<LocalNotificationSchema[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const [diagnostics, setDiagnostics] = useState<DiagnosticResult | null>(null);
+  const [lastScheduleResult, setLastScheduleResult] = useState<{ scheduled: number; errors: string[] } | null>(null);
 
   const addLog = (message: string) => {
     setLogs(prev => [...prev, `[${format(new Date(), 'HH:mm:ss')}] ${message}`]);
+  };
+
+  const runDiagnostics = async () => {
+    addLog('🔍 Running full diagnostics...');
+    const result = await diagnoseNotifications();
+    setDiagnostics(result);
+    setHasPermission(result.hasPermission);
+    
+    if (result.errors.length > 0) {
+      result.errors.forEach(err => addLog(`⚠️ ${err}`));
+    } else {
+      addLog('✓ All diagnostics passed');
+    }
+    addLog(`📱 Native: ${result.isNative}, Permission: ${result.hasPermission}, Pending: ${result.pendingCount}`);
   };
 
   const checkPermissions = async () => {
@@ -87,6 +115,9 @@ export default function DebugPage() {
     const granted = await requestNotificationPermissions();
     setHasPermission(granted);
     addLog(granted ? '✓ Permissions granted' : '✗ Permissions denied');
+    if (granted) {
+      await runDiagnostics();
+    }
   };
 
   const loadPendingNotifications = async () => {
@@ -96,6 +127,19 @@ export default function DebugPage() {
       const pending = await getPendingNotifications();
       setPendingNotifications(pending);
       addLog(`Found ${pending.length} pending notifications`);
+      
+      // Categorize by type for better visibility
+      const waterNotifs = pending.filter(n => n.id >= 900000 && n.id < 1000000);
+      const exerciseNotifs = pending.filter(n => n.id >= 1000000 && n.id < 1100000);
+      const checkInNotifs = pending.filter(n => n.id >= 800000 && n.id < 900000);
+      const cycleNotifs = pending.filter(n => n.id < 800000 && n.id >= 100000);
+      const customNotifs = pending.filter(n => n.id >= 50000 && n.id < 100000);
+      
+      addLog(`  🌸 Cycle: ${cycleNotifs.length}, 📝 Check-in: ${checkInNotifs.length}`);
+      addLog(`  💧 Water: ${waterNotifs.length}, 🏃 Exercise: ${exerciseNotifs.length}`);
+      if (customNotifs.length > 0) {
+        addLog(`  📌 Custom: ${customNotifs.length}`);
+      }
     } catch (error) {
       addLog(`Error: ${error}`);
     }
@@ -106,7 +150,7 @@ export default function DebugPage() {
     addLog('Sending test notification...');
     try {
       await sendTestNotification(userSettings.language);
-      addLog('✓ Test notification sent');
+      addLog('✓ Test notification sent (should appear in ~1 second)');
     } catch (error) {
       addLog(`✗ Error: ${error}`);
     }
@@ -114,15 +158,20 @@ export default function DebugPage() {
 
   const handleReschedule = async () => {
     if (!prediction) {
-      addLog('✗ No prediction available');
+      addLog('✗ No prediction available - complete onboarding first');
       return;
     }
     
     setIsLoading(true);
-    addLog('Rescheduling all notifications...');
+    addLog('🔄 Rescheduling all notifications...');
     try {
-      await scheduleNotifications(prediction, notificationPrefs, userSettings.language);
-      addLog('✓ Notifications rescheduled');
+      const result = await scheduleNotifications(prediction, notificationPrefs, userSettings.language);
+      setLastScheduleResult(result);
+      
+      if (result.errors.length > 0) {
+        result.errors.forEach(err => addLog(`⚠️ ${err}`));
+      }
+      addLog(`✓ Scheduled ${result.scheduled} notifications`);
       await loadPendingNotifications();
     } catch (error) {
       addLog(`✗ Error: ${error}`);
@@ -142,7 +191,7 @@ export default function DebugPage() {
   };
 
   useEffect(() => {
-    checkPermissions();
+    runDiagnostics();
     loadPendingNotifications();
   }, []);
 
@@ -173,6 +222,18 @@ export default function DebugPage() {
         >
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Sistem Durumu</h3>
           <Card className="p-4 space-y-3">
+            {/* Platform */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">Platform</span>
+              </div>
+              <span className={`text-sm font-medium ${diagnostics?.isNative ? 'text-emerald' : 'text-amber'}`}>
+                {diagnostics?.isNative ? 'Native (Android/iOS)' : 'Web (Limited)'}
+              </span>
+            </div>
+            
+            {/* Permission */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-muted-foreground" />
@@ -181,7 +242,7 @@ export default function DebugPage() {
               {hasPermission === null ? (
                 <span className="text-sm text-muted-foreground">Kontrol ediliyor...</span>
               ) : hasPermission ? (
-                <div className="flex items-center gap-1 text-green-600">
+                <div className="flex items-center gap-1 text-emerald">
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-sm">İzin verildi</span>
                 </div>
@@ -195,6 +256,26 @@ export default function DebugPage() {
               )}
             </div>
             
+            {/* Channels */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">Bildirim Kanalları</span>
+              </div>
+              {diagnostics?.channelsCreated ? (
+                <div className="flex items-center gap-1 text-emerald">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="text-sm">Hazır</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-amber">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-sm">Oluşturulmadı</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Preferred Time */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
@@ -203,13 +284,22 @@ export default function DebugPage() {
               <span className="text-sm font-medium">{notificationPrefs.preferredTime}</span>
             </div>
             
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">Saat Dilimi</span>
+            {/* Errors */}
+            {diagnostics?.errors && diagnostics.errors.length > 0 && (
+              <div className="pt-2 border-t border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-amber" />
+                  <span className="text-sm font-medium text-amber">Sorunlar Tespit Edildi</span>
+                </div>
+                <div className="space-y-1">
+                  {diagnostics.errors.map((err, i) => (
+                    <p key={i} className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                      {err}
+                    </p>
+                  ))}
+                </div>
               </div>
-              <span className="text-sm font-medium">{Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
-            </div>
+            )}
           </Card>
         </motion.div>
 

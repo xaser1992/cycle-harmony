@@ -62,7 +62,12 @@ export function useCycleData() {
               await createNotificationChannels();
               const hasPermission = await checkNotificationPermissions();
               if (hasPermission) {
-                await scheduleNotifications(pred, currentNotifPrefs, currentUserPrefs.language);
+                const result = await scheduleNotifications(pred, currentNotifPrefs, currentUserPrefs.language);
+                if (result.errors.length > 0) {
+                  console.warn('Notification scheduling issues:', result.errors);
+                } else {
+                  console.log(`✅ Initial notifications scheduled: ${result.scheduled}`);
+                }
               }
             } catch (error) {
               console.warn('Could not schedule initial notifications:', error);
@@ -95,7 +100,10 @@ export function useCycleData() {
     // Reschedule notifications (only on native platforms)
     if (notificationPrefs.enabled && Capacitor.isNativePlatform()) {
       try {
-        await scheduleNotifications(pred, notificationPrefs, userSettings.language);
+        const result = await scheduleNotifications(pred, notificationPrefs, userSettings.language);
+        if (result.errors.length > 0) {
+          console.warn('Notification reschedule issues:', result.errors);
+        }
       } catch (error) {
         console.warn('Could not reschedule notifications:', error);
       }
@@ -150,7 +158,10 @@ export function useCycleData() {
         // Reschedule notifications if enabled (only on native platforms)
         if (notificationPrefs.enabled && Capacitor.isNativePlatform() && pred) {
           try {
-            await scheduleNotifications(pred, notificationPrefs, userSettings.language);
+            const result = await scheduleNotifications(pred, notificationPrefs, userSettings.language);
+            if (result.errors.length > 0) {
+              console.warn('Notification reschedule issues after period entry:', result.errors);
+            }
           } catch (error) {
             console.warn('Could not reschedule notifications after period entry:', error);
           }
@@ -173,7 +184,10 @@ export function useCycleData() {
     // Schedule notifications (only on native platforms)
     if (prediction && Capacitor.isNativePlatform()) {
       try {
-        await scheduleNotifications(prediction, updated, userSettings.language);
+        const result = await scheduleNotifications(prediction, updated, userSettings.language);
+        if (result.errors.length > 0) {
+          console.warn('Notification schedule issues:', result.errors);
+        }
       } catch (error) {
         console.warn('Could not schedule notifications:', error);
       }

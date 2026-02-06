@@ -232,25 +232,37 @@ export async function scheduleNotifications(
   prediction: CyclePrediction,
   prefs: NotificationPreferences,
   language: 'tr' | 'en' = 'tr'
-): Promise<void> {
+): Promise<{ scheduled: number; errors: string[] }> {
+  const result = { scheduled: 0, errors: [] as string[] };
+  
   if (!isNative()) {
     console.log('Notifications not supported on web');
-    return;
+    result.errors.push('Web platform - not supported');
+    return result;
   }
   
   if (!prefs.enabled) {
+    console.log('Notifications disabled by user preference');
     await cancelAllNotifications();
-    return;
+    return result;
   }
   
   const hasPermission = await checkNotificationPermissions();
   if (!hasPermission) {
-    console.warn('Notification permissions not granted');
-    return;
+    console.warn('⚠️ Notification permissions not granted');
+    result.errors.push('Permission not granted');
+    return result;
   }
   
   // Ensure notification channels exist before scheduling (critical for Android)
-  await createNotificationChannels();
+  try {
+    await createNotificationChannels();
+    console.log('✅ Notification channels ready');
+  } catch (error) {
+    console.error('❌ Failed to create notification channels:', error);
+    result.errors.push(`Channel creation failed: ${error}`);
+    return result;
+  }
   
   // Cancel existing notifications before rescheduling
   await cancelAllNotifications();
@@ -384,32 +396,41 @@ export async function scheduleNotifications(
   if (notifications.length > 0) {
     try {
       await LocalNotifications.schedule({ notifications });
+      result.scheduled = notifications.length;
       console.log(`✅ Scheduled ${notifications.length} total notifications`);
       
       // Detailed breakdown by type (using 100,000 block ranges)
       const waterNotifs = notifications.filter(n => n.id >= 900000 && n.id < 1000000);
       const exerciseNotifs = notifications.filter(n => n.id >= 1000000 && n.id < 1100000);
       const checkInNotifs = notifications.filter(n => n.id >= 800000 && n.id < 900000);
+      const cycleNotifs = notifications.filter(n => n.id < 800000);
       
+      console.log(`🌸 Cycle notifications: ${cycleNotifs.length}`);
+      console.log(`📝 Daily check-ins: ${checkInNotifs.length}`);
       console.log(`💧 Water reminders: ${waterNotifs.length}`);
       console.log(`🏃 Exercise reminders: ${exerciseNotifs.length}`);
-      console.log(`📝 Daily check-ins: ${checkInNotifs.length}`);
       
+      if (cycleNotifs.length > 0) {
+        console.log(`🌸 First cycle at: ${cycleNotifs[0].schedule?.at}`);
+      }
+      if (checkInNotifs.length > 0) {
+        console.log(`📝 First check-in at: ${checkInNotifs[0].schedule?.at}`);
+      }
       if (waterNotifs.length > 0) {
         console.log(`💧 First water at: ${waterNotifs[0].schedule?.at}`);
       }
       if (exerciseNotifs.length > 0) {
         console.log(`🏃 First exercise at: ${exerciseNotifs[0].schedule?.at}`);
       }
-      if (checkInNotifs.length > 0) {
-        console.log(`📝 First check-in at: ${checkInNotifs[0].schedule?.at}`);
-      }
     } catch (error) {
       console.error('❌ Error scheduling notifications:', error);
+      result.errors.push(`Scheduling failed: ${error}`);
     }
   } else {
-    console.warn('⚠️ No notifications to schedule');
+    console.warn('⚠️ No notifications to schedule - check if all notification types are disabled or all dates are in the past');
   }
+  
+  return result;
 }
 
 // Get list of pending notifications (for debug panel)
@@ -490,6 +511,16 @@ export async function createNotificationChannels(): Promise<void> {
   }
 }
 
+// Custom reminder ID block - uses a separate range (50000-99999) to avoid conflicts
+// This is intentionally outside the TYPE_ID_MULTIPLIER system which uses 100000+ blocks
+const CUSTOM_REMINDER_ID_BASE = 50000;
+let customReminderCounter = 0;
+
+const makeCustomReminderId = (): number => {
+  customReminderCounter = (customReminderCounter + 1) % 50000; // Cycles 0-49999
+  return CUSTOM_REMINDER_ID_BASE + customReminderCounter;
+};
+
 // Schedule a custom reminder for a specific date
 export async function scheduleCustomReminder(
   title: string,
@@ -507,9 +538,13 @@ export async function scheduleCustomReminder(
     if (!hasPermission) {
       const granted = await requestNotificationPermissions();
       if (!granted) {
+        console.warn('Notification permissions not granted for custom reminder');
         return false;
       }
     }
+    
+    // Ensure channels exist before scheduling
+    await createNotificationChannels();
     
     // Schedule for 9:00 AM on the target date
     const scheduleTime = setMinutes(setHours(targetDate, 9), 0);
@@ -520,9 +555,11 @@ export async function scheduleCustomReminder(
       return false;
     }
     
+    const notificationId = makeCustomReminderId();
+    
     await LocalNotifications.schedule({
       notifications: [{
-        id: Math.floor(Math.random() * 100000) + 20000,
+        id: notificationId,
         title,
         body,
         schedule: { at: scheduleTime },
@@ -532,10 +569,65 @@ export async function scheduleCustomReminder(
       }],
     });
     
-    console.log(`Scheduled custom reminder for ${format(scheduleTime, 'yyyy-MM-dd HH:mm')}`);
+    console.log(`✅ Scheduled custom reminder #${notificationId} for ${format(scheduleTime, 'yyyy-MM-dd HH:mm')}`);
     return true;
   } catch (error) {
-    console.error('Error scheduling custom reminder:', error);
+    console.error('❌ Error scheduling custom reminder:', error);
     return false;
   }
+}
+
+// Verify and diagnose notification system
+export async function diagnoseNotifications(): Promise<{
+  isNative: boolean;
+  hasPermission: boolean;
+  pendingCount: number;
+  channelsCreated: boolean;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let hasPermission = false;
+  let pendingCount = 0;
+  let channelsCreated = false;
+
+  if (!isNative()) {
+    return {
+      isNative: false,
+      hasPermission: false,
+      pendingCount: 0,
+      channelsCreated: false,
+      errors: ['Web platform - notifications not supported'],
+    };
+  }
+
+  try {
+    hasPermission = await checkNotificationPermissions();
+    if (!hasPermission) {
+      errors.push('Notification permission not granted');
+    }
+  } catch (e) {
+    errors.push(`Permission check failed: ${e}`);
+  }
+
+  try {
+    const pending = await LocalNotifications.getPending();
+    pendingCount = pending.notifications.length;
+  } catch (e) {
+    errors.push(`Failed to get pending notifications: ${e}`);
+  }
+
+  try {
+    await createNotificationChannels();
+    channelsCreated = true;
+  } catch (e) {
+    errors.push(`Channel creation failed: ${e}`);
+  }
+
+  return {
+    isNative: true,
+    hasPermission,
+    pendingCount,
+    channelsCreated,
+    errors,
+  };
 }
