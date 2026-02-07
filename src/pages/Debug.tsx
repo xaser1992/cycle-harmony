@@ -25,6 +25,7 @@ import {
   getPendingNotifications,
   scheduleNotifications,
   cancelAllNotifications,
+  cancelScheduledSystemNotifications,
   diagnoseNotifications
 } from '@/lib/notifications';
 import { format, parseISO } from 'date-fns';
@@ -68,9 +69,13 @@ function DebugSkeleton() {
 
 interface DiagnosticResult {
   isNative: boolean;
+  platform: string;
   hasPermission: boolean;
   pendingCount: number;
+  systemCount: number;
+  customCount: number;
   channelsCreated: boolean;
+  channelsApplicable: boolean;
   errors: string[];
 }
 
@@ -100,7 +105,8 @@ export default function DebugPage() {
     } else {
       addLog('✓ All diagnostics passed');
     }
-    addLog(`📱 Native: ${result.isNative}, Permission: ${result.hasPermission}, Pending: ${result.pendingCount}`);
+    addLog(`📱 Platform: ${result.platform}, Permission: ${result.hasPermission}`);
+    addLog(`📊 System: ${result.systemCount}, Custom: ${result.customCount}, Total: ${result.pendingCount}`);
   };
 
   const checkPermissions = async () => {
@@ -180,10 +186,21 @@ export default function DebugPage() {
   };
 
   const handleCancelAll = async () => {
-    addLog('Cancelling all notifications...');
+    addLog('Cancelling ALL notifications (including custom)...');
     try {
       await cancelAllNotifications();
       addLog('✓ All notifications cancelled');
+      await loadPendingNotifications();
+    } catch (error) {
+      addLog(`✗ Error: ${error}`);
+    }
+  };
+
+  const handleCancelSystemOnly = async () => {
+    addLog('Cancelling system notifications only (preserving custom)...');
+    try {
+      await cancelScheduledSystemNotifications();
+      addLog('✓ System notifications cancelled, custom preserved');
       await loadPendingNotifications();
     } catch (error) {
       addLog(`✗ Error: ${error}`);
@@ -228,8 +245,10 @@ export default function DebugPage() {
                 <Smartphone className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm">Platform</span>
               </div>
-              <span className={`text-sm font-medium ${diagnostics?.isNative ? 'text-emerald' : 'text-amber'}`}>
-                {diagnostics?.isNative ? 'Native (Android/iOS)' : 'Web (Limited)'}
+              <span className={`text-sm font-medium ${diagnostics?.isNative ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                {diagnostics?.platform === 'android' ? 'Android' : 
+                 diagnostics?.platform === 'ios' ? 'iOS' : 
+                 'Web (Sınırlı)'}
               </span>
             </div>
             
@@ -242,7 +261,7 @@ export default function DebugPage() {
               {hasPermission === null ? (
                 <span className="text-sm text-muted-foreground">Kontrol ediliyor...</span>
               ) : hasPermission ? (
-                <div className="flex items-center gap-1 text-emerald">
+                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-sm">İzin verildi</span>
                 </div>
@@ -256,24 +275,47 @@ export default function DebugPage() {
               )}
             </div>
             
-            {/* Channels */}
+            {/* Channels - only show on Android */}
+            {diagnostics?.channelsApplicable && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">Bildirim Kanalları</span>
+                </div>
+                {diagnostics?.channelsCreated ? (
+                  <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="text-sm">Hazır</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="text-sm">Oluşturulmadı</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Notification Counts */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">Bildirim Kanalları</span>
+                <Bell className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">Bekleyen Bildirimler</span>
               </div>
-              {diagnostics?.channelsCreated ? (
-                <div className="flex items-center gap-1 text-emerald">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm">Hazır</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 text-amber">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span className="text-sm">Oluşturulmadı</span>
-                </div>
-              )}
+              <div className="text-sm">
+                <span className="font-medium">{diagnostics?.systemCount || 0}</span>
+                <span className="text-muted-foreground"> sistem</span>
+                {(diagnostics?.customCount || 0) > 0 && (
+                  <>
+                    <span className="text-muted-foreground">, </span>
+                    <span className="font-medium">{diagnostics?.customCount}</span>
+                    <span className="text-muted-foreground"> özel</span>
+                  </>
+                )}
+              </div>
             </div>
+            
+            {/* Preferred Time */}
             
             {/* Preferred Time */}
             <div className="flex items-center justify-between">
@@ -287,9 +329,9 @@ export default function DebugPage() {
             {/* Errors */}
             {diagnostics?.errors && diagnostics.errors.length > 0 && (
               <div className="pt-2 border-t border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-4 h-4 text-amber" />
-                  <span className="text-sm font-medium text-amber">Sorunlar Tespit Edildi</span>
+              <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Sorunlar Tespit Edildi</span>
                 </div>
                 <div className="space-y-1">
                   {diagnostics.errors.map((err, i) => (
@@ -419,15 +461,26 @@ export default function DebugPage() {
           </Card>
           
           {pendingNotifications.length > 0 && (
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              className="w-full mt-2"
-              onClick={handleCancelAll}
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Tümünü İptal Et
-            </Button>
+            <div className="flex gap-2 mt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1"
+                onClick={handleCancelSystemOnly}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sistem Bildirimlerini Sıfırla
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                className="flex-1"
+                onClick={handleCancelAll}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Tümünü İptal Et
+              </Button>
+            </div>
           )}
         </motion.div>
 

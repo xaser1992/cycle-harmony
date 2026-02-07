@@ -13,12 +13,24 @@ import type {
 // Check if we're on a native platform
 const isNative = () => Capacitor.isNativePlatform();
 
+// Get current platform
+const getPlatform = () => Capacitor.getPlatform();
+
 // Notification channel IDs for Android
 export const NOTIFICATION_CHANNELS = {
   CRITICAL: 'critical_cycle_alerts',
   DAILY: 'daily_checkin',
   WELLNESS: 'wellness',
 } as const;
+
+// Notification ID ranges (non-overlapping blocks)
+// System notifications: 100,000+ (each type gets its own 100,000 block)
+// Custom reminders: 50,000 - 99,999
+// Test notifications: 40,000 - 49,999
+const SYSTEM_NOTIFICATION_ID_BASE = 100000;
+const CUSTOM_REMINDER_ID_BASE = 50000;
+const CUSTOM_REMINDER_ID_MAX = 99999;
+const TEST_NOTIFICATION_ID = 40001; // Safe range: 40,000-49,999
 
 // Notification ID multiplier for each type (100,000 blocks to prevent overlap)
 // Each type gets its own 100,000 ID block to guarantee no collisions
@@ -38,7 +50,20 @@ const TYPE_ID_MULTIPLIER: Record<NotificationType, number> = {
 // Generate a unique notification ID that won't collide
 // Each type has its own 100,000 block (e.g., water: 900000-999999, exercise: 1000000-1099999)
 const makeNotificationId = (type: NotificationType, index: number): number => {
-  return TYPE_ID_MULTIPLIER[type] * 100000 + index;
+  return TYPE_ID_MULTIPLIER[type] * SYSTEM_NOTIFICATION_ID_BASE + index;
+};
+
+// Custom reminder ID counter
+let customReminderCounter = 0;
+
+const makeCustomReminderId = (): number => {
+  customReminderCounter = (customReminderCounter + 1) % (CUSTOM_REMINDER_ID_MAX - CUSTOM_REMINDER_ID_BASE);
+  return CUSTOM_REMINDER_ID_BASE + customReminderCounter;
+};
+
+// Check if a notification ID is a system notification (not custom)
+const isSystemNotificationId = (id: number): boolean => {
+  return id >= SYSTEM_NOTIFICATION_ID_BASE;
 };
 
 // Get notification content based on type and privacy mode
@@ -161,25 +186,52 @@ function isInQuietHours(time: Date, quietStart: string, quietEnd: string): boole
   return currentMinutes >= startMinutes && currentMinutes < endMinutes;
 }
 
-// Get next valid notification time
+// Get next valid notification time (respects quiet hours correctly)
+// FIXED: Overnight quiet hours now correctly handle morning vs night targets
 function getNextValidTime(
   targetDate: Date, 
   preferredTime: string, 
   quietStart: string, 
   quietEnd: string
 ): Date {
-  const [hour, min] = preferredTime.split(':').map(Number);
-  let notificationTime = setMinutes(setHours(targetDate, hour), min);
+  const [prefHour, prefMin] = preferredTime.split(':').map(Number);
+  const [startHour, startMin] = quietStart.split(':').map(Number);
+  const [endHour, endMin] = quietEnd.split(':').map(Number);
   
-  // If preferred time is in quiet hours, schedule for end of quiet hours
-  if (isInQuietHours(notificationTime, quietStart, quietEnd)) {
-    const [endHour, endMin] = quietEnd.split(':').map(Number);
-    notificationTime = setMinutes(setHours(targetDate, endHour), endMin);
+  let notificationTime = setMinutes(setHours(targetDate, prefHour), prefMin);
+  
+  const prefMinutes = prefHour * 60 + prefMin;
+  const startMinutes = startHour * 60 + startMin;
+  const endMinutes = endHour * 60 + endMin;
+  
+  // Check if preferred time is in quiet hours
+  if (!isInQuietHours(notificationTime, quietStart, quietEnd)) {
+    // Not in quiet hours, use as-is
+    return notificationTime;
+  }
+  
+  // Preferred time IS in quiet hours - need to reschedule to end of quiet hours
+  const isOvernight = startMinutes > endMinutes;
+  
+  if (isOvernight) {
+    // Overnight quiet hours (e.g., 22:00 - 08:00)
+    // Two sub-ranges:
+    // - Night portion: startMinutes → 24:00 (same day)
+    // - Morning portion: 00:00 → endMinutes (same day)
     
-    // If end time is before start (overnight), add a day
-    if (endHour < parseInt(quietStart.split(':')[0])) {
-      notificationTime = addDays(notificationTime, 1);
+    if (prefMinutes >= startMinutes) {
+      // Preferred time is in the "night" portion (e.g., 23:00 when quiet is 22:00-08:00)
+      // Schedule for end of quiet hours NEXT DAY
+      notificationTime = setMinutes(setHours(addDays(targetDate, 1), endHour), endMin);
+    } else if (prefMinutes < endMinutes) {
+      // Preferred time is in the "morning" portion (e.g., 06:00 when quiet is 22:00-08:00)
+      // Schedule for end of quiet hours SAME DAY
+      notificationTime = setMinutes(setHours(targetDate, endHour), endMin);
     }
+  } else {
+    // Normal quiet hours (e.g., 14:00 - 16:00)
+    // Just schedule for end time same day
+    notificationTime = setMinutes(setHours(targetDate, endHour), endMin);
   }
   
   return notificationTime;
@@ -214,7 +266,7 @@ export async function checkNotificationPermissions(): Promise<boolean> {
   }
 }
 
-// Cancel all scheduled notifications
+// Cancel ALL notifications (use with caution - deletes custom reminders too)
 export async function cancelAllNotifications(): Promise<void> {
   if (!isNative()) return;
   try {
@@ -225,6 +277,59 @@ export async function cancelAllNotifications(): Promise<void> {
   } catch (error) {
     console.error('Error cancelling notifications:', error);
   }
+}
+
+// Cancel only SYSTEM notifications (preserves custom reminders in 50000-99999 range)
+export async function cancelScheduledSystemNotifications(): Promise<void> {
+  if (!isNative()) return;
+  try {
+    const pending = await LocalNotifications.getPending();
+    const systemNotifications = pending.notifications.filter(n => isSystemNotificationId(n.id));
+    
+    if (systemNotifications.length > 0) {
+      await LocalNotifications.cancel({ notifications: systemNotifications });
+      console.log(`🗑️ Cancelled ${systemNotifications.length} system notifications (preserved custom reminders)`);
+    }
+  } catch (error) {
+    console.error('Error cancelling system notifications:', error);
+  }
+}
+
+// Build platform-specific notification payload
+function buildNotificationPayload(
+  id: number,
+  title: string,
+  body: string,
+  scheduleAt: Date,
+  channelId: string
+): LocalNotificationSchema {
+  const platform = getPlatform();
+  
+  const basePayload: LocalNotificationSchema = {
+    id,
+    title,
+    body,
+    schedule: { at: scheduleAt },
+  };
+  
+  if (platform === 'android') {
+    // Android-specific: channelId, smallIcon, sound
+    return {
+      ...basePayload,
+      channelId,
+      smallIcon: 'ic_stat_icon',
+      sound: 'notification.wav',
+    };
+  } else if (platform === 'ios') {
+    // iOS-specific: no channelId or smallIcon, optional sound
+    return {
+      ...basePayload,
+      sound: 'notification.wav',
+    };
+  }
+  
+  // Fallback for unknown platforms
+  return basePayload;
 }
 
 // Schedule all notifications based on predictions
@@ -243,7 +348,7 @@ export async function scheduleNotifications(
   
   if (!prefs.enabled) {
     console.log('Notifications disabled by user preference');
-    await cancelAllNotifications();
+    await cancelScheduledSystemNotifications();
     return result;
   }
   
@@ -254,7 +359,7 @@ export async function scheduleNotifications(
     return result;
   }
   
-  // Ensure notification channels exist before scheduling (critical for Android)
+  // Ensure notification channels exist before scheduling (Android only)
   try {
     await createNotificationChannels();
     console.log('✅ Notification channels ready');
@@ -264,8 +369,8 @@ export async function scheduleNotifications(
     return result;
   }
   
-  // Cancel existing notifications before rescheduling
-  await cancelAllNotifications();
+  // Cancel existing SYSTEM notifications before rescheduling (preserves custom reminders)
+  await cancelScheduledSystemNotifications();
   
   const notifications: LocalNotificationSchema[] = [];
   const now = new Date();
@@ -275,6 +380,13 @@ export async function scheduleNotifications(
   const nextIndex = (type: NotificationType): number => {
     seqByType[type] = (seqByType[type] ?? 0) + 1;
     return seqByType[type];
+  };
+  
+  // Helper to get channel for notification type
+  const getChannelForType = (type: NotificationType): string => {
+    if (type === 'daily_checkin') return NOTIFICATION_CHANNELS.DAILY;
+    if (type === 'water_reminder' || type === 'exercise_reminder') return NOTIFICATION_CHANNELS.WELLNESS;
+    return NOTIFICATION_CHANNELS.CRITICAL;
   };
   
   // Helper to add notification if enabled and in future
@@ -296,16 +408,17 @@ export async function scheduleNotifications(
     if (isBefore(scheduleTime, now)) return;
     
     const content = getNotificationContent(type, language, prefs.privacyMode, extraData);
+    const channelId = getChannelForType(type);
     
-    notifications.push({
-      id: makeNotificationId(type, nextIndex(type)),
-      title: content.title,
-      body: content.body,
-      schedule: { at: scheduleTime },
-      channelId: type === 'daily_checkin' ? NOTIFICATION_CHANNELS.DAILY : NOTIFICATION_CHANNELS.CRITICAL,
-      sound: 'notification.wav',
-      smallIcon: 'ic_stat_icon',
-    });
+    notifications.push(
+      buildNotificationPayload(
+        makeNotificationId(type, nextIndex(type)),
+        content.title,
+        content.body,
+        scheduleTime,
+        channelId
+      )
+    );
   };
   
   // Schedule period approaching (2 days before)
@@ -316,9 +429,11 @@ export async function scheduleNotifications(
   const periodExpectedDate = parseISO(prediction.nextPeriodStart);
   addNotification('period_expected', periodExpectedDate);
   
-  // Schedule period late (1 day after expected)
-  const periodLateDate = addDays(parseISO(prediction.nextPeriodStart), 1);
-  addNotification('period_late', periodLateDate, { daysLate: 1 });
+  // Schedule period late (1, 2, and 3 days after expected)
+  for (let daysLate = 1; daysLate <= 3; daysLate++) {
+    const periodLateDate = addDays(parseISO(prediction.nextPeriodStart), daysLate);
+    addNotification('period_late', periodLateDate, { daysLate });
+  }
   
   // Schedule fertile window start
   const fertileStartDate = parseISO(prediction.fertileWindowStart);
@@ -346,7 +461,7 @@ export async function scheduleNotifications(
   }
   
   // Schedule water reminders for next 30 days (3 times per day: 10:00, 14:00, 18:00)
-  // IMPORTANT: Start from i=0 (today) to include today's remaining reminders
+  // Note: These are fixed times for hydration - not based on preferredTime
   if (prefs.togglesByType.water_reminder) {
     for (let i = 0; i <= 30; i++) {
       const baseDate = addDays(now, i);
@@ -355,39 +470,38 @@ export async function scheduleNotifications(
         // Only schedule if in the future AND not in quiet hours
         if (isAfter(waterTime, now) && !isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd)) {
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
-          // Use day*10 + slotIndex for unique index within water type
           const idx = i * 10 + slotIndex;
-          notifications.push({
-            id: makeNotificationId('water_reminder', idx),
-            title: content.title,
-            body: content.body,
-            schedule: { at: waterTime },
-            channelId: NOTIFICATION_CHANNELS.WELLNESS,
-            smallIcon: 'ic_stat_icon',
-            sound: 'notification.wav',
-          });
+          notifications.push(
+            buildNotificationPayload(
+              makeNotificationId('water_reminder', idx),
+              content.title,
+              content.body,
+              waterTime,
+              NOTIFICATION_CHANNELS.WELLNESS
+            )
+          );
         }
       });
     }
   }
   
   // Schedule exercise reminders for next 30 days (once per day at 17:00)
-  // IMPORTANT: Start from i=0 (today) to include today's reminder if not passed
+  // Note: Fixed time for afternoon activity reminder
   if (prefs.togglesByType.exercise_reminder) {
     for (let i = 0; i <= 30; i++) {
       const exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
       // Only schedule if in the future AND not in quiet hours
       if (isAfter(exerciseDate, now) && !isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd)) {
         const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
-        notifications.push({
-          id: makeNotificationId('exercise_reminder', i),
-          title: content.title,
-          body: content.body,
-          schedule: { at: exerciseDate },
-          channelId: NOTIFICATION_CHANNELS.WELLNESS,
-          smallIcon: 'ic_stat_icon',
-          sound: 'notification.wav',
-        });
+        notifications.push(
+          buildNotificationPayload(
+            makeNotificationId('exercise_reminder', i),
+            content.title,
+            content.body,
+            exerciseDate,
+            NOTIFICATION_CHANNELS.WELLNESS
+          )
+        );
       }
     }
   }
@@ -403,7 +517,7 @@ export async function scheduleNotifications(
       const waterNotifs = notifications.filter(n => n.id >= 900000 && n.id < 1000000);
       const exerciseNotifs = notifications.filter(n => n.id >= 1000000 && n.id < 1100000);
       const checkInNotifs = notifications.filter(n => n.id >= 800000 && n.id < 900000);
-      const cycleNotifs = notifications.filter(n => n.id < 800000);
+      const cycleNotifs = notifications.filter(n => n.id >= 100000 && n.id < 800000);
       
       console.log(`🌸 Cycle notifications: ${cycleNotifs.length}`);
       console.log(`📝 Daily check-ins: ${checkInNotifs.length}`);
@@ -456,23 +570,35 @@ export async function sendTestNotification(language: 'tr' | 'en' = 'tr'): Promis
     throw new Error('Notification permissions not granted');
   }
   
-  await LocalNotifications.schedule({
-    notifications: [{
-      id: 99999,
-      title: language === 'tr' ? 'Test Bildirimi' : 'Test Notification',
-      body: language === 'tr' 
-        ? 'Bildirimler düzgün çalışıyor! 🌸' 
-        : 'Notifications are working correctly! 🌸',
-      schedule: { at: new Date(Date.now() + 1000) }, // 1 second from now
-      sound: 'notification.wav',
-      smallIcon: 'ic_stat_icon',
-    }],
-  });
+  const platform = getPlatform();
+  
+  const notification: LocalNotificationSchema = {
+    id: TEST_NOTIFICATION_ID, // Safe ID outside custom reminder range
+    title: language === 'tr' ? 'Test Bildirimi' : 'Test Notification',
+    body: language === 'tr' 
+      ? 'Bildirimler düzgün çalışıyor! 🌸' 
+      : 'Notifications are working correctly! 🌸',
+    schedule: { at: new Date(Date.now() + 1000) }, // 1 second from now
+  };
+  
+  // Add platform-specific properties
+  if (platform === 'android') {
+    notification.channelId = NOTIFICATION_CHANNELS.CRITICAL;
+    notification.smallIcon = 'ic_stat_icon';
+    notification.sound = 'notification.wav';
+  } else if (platform === 'ios') {
+    notification.sound = 'notification.wav';
+  }
+  
+  await LocalNotifications.schedule({ notifications: [notification] });
 }
 
-// Create notification channels for Android
+// Create notification channels for Android ONLY
 export async function createNotificationChannels(): Promise<void> {
-  if (!isNative()) return;
+  // Channels are Android-only concept
+  if (!isNative() || getPlatform() !== 'android') {
+    return;
+  }
   
   try {
     await LocalNotifications.createChannel({
@@ -499,27 +625,18 @@ export async function createNotificationChannels(): Promise<void> {
       id: NOTIFICATION_CHANNELS.WELLNESS,
       name: 'Wellness',
       description: 'Su iç, egzersiz gibi wellness hatırlatmaları',
-      importance: 3, // DEFAULT - was LOW(2), now higher for visibility
-      sound: 'notification.wav', // Added sound
+      importance: 3, // DEFAULT
+      sound: 'notification.wav',
       visibility: 0, // PRIVATE
-      vibration: true, // Added vibration
+      vibration: true,
     });
     
-    console.log('Notification channels created');
+    console.log('✅ Android notification channels created');
   } catch (error) {
     console.error('Error creating notification channels:', error);
+    throw error;
   }
 }
-
-// Custom reminder ID block - uses a separate range (50000-99999) to avoid conflicts
-// This is intentionally outside the TYPE_ID_MULTIPLIER system which uses 100000+ blocks
-const CUSTOM_REMINDER_ID_BASE = 50000;
-let customReminderCounter = 0;
-
-const makeCustomReminderId = (): number => {
-  customReminderCounter = (customReminderCounter + 1) % 50000; // Cycles 0-49999
-  return CUSTOM_REMINDER_ID_BASE + customReminderCounter;
-};
 
 // Schedule a custom reminder for a specific date
 export async function scheduleCustomReminder(
@@ -543,7 +660,7 @@ export async function scheduleCustomReminder(
       }
     }
     
-    // Ensure channels exist before scheduling
+    // Ensure channels exist before scheduling (Android only)
     await createNotificationChannels();
     
     // Schedule for 9:00 AM on the target date
@@ -556,18 +673,25 @@ export async function scheduleCustomReminder(
     }
     
     const notificationId = makeCustomReminderId();
+    const platform = getPlatform();
     
-    await LocalNotifications.schedule({
-      notifications: [{
-        id: notificationId,
-        title,
-        body,
-        schedule: { at: scheduleTime },
-        channelId: NOTIFICATION_CHANNELS.CRITICAL,
-        sound: 'notification.wav',
-        smallIcon: 'ic_stat_icon',
-      }],
-    });
+    const notification: LocalNotificationSchema = {
+      id: notificationId,
+      title,
+      body,
+      schedule: { at: scheduleTime },
+    };
+    
+    // Add platform-specific properties
+    if (platform === 'android') {
+      notification.channelId = NOTIFICATION_CHANNELS.CRITICAL;
+      notification.smallIcon = 'ic_stat_icon';
+      notification.sound = 'notification.wav';
+    } else if (platform === 'ios') {
+      notification.sound = 'notification.wav';
+    }
+    
+    await LocalNotifications.schedule({ notifications: [notification] });
     
     console.log(`✅ Scheduled custom reminder #${notificationId} for ${format(scheduleTime, 'yyyy-MM-dd HH:mm')}`);
     return true;
@@ -580,22 +704,34 @@ export async function scheduleCustomReminder(
 // Verify and diagnose notification system
 export async function diagnoseNotifications(): Promise<{
   isNative: boolean;
+  platform: string;
   hasPermission: boolean;
   pendingCount: number;
+  systemCount: number;
+  customCount: number;
   channelsCreated: boolean;
+  channelsApplicable: boolean;
   errors: string[];
 }> {
   const errors: string[] = [];
   let hasPermission = false;
   let pendingCount = 0;
+  let systemCount = 0;
+  let customCount = 0;
   let channelsCreated = false;
+  const platform = getPlatform();
+  const channelsApplicable = platform === 'android';
 
   if (!isNative()) {
     return {
       isNative: false,
+      platform: 'web',
       hasPermission: false,
       pendingCount: 0,
+      systemCount: 0,
+      customCount: 0,
       channelsCreated: false,
+      channelsApplicable: false,
       errors: ['Web platform - notifications not supported'],
     };
   }
@@ -612,22 +748,33 @@ export async function diagnoseNotifications(): Promise<{
   try {
     const pending = await LocalNotifications.getPending();
     pendingCount = pending.notifications.length;
+    systemCount = pending.notifications.filter(n => isSystemNotificationId(n.id)).length;
+    customCount = pending.notifications.filter(n => n.id >= CUSTOM_REMINDER_ID_BASE && n.id <= CUSTOM_REMINDER_ID_MAX).length;
   } catch (e) {
     errors.push(`Failed to get pending notifications: ${e}`);
   }
 
-  try {
-    await createNotificationChannels();
+  if (channelsApplicable) {
+    try {
+      await createNotificationChannels();
+      channelsCreated = true;
+    } catch (e) {
+      errors.push(`Channel creation failed: ${e}`);
+    }
+  } else {
+    // On iOS, channels don't apply - mark as "created" for diagnostic purposes
     channelsCreated = true;
-  } catch (e) {
-    errors.push(`Channel creation failed: ${e}`);
   }
 
   return {
     isNative: true,
+    platform,
     hasPermission,
     pendingCount,
+    systemCount,
+    customCount,
     channelsCreated,
+    channelsApplicable,
     errors,
   };
 }
