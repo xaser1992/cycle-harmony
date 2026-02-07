@@ -27,6 +27,7 @@ export const NOTIFICATION_CHANNELS = {
 // System notifications: 100,000+ (each type gets its own 100,000 block)
 // Custom reminders: 50,000 - 99,999
 // Test notifications: 40,000 - 49,999
+// IMPORTANT: Test ID must ALWAYS remain < 100,000 to avoid being cancelled by cancelScheduledSystemNotifications()
 const SYSTEM_NOTIFICATION_ID_BASE = 100000;
 const CUSTOM_REMINDER_ID_BASE = 50000;
 const CUSTOM_REMINDER_ID_MAX = 99999;
@@ -53,11 +54,13 @@ const makeNotificationId = (type: NotificationType, index: number): number => {
   return TYPE_ID_MULTIPLIER[type] * SYSTEM_NOTIFICATION_ID_BASE + index;
 };
 
-// Custom reminder ID counter
-let customReminderCounter = 0;
+// Custom reminder ID counter (produces IDs from 50000 to 99999 inclusive)
+let customReminderCounter = -1; // Start at -1 so first call produces 50000
 
 const makeCustomReminderId = (): number => {
-  customReminderCounter = (customReminderCounter + 1) % (CUSTOM_REMINDER_ID_MAX - CUSTOM_REMINDER_ID_BASE);
+  // Inclusive range: 50000 to 99999 = 50000 IDs total
+  const RANGE = (CUSTOM_REMINDER_ID_MAX - CUSTOM_REMINDER_ID_BASE) + 1;
+  customReminderCounter = (customReminderCounter + 1) % RANGE;
   return CUSTOM_REMINDER_ID_BASE + customReminderCounter;
 };
 
@@ -227,6 +230,10 @@ function getNextValidTime(
       // Preferred time is in the "morning" portion (e.g., 06:00 when quiet is 22:00-08:00)
       // Schedule for end of quiet hours SAME DAY
       notificationTime = setMinutes(setHours(targetDate, endHour), endMin);
+    } else {
+      // Fallback for edge cases (e.g., prefMinutes === endMinutes)
+      // Schedule for end of quiet hours same day
+      notificationTime = setMinutes(setHours(targetDate, endHour), endMin);
     }
   } else {
     // Normal quiet hours (e.g., 14:00 - 16:00)
@@ -360,13 +367,16 @@ export async function scheduleNotifications(
   }
   
   // Ensure notification channels exist before scheduling (Android only)
-  try {
-    await createNotificationChannels();
-    console.log('✅ Notification channels ready');
-  } catch (error) {
-    console.error('❌ Failed to create notification channels:', error);
-    result.errors.push(`Channel creation failed: ${error}`);
-    return result;
+  // NOTE: createNotificationChannels() returns immediately on non-Android platforms
+  if (getPlatform() === 'android') {
+    try {
+      await createNotificationChannels();
+      console.log('✅ Android notification channels ready');
+    } catch (error) {
+      console.error('❌ Failed to create notification channels:', error);
+      result.errors.push(`Channel creation failed: ${error}`);
+      return result;
+    }
   }
   
   // Cancel existing SYSTEM notifications before rescheduling (preserves custom reminders)

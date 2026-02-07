@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useCycleData } from '@/hooks/useCycleData';
 import { 
@@ -434,23 +435,40 @@ export default function DebugPage() {
               </p>
             ) : (
               <div className="space-y-2">
-                {pendingNotifications.slice(0, 10).map((notif) => (
-                  <div 
-                    key={notif.id}
-                    className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium">{notif.title}</p>
-                      <p className="text-xs text-muted-foreground">{notif.body}</p>
+                {pendingNotifications.slice(0, 10).map((notif) => {
+                  const isSystem = notif.id >= 100000;
+                  const isCustom = notif.id >= 50000 && notif.id < 100000;
+                  const isTest = notif.id >= 40000 && notif.id < 50000;
+                  
+                  return (
+                    <div 
+                      key={notif.id}
+                      className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded-lg"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium truncate">{notif.title}</p>
+                          {isSystem && (
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Sistem</Badge>
+                          )}
+                          {isCustom && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/50 text-primary">Özel</Badge>
+                          )}
+                          {isTest && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/50 text-amber-600 dark:text-amber-400">Test</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">{notif.body}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-2 shrink-0">
+                        {notif.schedule?.at 
+                          ? format(new Date(notif.schedule.at), 'd MMM HH:mm', { locale: tr })
+                          : '-'
+                        }
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {notif.schedule?.at 
-                        ? format(new Date(notif.schedule.at), 'd MMM HH:mm', { locale: tr })
-                        : '-'
-                      }
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
                 {pendingNotifications.length > 10 && (
                   <p className="text-xs text-muted-foreground text-center">
                     +{pendingNotifications.length - 10} daha
