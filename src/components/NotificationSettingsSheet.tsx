@@ -38,12 +38,22 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
   const { notificationPrefs, updateNotificationPrefs, userSettings } = useCycleData();
   const [hasPermission, setHasPermission] = useState(false);
 
-  // Check permissions on open
+  // Check permissions on open and auto-request if needed
   useEffect(() => {
     if (isOpen) {
-      checkNotificationPermissions().then(setHasPermission);
+      checkNotificationPermissions().then(async (granted) => {
+        setHasPermission(granted);
+        // Auto-request permission if not granted
+        if (!granted) {
+          const newGranted = await requestNotificationPermissions();
+          setHasPermission(newGranted);
+          if (newGranted) {
+            toast.success(userSettings.language === 'tr' ? 'Bildirim izni verildi!' : 'Notification permission granted!');
+          }
+        }
+      });
     }
-  }, [isOpen]);
+  }, [isOpen, userSettings.language]);
 
   // Handle Android back button
   useEffect(() => {
