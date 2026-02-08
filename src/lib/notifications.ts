@@ -130,8 +130,8 @@ export function getNotificationContent(
       body: language === 'tr' 
         ? 'PMS semptomları başlayabilir. Kendine iyi bak!' 
         : 'PMS symptoms may begin. Take care of yourself!',
-      privateTitle: language === 'tr' ? 'Wellness Hatırlatması' : 'Wellness Reminder',
-      privateBody: language === 'tr' ? 'Kendine iyi bak.' : 'Take care of yourself.',
+      privateTitle: language === 'tr' ? 'Döngü Hatırlatması' : 'Cycle Reminder',
+      privateBody: language === 'tr' ? 'Döngü güncellemen var.' : 'You have a cycle update.',
     },
     daily_checkin: {
       title: language === 'tr' ? 'Günlük Check-in' : 'Daily Check-in',
@@ -146,16 +146,16 @@ export function getNotificationContent(
       body: language === 'tr' 
         ? 'Günlük su hedefin için bir bardak su iç!' 
         : 'Drink a glass of water for your daily goal!',
-      privateTitle: language === 'tr' ? 'Wellness' : 'Wellness',
-      privateBody: language === 'tr' ? 'Wellness hatırlatması.' : 'Wellness reminder.',
+      privateTitle: language === 'tr' ? 'Su Hatırlatması' : 'Water Reminder',
+      privateBody: language === 'tr' ? 'Su içme hatırlatması.' : 'Water intake reminder.',
     },
     exercise_reminder: {
       title: language === 'tr' ? 'Hareket Zamanı 🏃‍♀️' : 'Time to Move 🏃‍♀️',
       body: language === 'tr' 
         ? 'Kısa bir yürüyüş veya esneme yapmaya ne dersin?' 
         : 'How about a short walk or some stretching?',
-      privateTitle: language === 'tr' ? 'Wellness' : 'Wellness',
-      privateBody: language === 'tr' ? 'Wellness hatırlatması.' : 'Wellness reminder.',
+      privateTitle: language === 'tr' ? 'Egzersiz Hatırlatması' : 'Exercise Reminder',
+      privateBody: language === 'tr' ? 'Harekete geçme vakti.' : 'Time to exercise.',
     },
   };
 
