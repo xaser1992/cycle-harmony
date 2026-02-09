@@ -22,7 +22,6 @@ import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/contexts/CycleDataContext';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
-import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { getMedicationLogsForDate, getMedications } from '@/lib/medicationStorage';
 import { scheduleCustomReminder } from '@/lib/notifications';
 import { FLOW_LABELS, SYMPTOM_LABELS, MOOD_LABELS } from '@/types/cycle';
@@ -104,9 +103,7 @@ export default function CalendarPage() {
     isLoading 
   } = useCycleData();
   
-  // Enable swipe navigation between tabs
-  useSwipeNavigation();
-  
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayDetail, setShowDayDetail] = useState(false);
