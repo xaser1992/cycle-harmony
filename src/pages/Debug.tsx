@@ -18,7 +18,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { useCycleData } from '@/hooks/useCycleData';
+import { useCycleData } from '@/contexts/CycleDataContext';
 import { 
   checkNotificationPermissions, 
   requestNotificationPermissions,

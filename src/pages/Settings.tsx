@@ -22,7 +22,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
-import { useCycleData } from '@/hooks/useCycleData';
+import { useCycleData } from '@/contexts/CycleDataContext';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAppLock } from '@/components/AppLockProvider';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';

@@ -20,7 +20,7 @@ import {
 } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { BottomNav } from '@/components/BottomNav';
-import { useCycleData } from '@/hooks/useCycleData';
+import { useCycleData } from '@/contexts/CycleDataContext';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { getMedicationLogsForDate, getMedications } from '@/lib/medicationStorage';
