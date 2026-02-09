@@ -1,5 +1,6 @@
 // 🌸 Global Update Sheet Context
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { UpdateSheet } from '@/components/UpdateSheet';
 import { useCycleData } from '@/contexts/CycleDataContext';
 import type { DayEntry } from '@/types/cycle';
@@ -20,9 +21,15 @@ const UpdateSheetContext = createContext<UpdateSheetContextType | null>(null);
 
 export function UpdateSheetProvider({ children }: { children: ReactNode }) {
   const { entries, saveDayEntry, userSettings } = useCycleData();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentTab, setCurrentTab] = useState<'flow' | 'symptoms' | 'mood'>('flow');
+
+  // Close sheet on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
 
   const openUpdateSheet = useCallback((options?: OpenSheetOptions) => {
     setCurrentDate(options?.date || new Date());

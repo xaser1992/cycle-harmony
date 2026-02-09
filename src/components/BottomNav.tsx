@@ -2,6 +2,7 @@
 import { useCallback, forwardRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 
 // Tab configuration
 interface TabConfig {
@@ -32,6 +33,9 @@ interface BottomNavProps {
 export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function BottomNav({ onCenterPress }, ref) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Single swipe navigation instance for the entire app
+  useSwipeNavigation({ threshold: 60 });
 
   const handleTap = useCallback((path: string) => {
     navigate(path);

@@ -21,7 +21,6 @@ import {
 import { BottomNav } from '@/components/BottomNav';
 import { useCycleData } from '@/contexts/CycleDataContext';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
-import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { getCycleHistory, type CycleRecord } from '@/lib/storage';
 import { format, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks, startOfMonth, endOfMonth, addMonths, isSameMonth, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -486,8 +485,6 @@ export default function StatsPage() {
 
   const allowChartAnimations = !prefersReducedMotion;
   
-  // Swipe navigation - tab arası geçiş için
-  useSwipeNavigation({ threshold: 60 });
 
   // Load cycle history
   useEffect(() => {

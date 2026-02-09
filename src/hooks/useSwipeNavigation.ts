@@ -1,4 +1,6 @@
 // 🌸 Swipe Navigation Hook - Tab arası geçiş için
+// IMPORTANT: Only use this hook ONCE in the app (e.g., in BottomNav or App layout)
+// With KeepAlive, multiple instances would register duplicate listeners
 import { useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -18,33 +20,29 @@ export function useSwipeNavigation(options: SwipeOptions = {}) {
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
   const isSwiping = useRef(false);
-
-  const getCurrentIndex = useCallback(() => {
-    return TAB_ORDER.indexOf(location.pathname);
-  }, [location.pathname]);
+  // Use ref to always have current pathname in event handlers
+  const pathnameRef = useRef(location.pathname);
+  pathnameRef.current = location.pathname;
 
   const navigateToTab = useCallback((direction: 'left' | 'right') => {
-    const currentIndex = getCurrentIndex();
+    const currentIndex = TAB_ORDER.indexOf(pathnameRef.current);
     if (currentIndex === -1) return;
 
     let newIndex: number;
     if (direction === 'left') {
-      // Sola kaydır = sonraki tab
       newIndex = currentIndex + 1;
-      if (newIndex >= TAB_ORDER.length) return; // Son tab'da durma
+      if (newIndex >= TAB_ORDER.length) return;
     } else {
-      // Sağa kaydır = önceki tab
       newIndex = currentIndex - 1;
-      if (newIndex < 0) return; // İlk tab'da durma
+      if (newIndex < 0) return;
     }
 
-    // Haptic feedback
     if (navigator.vibrate) {
       navigator.vibrate(10);
     }
 
     navigate(TAB_ORDER[newIndex]);
-  }, [getCurrentIndex, navigate]);
+  }, [navigate]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -57,12 +55,8 @@ export function useSwipeNavigation(options: SwipeOptions = {}) {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isSwiping.current) return;
-      
-      // Dikey scroll'u engellememek için kontrol
       const deltaX = Math.abs(e.touches[0].clientX - touchStartX.current);
       const deltaY = Math.abs(e.touches[0].clientY - touchStartY.current);
-      
-      // Eğer dikey hareket yatayla aynı veya fazlaysa, swipe'ı iptal et
       if (deltaY > deltaX) {
         isSwiping.current = false;
       }
@@ -74,13 +68,10 @@ export function useSwipeNavigation(options: SwipeOptions = {}) {
       const touchEndX = e.changedTouches[0].clientX;
       const deltaX = touchEndX - touchStartX.current;
       
-      // Minimum threshold kontrolü
       if (Math.abs(deltaX) >= threshold) {
         if (deltaX < 0) {
-          // Sola kaydırma = sonraki sayfa
           navigateToTab('left');
         } else {
-          // Sağa kaydırma = önceki sayfa
           navigateToTab('right');
         }
       }
@@ -88,7 +79,6 @@ export function useSwipeNavigation(options: SwipeOptions = {}) {
       isSwiping.current = false;
     };
 
-    // Global touch events
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
@@ -101,7 +91,7 @@ export function useSwipeNavigation(options: SwipeOptions = {}) {
   }, [enabled, threshold, navigateToTab]);
 
   return {
-    currentTabIndex: getCurrentIndex(),
+    currentTabIndex: TAB_ORDER.indexOf(location.pathname),
     totalTabs: TAB_ORDER.length,
   };
 }
