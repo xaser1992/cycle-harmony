@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AppLockProvider } from "@/components/AppLockProvider";
+import { CycleDataProvider } from "@/contexts/CycleDataContext";
 import { UpdateSheetProvider } from "@/contexts/UpdateSheetContext";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { AliveScope } from "react-activation";
@@ -89,11 +90,13 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <AliveScope>
-              <UpdateSheetProvider>
-                <AppContent />
-              </UpdateSheetProvider>
-            </AliveScope>
+            <CycleDataProvider>
+              <AliveScope>
+                <UpdateSheetProvider>
+                  <AppContent />
+                </UpdateSheetProvider>
+              </AliveScope>
+            </CycleDataProvider>
           </BrowserRouter>
         </TooltipProvider>
       </AppLockProvider>

@@ -3,7 +3,7 @@ import { useEffect, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
-import { useCycleData } from '@/hooks/useCycleData';
+import { useCycleData } from '@/contexts/CycleDataContext';
 import { TodayCard } from '@/components/TodayCard';
 import { PhaseTimeline } from '@/components/PhaseTimeline';
 import { BottomNav } from '@/components/BottomNav';

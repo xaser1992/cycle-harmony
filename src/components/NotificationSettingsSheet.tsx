@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { useCycleData } from '@/hooks/useCycleData';
+import { useCycleData } from '@/contexts/CycleDataContext';
 import { App } from '@capacitor/app';
 import { toast } from 'sonner';
 import { 

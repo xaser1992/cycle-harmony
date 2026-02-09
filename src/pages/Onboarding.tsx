@@ -5,7 +5,7 @@ import { ChevronRight, ChevronLeft, Bell, Calendar, Heart, CheckCircle2, User, S
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCycleData } from '@/hooks/useCycleData';
+import { useCycleData } from '@/contexts/CycleDataContext';
 import { format, subDays, differenceInDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { requestNotificationPermissions } from '@/lib/notifications';
