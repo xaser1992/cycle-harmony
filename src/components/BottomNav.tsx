@@ -49,9 +49,9 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
   const rightTabs = tabConfig.slice(2);
 
   return (
-    <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-[70] pointer-events-auto" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Glass background */}
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/30" />
+      <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/30 pointer-events-none" />
 
       <div className="relative flex items-center justify-around h-[68px] px-1">
         {/* Left tabs */}
@@ -66,11 +66,18 @@ export const BottomNav = forwardRef<HTMLElement, BottomNavProps>(function Bottom
           ))}
         </div>
 
-        {/* Center FAB Button - Simple click opens UpdateSheet */}
-        <div className="relative -mt-8 mx-2">
+        {/* Center FAB Button - Hardened for mobile touch */}
+        <div className="relative -mt-8 mx-2 z-[80]">
           <button
+            type="button"
+            aria-label="Yeni kayıt"
             onClick={handleCenterPress}
-            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary via-period to-primary flex items-center justify-center active:scale-90 transition-transform duration-150"
+            onPointerUp={handleCenterPress}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleCenterPress();
+            }}
+            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary via-period to-primary flex items-center justify-center active:scale-90 transition-transform duration-150 pointer-events-auto touch-manipulation"
             style={{
               boxShadow: '0 4px 20px -2px hsl(var(--primary) / 0.5), 0 0 30px -5px hsl(var(--primary) / 0.3)',
             }}
