@@ -438,15 +438,16 @@ CalendarDay.displayName = 'CalendarDay';
 const SymptomBar = memo(({ 
   symptom, 
   maxCount, 
-  index 
+  index,
+  colors 
 }: { 
   symptom: { name: string; count: number };
   maxCount: number;
   index: number;
+  colors: ReturnType<typeof getChartColors>;
 }) => {
-  const chartColors = getChartColors();
-  const colors = [chartColors.primary, chartColors.secondary, chartColors.accent, chartColors.warning];
-  const color = colors[index] || chartColors.primary;
+  const colorArr = [colors.primary, colors.secondary, colors.accent, colors.warning];
+  const color = colorArr[index] || colors.primary;
   const width = `${(symptom.count / maxCount) * 100}%`;
   
   return (
@@ -474,13 +475,16 @@ export default function StatsPage() {
   const [cycleHistory, setCycleHistory] = useState<CycleRecord[]>([]);
   const [historyMonth, setHistoryMonth] = useState(new Date());
   const [chartsAnimKey, setChartsAnimKey] = useState(0);
+  const [chartsReady, setChartsReady] = useState(false);
   
   const language = userSettings?.language;
   const isEnglish = language === 'en';
 
-  // Always allow chart animations - they're lightweight and essential for UX
   const allowChartAnimations = true;
-  
+
+  // Memoize chart colors to avoid getComputedStyle on every render
+  const chartColors = useMemo(() => getChartColors(), []);
+  const phaseColors = useMemo(() => getCyclePhaseColors(), []);
 
   // Load cycle history
   useEffect(() => {
@@ -494,9 +498,18 @@ export default function StatsPage() {
     return m;
   }, [entries]);
 
-  // Sekme açılınca grafiklerin animasyonla çizilmesi için bir kere remount ediyoruz.
+  // Charts tab: wait 2 frames for ResponsiveContainer to measure, then render charts with animation
   useEffect(() => {
-    if (activeTab === 'charts') setChartsAnimKey((k) => k + 1);
+    if (activeTab !== 'charts') {
+      setChartsReady(false);
+      return;
+    }
+    setChartsAnimKey((k) => k + 1);
+    const raf1 = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(() => setChartsReady(true));
+      return () => cancelAnimationFrame(raf2);
+    });
+    return () => cancelAnimationFrame(raf1);
   }, [activeTab]);
 
   const handleCenterPress = useCallback((tab?: 'flow' | 'symptoms' | 'mood') => {
@@ -692,7 +705,7 @@ export default function StatsPage() {
     const ovulationDays = 3;
     const follicularDays = 8;
     const lutealDays = 28 - periodDays - ovulationDays - follicularDays;
-    const phaseColors = getCyclePhaseColors();
+    
     
     return [
       { name: 'Adet', days: periodDays, color: phaseColors.period },
@@ -1125,6 +1138,7 @@ export default function StatsPage() {
                       symptom={symptom}
                       maxCount={monthlySymptomData[0]?.count || 1}
                       index={index}
+                      colors={chartColors}
                     />
                   ))}
                 </div>
@@ -1134,6 +1148,14 @@ export default function StatsPage() {
         )}
 
         {activeTab === 'charts' && (
+          <div className="space-y-5 animate-fade-in">
+            {!chartsReady ? (
+              <div className="space-y-5">
+                <div className="h-44 rounded-3xl bg-muted/30 animate-pulse" />
+                <div className="h-40 rounded-3xl bg-muted/30 animate-pulse" />
+                <div className="h-40 rounded-3xl bg-muted/30 animate-pulse" />
+              </div>
+            ) : (
           <div key={chartsAnimKey} className="space-y-5 animate-fade-in">
             {/* Cycle Length Trend - Line Chart */}
             <ChartCard
@@ -1170,6 +1192,8 @@ export default function StatsPage() {
                       dot={{ fill: 'hsl(var(--accent-pink))', strokeWidth: 0, r: 5 }}
                       activeDot={{ r: 7, fill: 'hsl(var(--accent-pink))' }}
                       isAnimationActive={allowChartAnimations}
+                      animationDuration={900}
+                      animationBegin={0}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -1378,6 +1402,8 @@ export default function StatsPage() {
                 </div>
               </div>
             </ChartCard>
+          </div>
+            )}
           </div>
         )}
 
