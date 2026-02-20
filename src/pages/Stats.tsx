@@ -602,36 +602,83 @@ export default function StatsPage() {
     };
   }, [entries, userSettings?.targetWeight]);
 
-  // Generate last 6 months cycle data - stable with useMemo
-  const cycleLengthData = useMemo(() => {
-    const months = [];
-    const baseDate = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const date = subMonths(baseDate, i);
-      // Use a deterministic value based on month to avoid random re-renders
-      const monthHash = date.getMonth() + date.getFullYear();
-      months.push({
-        month: format(date, 'MMM', { locale: tr }),
-        length: 25 + (monthHash % 6),
-      });
+  // Calculate real cycle lengths and period durations from actual entries
+  const { cycleLengthData, periodDurationData } = useMemo(() => {
+    // Find all period entries sorted by date
+    const periodEntries = entries
+      .filter(e => e.flowLevel && e.flowLevel !== 'none')
+      .sort((a, b) => a.date.localeCompare(b.date));
+    
+    if (periodEntries.length === 0) {
+      return { cycleLengthData: [], periodDurationData: [] };
     }
-    return months;
-  }, []);
-
-  // Generate last 6 months period duration - stable with useMemo
-  const periodDurationData = useMemo(() => {
-    const months = [];
-    const baseDate = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const date = subMonths(baseDate, i);
-      const monthHash = date.getMonth() + date.getFullYear();
-      months.push({
-        month: format(date, 'MMM', { locale: tr }),
-        duration: 3 + (monthHash % 3),
-      });
+    
+    // Group consecutive period days into clusters (gap > 7 days = new cycle)
+    const clusters: { startDate: string; endDate: string; duration: number }[] = [];
+    let clusterStart = periodEntries[0].date;
+    let clusterEnd = periodEntries[0].date;
+    
+    for (let i = 1; i < periodEntries.length; i++) {
+      const prevParts = clusterEnd.split('-').map(Number);
+      const currParts = periodEntries[i].date.split('-').map(Number);
+      const prev = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]);
+      const curr = new Date(currParts[0], currParts[1] - 1, currParts[2]);
+      const daysDiff = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff <= 7) {
+        clusterEnd = periodEntries[i].date;
+      } else {
+        const sp = clusterStart.split('-').map(Number);
+        const ep = clusterEnd.split('-').map(Number);
+        const sd = new Date(sp[0], sp[1] - 1, sp[2]);
+        const ed = new Date(ep[0], ep[1] - 1, ep[2]);
+        const dur = Math.round((ed.getTime() - sd.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        clusters.push({ startDate: clusterStart, endDate: clusterEnd, duration: dur });
+        clusterStart = periodEntries[i].date;
+        clusterEnd = periodEntries[i].date;
+      }
     }
-    return months;
-  }, []);
+    // Push last cluster
+    const sp = clusterStart.split('-').map(Number);
+    const ep = clusterEnd.split('-').map(Number);
+    const sd = new Date(sp[0], sp[1] - 1, sp[2]);
+    const ed = new Date(ep[0], ep[1] - 1, ep[2]);
+    const dur = Math.round((ed.getTime() - sd.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    clusters.push({ startDate: clusterStart, endDate: clusterEnd, duration: dur });
+    
+    // Calculate cycle lengths (days between consecutive cluster starts)
+    const cycleLengths: { month: string; length: number }[] = [];
+    for (let i = 1; i < clusters.length; i++) {
+      const pp = clusters[i - 1].startDate.split('-').map(Number);
+      const cp = clusters[i].startDate.split('-').map(Number);
+      const prevStart = new Date(pp[0], pp[1] - 1, pp[2]);
+      const currStart = new Date(cp[0], cp[1] - 1, cp[2]);
+      const length = Math.round((currStart.getTime() - prevStart.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (length > 0 && length < 60) {
+        cycleLengths.push({
+          month: format(currStart, 'MMM', { locale: tr }),
+          length,
+        });
+      }
+    }
+    
+    // Period durations per cluster
+    const periodDurations: { month: string; duration: number }[] = clusters.map(c => {
+      const parts = c.startDate.split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      return {
+        month: format(d, 'MMM', { locale: tr }),
+        duration: c.duration,
+      };
+    });
+    
+    // Show last 6 data points
+    return {
+      cycleLengthData: cycleLengths.slice(-6),
+      periodDurationData: periodDurations.slice(-6),
+    };
+  }, [entries]);
 
   // Weekly overview data - last 4 weeks
   const weeklyOverviewData = useMemo(() => {
