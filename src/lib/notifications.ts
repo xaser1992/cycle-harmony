@@ -392,6 +392,7 @@ async function _doScheduleNotifications(
   }
   
   isScheduling = true;
+  console.log('🔔 scheduleNotifications executing', new Date().toISOString());
   
   try {
   if (!isNative()) {
@@ -574,6 +575,14 @@ async function _doScheduleNotifications(
         waterTime = getNextValidTime(waterTime, format(waterTime, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
         if (isAfter(waterTime, now)) {
           waterTime = ensureNonOverlappingTime(waterTime);
+          // Dedup: same type + same minute => skip
+          const waterMinuteMs = minuteKey(waterTime);
+          const alreadyWaterAtMinute = notifications.some(n => {
+            const at = n.schedule?.at instanceof Date ? n.schedule.at : null;
+            if (!at) return false;
+            return minuteKey(at) === waterMinuteMs && Math.floor((n.id ?? 0) / SYSTEM_NOTIFICATION_ID_BASE) === TYPE_ID_MULTIPLIER.water_reminder;
+          });
+          if (alreadyWaterAtMinute) return;
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
           const idx = i * 10 + slotIndex;
           notifications.push(
@@ -591,6 +600,14 @@ async function _doScheduleNotifications(
       exerciseDate = getNextValidTime(exerciseDate, format(exerciseDate, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
       if (isAfter(exerciseDate, now)) {
         exerciseDate = ensureNonOverlappingTime(exerciseDate);
+        // Dedup: same type + same minute => skip
+        const exMinuteMs = minuteKey(exerciseDate);
+        const alreadyExAtMinute = notifications.some(n => {
+          const at = n.schedule?.at instanceof Date ? n.schedule.at : null;
+          if (!at) return false;
+          return minuteKey(at) === exMinuteMs && Math.floor((n.id ?? 0) / SYSTEM_NOTIFICATION_ID_BASE) === TYPE_ID_MULTIPLIER.exercise_reminder;
+        });
+        if (alreadyExAtMinute) continue;
         const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
         notifications.push(
           buildNotificationPayload(makeNotificationId('exercise_reminder', i), content.title, content.body, exerciseDate, NOTIFICATION_CHANNELS.WELLNESS)
@@ -740,8 +757,9 @@ export async function scheduleCustomReminder(
     // Ensure channels exist before scheduling (Android only)
     await createNotificationChannels();
     
-    // Schedule for 9:00 AM on the target date
+    // Schedule for 9:00:05 AM on the target date (seconds stabilized)
     const scheduleTime = setMinutes(setHours(targetDate, 9), 0);
+    scheduleTime.setSeconds(5, 0);
     
     // Only schedule if in the future
     if (isBefore(scheduleTime, new Date())) {
