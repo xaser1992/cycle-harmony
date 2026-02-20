@@ -440,19 +440,26 @@ async function _doScheduleNotifications(
     return NOTIFICATION_CHANNELS.CRITICAL;
   };
   
-  // Ensures no two notifications share the exact same minute (prevents Android bundling)
+  // Avoid Android bundling: ensure each notification occupies a unique MINUTE slot
+  const minuteKey = (d: Date) => {
+    const copy = new Date(d);
+    copy.setSeconds(0, 0);
+    return copy.getTime();
+  };
+  
   const ensureNonOverlappingTime = (desired: Date): Date => {
     let t = new Date(desired);
     t.setSeconds(5);
     t.setMilliseconds(0);
     
-    const hasCollision = (timeMs: number) =>
+    const hasMinuteCollision = (keyMs: number) =>
       notifications.some(n => {
-        const at = n.schedule?.at instanceof Date ? n.schedule.at.getTime() : 0;
-        return at === timeMs;
+        const at = n.schedule?.at instanceof Date ? n.schedule.at : null;
+        if (!at) return false;
+        return minuteKey(at) === keyMs;
       });
     
-    while (hasCollision(t.getTime())) {
+    while (hasMinuteCollision(minuteKey(t))) {
       t = addMinutes(t, 1);
       t.setSeconds(5);
       t.setMilliseconds(0);
@@ -498,10 +505,22 @@ async function _doScheduleNotifications(
     if (isBefore(scheduleTime, now)) return;
     
     // Ensure no collision with already-scheduled notifications
-    const channelId = getChannelForType(type);
     scheduleTime = ensureNonOverlappingTime(scheduleTime);
     
+    // Deduplicate: same type + same minute => skip
+    const targetMinuteMs = minuteKey(scheduleTime);
+    const existsSameTypeSameMinute = notifications.some(n => {
+      if (n.id == null) return false;
+      const nAt = n.schedule?.at instanceof Date ? n.schedule.at : null;
+      if (!nAt) return false;
+      const isSameMinute = minuteKey(nAt) === targetMinuteMs;
+      const isSameTypeBlock = Math.floor(n.id / SYSTEM_NOTIFICATION_ID_BASE) === TYPE_ID_MULTIPLIER[type];
+      return isSameMinute && isSameTypeBlock;
+    });
+    if (existsSameTypeSameMinute) return;
+    
     const content = getNotificationContent(type, language, prefs.privacyMode, extraData);
+    const channelId = getChannelForType(type);
     
     notifications.push(
       buildNotificationPayload(
@@ -552,18 +571,13 @@ async function _doScheduleNotifications(
       const baseDate = addDays(now, i);
       [10, 14, 18].forEach((hour, slotIndex) => {
         let waterTime = setMinutes(setHours(baseDate, hour), 0);
-        if (isAfter(waterTime, now) && !isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd)) {
+        waterTime = getNextValidTime(waterTime, format(waterTime, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
+        if (isAfter(waterTime, now)) {
           waterTime = ensureNonOverlappingTime(waterTime);
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
           const idx = i * 10 + slotIndex;
           notifications.push(
-            buildNotificationPayload(
-              makeNotificationId('water_reminder', idx),
-              content.title,
-              content.body,
-              waterTime,
-              NOTIFICATION_CHANNELS.WELLNESS
-            )
+            buildNotificationPayload(makeNotificationId('water_reminder', idx), content.title, content.body, waterTime, NOTIFICATION_CHANNELS.WELLNESS)
           );
         }
       });
@@ -574,17 +588,12 @@ async function _doScheduleNotifications(
   if (prefs.togglesByType.exercise_reminder) {
     for (let i = 0; i <= 30; i++) {
       let exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
-      if (isAfter(exerciseDate, now) && !isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd)) {
+      exerciseDate = getNextValidTime(exerciseDate, format(exerciseDate, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
+      if (isAfter(exerciseDate, now)) {
         exerciseDate = ensureNonOverlappingTime(exerciseDate);
         const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
         notifications.push(
-          buildNotificationPayload(
-            makeNotificationId('exercise_reminder', i),
-            content.title,
-            content.body,
-            exerciseDate,
-            NOTIFICATION_CHANNELS.WELLNESS
-          )
+          buildNotificationPayload(makeNotificationId('exercise_reminder', i), content.title, content.body, exerciseDate, NOTIFICATION_CHANNELS.WELLNESS)
         );
       }
     }
