@@ -478,12 +478,8 @@ export default function StatsPage() {
   const language = userSettings?.language;
   const isEnglish = language === 'en';
 
-  const prefersReducedMotion = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
-  }, []);
-
-  const allowChartAnimations = !prefersReducedMotion;
+  // Always allow chart animations - they're lightweight and essential for UX
+  const allowChartAnimations = true;
   
 
   // Load cycle history
