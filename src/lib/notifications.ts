@@ -1,7 +1,7 @@
 // 🌸 Notification Service using Capacitor Local Notifications
 import { LocalNotifications, ScheduleOptions, LocalNotificationSchema } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
-import { parseISO, addDays, setHours, setMinutes, isBefore, isAfter, format } from 'date-fns';
+import { parseISO, addDays, setHours, setMinutes, addMinutes, isBefore, isAfter, format } from 'date-fns';
 import type { 
   NotificationType, 
   NotificationPreferences, 
@@ -423,7 +423,7 @@ async function _doScheduleNotifications(
   await cancelScheduledSystemNotifications();
   
   // Small delay to ensure cancellation is processed
-  await new Promise(r => setTimeout(r, 50));
+  await new Promise(r => setTimeout(r, 300));
   
   const notifications: LocalNotificationSchema[] = [];
   const now = new Date();
@@ -440,18 +440,39 @@ async function _doScheduleNotifications(
     return NOTIFICATION_CHANNELS.CRITICAL;
   };
   
+  // Ensures no two notifications share the exact same minute (prevents Android bundling)
+  const ensureNonOverlappingTime = (desired: Date): Date => {
+    let t = new Date(desired);
+    t.setSeconds(5);
+    t.setMilliseconds(0);
+    
+    const hasCollision = (timeMs: number) =>
+      notifications.some(n => {
+        const at = n.schedule?.at instanceof Date ? n.schedule.at.getTime() : 0;
+        return at === timeMs;
+      });
+    
+    while (hasCollision(t.getTime())) {
+      t = addMinutes(t, 1);
+      t.setSeconds(5);
+      t.setMilliseconds(0);
+    }
+    
+    return t;
+  };
+  
   // Helper to add notification - each type gets a small minute offset to prevent stacking
   const TYPE_MINUTE_OFFSET: Record<NotificationType, number> = {
     period_approaching: 0,
-    period_expected: 0,
-    period_late: 0,
-    fertile_start: 0,
-    ovulation_day: 0,
-    fertile_ending: 0,
-    pms_reminder: 0,
-    daily_checkin: 0,
-    water_reminder: 1,    // +1 min offset from other notifications
-    exercise_reminder: 2, // +2 min offset
+    period_expected: 1,
+    period_late: 2,
+    fertile_start: 3,
+    ovulation_day: 4,
+    fertile_ending: 5,
+    pms_reminder: 6,
+    daily_checkin: 7,
+    water_reminder: 0,    // water/exercise use fixed times, not preferredTime
+    exercise_reminder: 0,
   };
   
   const addNotification = (
@@ -471,21 +492,16 @@ async function _doScheduleNotifications(
     // Add minute offset to prevent simultaneous notifications
     const offset = TYPE_MINUTE_OFFSET[type];
     if (offset > 0) {
-      scheduleTime = new Date(scheduleTime.getTime() + offset * 60 * 1000);
+      scheduleTime = addMinutes(scheduleTime, offset);
     }
     
     if (isBefore(scheduleTime, now)) return;
     
-    // Deduplicate: don't add if same type+time already exists
-    const timeKey = scheduleTime.getTime();
-    const existingIdx = notifications.findIndex(n => {
-      const nTime = n.schedule?.at instanceof Date ? n.schedule.at.getTime() : 0;
-      return nTime === timeKey && n.channelId === getChannelForType(type);
-    });
-    if (existingIdx !== -1) return; // Skip duplicate
+    // Ensure no collision with already-scheduled notifications
+    const channelId = getChannelForType(type);
+    scheduleTime = ensureNonOverlappingTime(scheduleTime);
     
     const content = getNotificationContent(type, language, prefs.privacyMode, extraData);
-    const channelId = getChannelForType(type);
     
     notifications.push(
       buildNotificationPayload(
@@ -530,13 +546,14 @@ async function _doScheduleNotifications(
     }
   }
   
-  // Water reminders: 3 per day at 10:00, 14:00, 18:00 (staggered +1 min)
+  // Water reminders: 3 per day at 10:00, 14:00, 18:00
   if (prefs.togglesByType.water_reminder) {
     for (let i = 0; i <= 30; i++) {
       const baseDate = addDays(now, i);
       [10, 14, 18].forEach((hour, slotIndex) => {
-        const waterTime = setMinutes(setHours(baseDate, hour), 1); // :01 to avoid stacking
+        let waterTime = setMinutes(setHours(baseDate, hour), 0);
         if (isAfter(waterTime, now) && !isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd)) {
+          waterTime = ensureNonOverlappingTime(waterTime);
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
           const idx = i * 10 + slotIndex;
           notifications.push(
@@ -553,11 +570,12 @@ async function _doScheduleNotifications(
     }
   }
   
-  // Exercise reminders: 1 per day at 17:02 (staggered +2 min)
+  // Exercise reminders: 1 per day at 17:00
   if (prefs.togglesByType.exercise_reminder) {
     for (let i = 0; i <= 30; i++) {
-      const exerciseDate = setMinutes(setHours(addDays(now, i), 17), 2); // :02 to avoid stacking
+      let exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
       if (isAfter(exerciseDate, now) && !isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd)) {
+        exerciseDate = ensureNonOverlappingTime(exerciseDate);
         const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
         notifications.push(
           buildNotificationPayload(
