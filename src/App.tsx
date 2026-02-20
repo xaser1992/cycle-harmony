@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { BackHandlerProvider } from "@/hooks/useBackHandler";
 import { AppLockProvider } from "@/components/AppLockProvider";
 import { CycleDataProvider } from "@/contexts/CycleDataContext";
 import { UpdateSheetProvider } from "@/contexts/UpdateSheetContext";
@@ -80,11 +81,13 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <CycleDataProvider>
-              <UpdateSheetProvider>
-                <AppContent />
-              </UpdateSheetProvider>
-            </CycleDataProvider>
+            <BackHandlerProvider>
+              <CycleDataProvider>
+                <UpdateSheetProvider>
+                  <AppContent />
+                </UpdateSheetProvider>
+              </CycleDataProvider>
+            </BackHandlerProvider>
           </BrowserRouter>
         </TooltipProvider>
       </AppLockProvider>

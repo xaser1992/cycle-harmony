@@ -9,7 +9,7 @@ import { format, parseISO, differenceInDays, addDays, eachDayOfInterval } from '
 import { tr } from 'date-fns/locale';
 import { X, ChevronRight, CalendarDays, Bell, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { App } from '@capacitor/app';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 // Fertility chance by days relative to ovulation
 const getFertilityChance = (daysFromOvulation: number): number => {
@@ -210,22 +210,8 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
   const [activeInfoCard, setActiveInfoCard] = useState<'period' | 'ovulation' | 'fertile' | null>(null);
 
   // Android back button support for modals
-  useEffect(() => {
-    const isAnyModalOpen = showDetails || activeInfoCard !== null;
-    if (!isAnyModalOpen) return;
-
-    const backHandler = App.addListener('backButton', () => {
-      if (activeInfoCard) {
-        setActiveInfoCard(null);
-      } else if (showDetails) {
-        setShowDetails(false);
-      }
-    });
-
-    return () => {
-      backHandler.then(h => h.remove());
-    };
-  }, [showDetails, activeInfoCard]);
+  useBackHandler(!!activeInfoCard, () => setActiveInfoCard(null));
+  useBackHandler(showDetails, () => setShowDetails(false));
 
   const handleNavigateToCalendar = (dateStr: string) => {
     setActiveInfoCard(null);

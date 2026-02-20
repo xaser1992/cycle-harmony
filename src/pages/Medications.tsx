@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { App } from '@capacitor/app';
+import { useBackHandler } from '@/hooks/useBackHandler';
 import { scheduleMedicationNotifications } from '@/lib/medicationNotifications';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -121,22 +121,8 @@ export default function Medications() {
   }, []);
 
   // Handle Android back button for sheets
-  useEffect(() => {
-    const hasOpenSheet = isAddSheetOpen || !!selectedMedication;
-    if (!hasOpenSheet) return;
-    
-    const backHandler = App.addListener('backButton', () => {
-      if (isAddSheetOpen) {
-        setIsAddSheetOpen(false);
-      } else if (selectedMedication) {
-        setSelectedMedication(null);
-      }
-    });
-    
-    return () => {
-      backHandler.then(handler => handler.remove());
-    };
-  }, [isAddSheetOpen, selectedMedication]);
+  useBackHandler(isAddSheetOpen, () => setIsAddSheetOpen(false));
+  useBackHandler(!!selectedMedication, () => setSelectedMedication(null));
   const loadData = async () => {
     try {
       const [meds, logs] = await Promise.all([

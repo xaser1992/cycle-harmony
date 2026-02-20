@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { DayEntry, FlowLevel, Symptom, Mood } from '@/types/cycle';
 import { format, addDays, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { App } from '@capacitor/app';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 interface UpdateSheetProps {
   isOpen: boolean;
@@ -254,17 +254,7 @@ export function UpdateSheet({
   }, [isOpen, existingEntry, initialDate]);
 
   // Handle Android back button
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    const backHandler = App.addListener('backButton', () => {
-      onClose();
-    });
-    
-    return () => {
-      backHandler.then(handler => handler.remove());
-    };
-  }, [isOpen, onClose]);
+  useBackHandler(isOpen, onClose);
 
   const toggleSelection = useCallback((
     e: MouseEvent,

@@ -9,7 +9,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useCycleData } from '@/contexts/CycleDataContext';
-import { App } from '@capacitor/app';
+import { useBackHandler } from '@/hooks/useBackHandler';
 import { toast } from 'sonner';
 import { 
   sendTestNotification, 
@@ -56,17 +56,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
   }, [isOpen, userSettings.language]);
 
   // Handle Android back button
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    const backHandler = App.addListener('backButton', () => {
-      onClose();
-    });
-    
-    return () => {
-      backHandler.then(handler => handler.remove());
-    };
-  }, [isOpen, onClose]);
+  useBackHandler(isOpen, onClose);
 
   const handleRequestPermissions = async () => {
     const granted = await requestNotificationPermissions();
