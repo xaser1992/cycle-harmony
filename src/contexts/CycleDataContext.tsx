@@ -196,10 +196,27 @@ export function CycleDataProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Safe fallback defaults for HMR/mounting edge cases
+const SAFE_DEFAULTS: CycleDataContextType = {
+  cycleSettings: DEFAULT_CYCLE_SETTINGS,
+  entries: [],
+  notificationPrefs: DEFAULT_NOTIFICATION_PREFS,
+  userSettings: DEFAULT_USER_SETTINGS,
+  prediction: null,
+  currentPhase: null,
+  isLoading: true,
+  updateCycleSettings: async () => {},
+  saveDayEntry: async () => {},
+  updateNotificationPrefs: async () => {},
+  updateUserSettings: async () => {},
+  completeOnboarding: async () => {},
+};
+
 export function useCycleData() {
   const context = useContext(CycleDataContext);
   if (!context) {
-    throw new Error('useCycleData must be used within a CycleDataProvider');
+    console.warn('useCycleData called outside CycleDataProvider - returning safe defaults');
+    return SAFE_DEFAULTS;
   }
   return context;
 }
