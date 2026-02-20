@@ -339,67 +339,121 @@ function buildNotificationPayload(
   return basePayload;
 }
 
-// Schedule all notifications based on predictions
-export async function scheduleNotifications(
+// Scheduling mutex to prevent concurrent scheduling
+let isScheduling = false;
+let pendingScheduleArgs: { prediction: CyclePrediction; prefs: NotificationPreferences; language: 'tr' | 'en' } | null = null;
+let scheduleDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+// Debounced wrapper - coalesces rapid calls into one
+export function scheduleNotifications(
+  prediction: CyclePrediction,
+  prefs: NotificationPreferences,
+  language: 'tr' | 'en' = 'tr'
+): Promise<{ scheduled: number; errors: string[] }> {
+  return new Promise((resolve) => {
+    pendingScheduleArgs = { prediction, prefs, language };
+    
+    if (scheduleDebounceTimer) {
+      clearTimeout(scheduleDebounceTimer);
+    }
+    
+    scheduleDebounceTimer = setTimeout(async () => {
+      const args = pendingScheduleArgs;
+      pendingScheduleArgs = null;
+      scheduleDebounceTimer = null;
+      
+      if (!args) {
+        resolve({ scheduled: 0, errors: [] });
+        return;
+      }
+      
+      // Wait for any in-progress scheduling to finish
+      while (isScheduling) {
+        await new Promise(r => setTimeout(r, 100));
+      }
+      
+      const result = await _doScheduleNotifications(args.prediction, args.prefs, args.language);
+      resolve(result);
+    }, 500); // 500ms debounce - coalesces rapid calls
+  });
+}
+
+// Internal: actual scheduling logic (called only from debounced wrapper)
+async function _doScheduleNotifications(
   prediction: CyclePrediction,
   prefs: NotificationPreferences,
   language: 'tr' | 'en' = 'tr'
 ): Promise<{ scheduled: number; errors: string[] }> {
   const result = { scheduled: 0, errors: [] as string[] };
   
+  if (isScheduling) {
+    console.log('⏳ Notification scheduling already in progress, skipping');
+    return result;
+  }
+  
+  isScheduling = true;
+  
+  try {
   if (!isNative()) {
-    console.log('Notifications not supported on web');
     result.errors.push('Web platform - not supported');
     return result;
   }
   
   if (!prefs.enabled) {
-    console.log('Notifications disabled by user preference');
     await cancelScheduledSystemNotifications();
     return result;
   }
   
   const hasPermission = await checkNotificationPermissions();
   if (!hasPermission) {
-    console.warn('⚠️ Notification permissions not granted');
     result.errors.push('Permission not granted');
     return result;
   }
   
-  // Ensure notification channels exist before scheduling (Android only)
-  // NOTE: createNotificationChannels() returns immediately on non-Android platforms
   if (getPlatform() === 'android') {
     try {
       await createNotificationChannels();
-      console.log('✅ Android notification channels ready');
     } catch (error) {
-      console.error('❌ Failed to create notification channels:', error);
       result.errors.push(`Channel creation failed: ${error}`);
       return result;
     }
   }
   
-  // Cancel existing SYSTEM notifications before rescheduling (preserves custom reminders)
+  // Cancel existing SYSTEM notifications before rescheduling
   await cancelScheduledSystemNotifications();
+  
+  // Small delay to ensure cancellation is processed
+  await new Promise(r => setTimeout(r, 50));
   
   const notifications: LocalNotificationSchema[] = [];
   const now = new Date();
   
-  // Track sequence index per notification type
   const seqByType: Record<string, number> = {};
   const nextIndex = (type: NotificationType): number => {
     seqByType[type] = (seqByType[type] ?? 0) + 1;
     return seqByType[type];
   };
   
-  // Helper to get channel for notification type
   const getChannelForType = (type: NotificationType): string => {
     if (type === 'daily_checkin') return NOTIFICATION_CHANNELS.DAILY;
     if (type === 'water_reminder' || type === 'exercise_reminder') return NOTIFICATION_CHANNELS.WELLNESS;
     return NOTIFICATION_CHANNELS.CRITICAL;
   };
   
-  // Helper to add notification if enabled and in future
+  // Helper to add notification - each type gets a small minute offset to prevent stacking
+  const TYPE_MINUTE_OFFSET: Record<NotificationType, number> = {
+    period_approaching: 0,
+    period_expected: 0,
+    period_late: 0,
+    fertile_start: 0,
+    ovulation_day: 0,
+    fertile_ending: 0,
+    pms_reminder: 0,
+    daily_checkin: 0,
+    water_reminder: 1,    // +1 min offset from other notifications
+    exercise_reminder: 2, // +2 min offset
+  };
+  
   const addNotification = (
     type: NotificationType,
     targetDate: Date,
@@ -407,15 +461,28 @@ export async function scheduleNotifications(
   ) => {
     if (!prefs.togglesByType[type]) return;
     
-    const scheduleTime = getNextValidTime(
+    let scheduleTime = getNextValidTime(
       targetDate,
       prefs.preferredTime,
       prefs.quietHoursStart,
       prefs.quietHoursEnd
     );
     
-    // Only schedule if in the future
+    // Add minute offset to prevent simultaneous notifications
+    const offset = TYPE_MINUTE_OFFSET[type];
+    if (offset > 0) {
+      scheduleTime = new Date(scheduleTime.getTime() + offset * 60 * 1000);
+    }
+    
     if (isBefore(scheduleTime, now)) return;
+    
+    // Deduplicate: don't add if same type+time already exists
+    const timeKey = scheduleTime.getTime();
+    const existingIdx = notifications.findIndex(n => {
+      const nTime = n.schedule?.at instanceof Date ? n.schedule.at.getTime() : 0;
+      return nTime === timeKey && n.channelId === getChannelForType(type);
+    });
+    if (existingIdx !== -1) return; // Skip duplicate
     
     const content = getNotificationContent(type, language, prefs.privacyMode, extraData);
     const channelId = getChannelForType(type);
@@ -431,38 +498,31 @@ export async function scheduleNotifications(
     );
   };
   
-  // Schedule period approaching (2 days before)
+  // Schedule cycle-specific notifications (one-time events)
   const periodApproachingDate = addDays(parseISO(prediction.nextPeriodStart), -2);
   addNotification('period_approaching', periodApproachingDate);
   
-  // Schedule period expected (on the day)
   const periodExpectedDate = parseISO(prediction.nextPeriodStart);
   addNotification('period_expected', periodExpectedDate);
   
-  // Schedule period late (1, 2, and 3 days after expected)
   for (let daysLate = 1; daysLate <= 3; daysLate++) {
     const periodLateDate = addDays(parseISO(prediction.nextPeriodStart), daysLate);
     addNotification('period_late', periodLateDate, { daysLate });
   }
   
-  // Schedule fertile window start
   const fertileStartDate = parseISO(prediction.fertileWindowStart);
   addNotification('fertile_start', fertileStartDate);
   
-  // Schedule ovulation day
   const ovulationDate = parseISO(prediction.ovulationDate);
   addNotification('ovulation_day', ovulationDate);
   
-  // Schedule fertile window ending (1 day before end)
   const fertileEndingDate = addDays(parseISO(prediction.fertileWindowEnd), -1);
   addNotification('fertile_ending', fertileEndingDate);
   
-  // Schedule PMS reminder
   const pmsDate = parseISO(prediction.pmsStart);
   addNotification('pms_reminder', pmsDate);
   
-  // Schedule daily check-ins for next 30 days
-  // IMPORTANT: Start from i=0 (today) to include today's check-in if time hasn't passed
+  // Daily check-ins: 1 per day for 30 days
   if (prefs.togglesByType.daily_checkin) {
     for (let i = 0; i <= 30; i++) {
       const checkInDate = addDays(now, i);
@@ -470,14 +530,12 @@ export async function scheduleNotifications(
     }
   }
   
-  // Schedule water reminders for next 30 days (3 times per day: 10:00, 14:00, 18:00)
-  // Note: These are fixed times for hydration - not based on preferredTime
+  // Water reminders: 3 per day at 10:00, 14:00, 18:00 (staggered +1 min)
   if (prefs.togglesByType.water_reminder) {
     for (let i = 0; i <= 30; i++) {
       const baseDate = addDays(now, i);
       [10, 14, 18].forEach((hour, slotIndex) => {
-        const waterTime = setMinutes(setHours(baseDate, hour), 0);
-        // Only schedule if in the future AND not in quiet hours
+        const waterTime = setMinutes(setHours(baseDate, hour), 1); // :01 to avoid stacking
         if (isAfter(waterTime, now) && !isInQuietHours(waterTime, prefs.quietHoursStart, prefs.quietHoursEnd)) {
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
           const idx = i * 10 + slotIndex;
@@ -495,12 +553,10 @@ export async function scheduleNotifications(
     }
   }
   
-  // Schedule exercise reminders for next 30 days (once per day at 17:00)
-  // Note: Fixed time for afternoon activity reminder
+  // Exercise reminders: 1 per day at 17:02 (staggered +2 min)
   if (prefs.togglesByType.exercise_reminder) {
     for (let i = 0; i <= 30; i++) {
-      const exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
-      // Only schedule if in the future AND not in quiet hours
+      const exerciseDate = setMinutes(setHours(addDays(now, i), 17), 2); // :02 to avoid stacking
       if (isAfter(exerciseDate, now) && !isInQuietHours(exerciseDate, prefs.quietHoursStart, prefs.quietHoursEnd)) {
         const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
         notifications.push(
@@ -516,45 +572,29 @@ export async function scheduleNotifications(
     }
   }
   
-  // Schedule all notifications
+  // Schedule all at once
   if (notifications.length > 0) {
     try {
       await LocalNotifications.schedule({ notifications });
       result.scheduled = notifications.length;
-      console.log(`✅ Scheduled ${notifications.length} total notifications`);
+      console.log(`✅ Scheduled ${notifications.length} total notifications (deduplicated)`);
       
-      // Detailed breakdown by type (using 100,000 block ranges)
       const waterNotifs = notifications.filter(n => n.id >= 900000 && n.id < 1000000);
       const exerciseNotifs = notifications.filter(n => n.id >= 1000000 && n.id < 1100000);
       const checkInNotifs = notifications.filter(n => n.id >= 800000 && n.id < 900000);
       const cycleNotifs = notifications.filter(n => n.id >= 100000 && n.id < 800000);
       
-      console.log(`🌸 Cycle notifications: ${cycleNotifs.length}`);
-      console.log(`📝 Daily check-ins: ${checkInNotifs.length}`);
-      console.log(`💧 Water reminders: ${waterNotifs.length}`);
-      console.log(`🏃 Exercise reminders: ${exerciseNotifs.length}`);
-      
-      if (cycleNotifs.length > 0) {
-        console.log(`🌸 First cycle at: ${cycleNotifs[0].schedule?.at}`);
-      }
-      if (checkInNotifs.length > 0) {
-        console.log(`📝 First check-in at: ${checkInNotifs[0].schedule?.at}`);
-      }
-      if (waterNotifs.length > 0) {
-        console.log(`💧 First water at: ${waterNotifs[0].schedule?.at}`);
-      }
-      if (exerciseNotifs.length > 0) {
-        console.log(`🏃 First exercise at: ${exerciseNotifs[0].schedule?.at}`);
-      }
+      console.log(`🌸 Cycle: ${cycleNotifs.length} | 📝 Check-in: ${checkInNotifs.length} | 💧 Water: ${waterNotifs.length} | 🏃 Exercise: ${exerciseNotifs.length}`);
     } catch (error) {
       console.error('❌ Error scheduling notifications:', error);
       result.errors.push(`Scheduling failed: ${error}`);
     }
-  } else {
-    console.warn('⚠️ No notifications to schedule - check if all notification types are disabled or all dates are in the past');
   }
   
   return result;
+  } finally {
+    isScheduling = false;
+  }
 }
 
 // Get list of pending notifications (for debug panel)
