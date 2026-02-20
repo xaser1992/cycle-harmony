@@ -392,7 +392,7 @@ async function _doScheduleNotifications(
   }
   
   isScheduling = true;
-  console.log('🔔 scheduleNotifications executing', new Date().toISOString());
+  console.log('🔔 scheduleNotifications executing', new Date().toISOString(), new Error().stack);
   
   try {
   if (!isNative()) {
@@ -424,7 +424,7 @@ async function _doScheduleNotifications(
   await cancelScheduledSystemNotifications();
   
   // Small delay to ensure cancellation is processed
-  await new Promise(r => setTimeout(r, 300));
+  await new Promise(r => setTimeout(r, 800));
   
   const notifications: LocalNotificationSchema[] = [];
   const now = new Date();
@@ -598,21 +598,24 @@ async function _doScheduleNotifications(
     for (let i = 0; i <= 30; i++) {
       let exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
       exerciseDate = getNextValidTime(exerciseDate, format(exerciseDate, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
-      if (isAfter(exerciseDate, now)) {
-        exerciseDate = ensureNonOverlappingTime(exerciseDate);
-        // Dedup: same type + same minute => skip
-        const exMinuteMs = minuteKey(exerciseDate);
-        const alreadyExAtMinute = notifications.some(n => {
-          const at = n.schedule?.at instanceof Date ? n.schedule.at : null;
-          if (!at) return false;
-          return minuteKey(at) === exMinuteMs && Math.floor((n.id ?? 0) / SYSTEM_NOTIFICATION_ID_BASE) === TYPE_ID_MULTIPLIER.exercise_reminder;
-        });
-        if (alreadyExAtMinute) continue;
-        const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
-        notifications.push(
-          buildNotificationPayload(makeNotificationId('exercise_reminder', i), content.title, content.body, exerciseDate, NOTIFICATION_CHANNELS.WELLNESS)
-        );
-      }
+
+      if (!isAfter(exerciseDate, now)) continue;
+
+      exerciseDate = ensureNonOverlappingTime(exerciseDate);
+
+      const exMinuteMs = minuteKey(exerciseDate);
+      const alreadyExAtMinute = notifications.some(n => {
+        const at = n.schedule?.at instanceof Date ? n.schedule.at : null;
+        if (!at) return false;
+        return minuteKey(at) === exMinuteMs && Math.floor((n.id ?? 0) / SYSTEM_NOTIFICATION_ID_BASE) === TYPE_ID_MULTIPLIER.exercise_reminder;
+      });
+
+      if (alreadyExAtMinute) continue;
+
+      const content = getNotificationContent('exercise_reminder', language, prefs.privacyMode);
+      notifications.push(
+        buildNotificationPayload(makeNotificationId('exercise_reminder', i), content.title, content.body, exerciseDate, NOTIFICATION_CHANNELS.WELLNESS)
+      );
     }
   }
   
