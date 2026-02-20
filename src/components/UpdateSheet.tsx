@@ -5,13 +5,6 @@ import { X, Check, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Sheet, 
-  SheetContent,
-  SheetTitle,
-  SheetDescription
-} from '@/components/ui/sheet';
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import type { DayEntry, FlowLevel, Symptom, Mood } from '@/types/cycle';
 import { format, addDays, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -404,247 +397,151 @@ export function UpdateSheet({
     );
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Sheet open={isOpen} onOpenChange={() => {}}>
-      <SheetContent 
-        side="bottom" 
-        className="h-[92vh] rounded-t-[2rem] p-0 border-0 backdrop-blur-xl bg-glass"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-        // Prevent Radix auto-focus from scrolling the underlying page (common on mobile)
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        onCloseAutoFocus={(e) => e.preventDefault()}
-      >
-        {/* Accessibility: Hidden title and description for screen readers */}
-        <VisuallyHidden.Root>
-          <SheetTitle>Günlük Kayıt</SheetTitle>
-          <SheetDescription>Bugünkü sağlık verilerinizi kaydedin</SheetDescription>
-        </VisuallyHidden.Root>
-        
-        <div className="flex flex-col h-full bg-muted/20">
-          {/* Header with Date Navigation - Pull to dismiss */}
-          <div 
-            className="bg-card/80 backdrop-blur-sm border-b border-border/30 px-4 pt-4 pb-3 rounded-t-[2rem] cursor-grab active:cursor-grabbing touch-pan-y"
-            onTouchStart={(e) => {
-              const touch = e.touches[0];
-              (e.currentTarget as HTMLElement).dataset.startY = String(touch.clientY);
-            }}
-            onTouchMove={(e) => {
-              const touch = e.touches[0];
-              const startY = Number((e.currentTarget as HTMLElement).dataset.startY || 0);
-              const deltaY = touch.clientY - startY;
-              if (deltaY > 0) {
-                (e.currentTarget as HTMLElement).style.transform = `translateY(${Math.min(deltaY * 0.5, 60)}px)`;
-                (e.currentTarget as HTMLElement).style.opacity = String(1 - deltaY / 300);
-              }
-            }}
-            onTouchEnd={(e) => {
-              const startY = Number((e.currentTarget as HTMLElement).dataset.startY || 0);
-              const endY = e.changedTouches[0].clientY;
-              const deltaY = endY - startY;
-              (e.currentTarget as HTMLElement).style.transform = '';
-              (e.currentTarget as HTMLElement).style.opacity = '';
-              if (deltaY > 80) {
-                onClose();
-              }
-            }}
+    <div className="fixed inset-0 z-[100] flex flex-col bg-background animate-fade-in">
+      {/* Header with Date Navigation */}
+      <div className="bg-card/80 backdrop-blur-sm border-b border-border/30 px-4 pt-4 pb-3 safe-area-top">
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-50 active:scale-90 transition-transform safe-area-top"
+          style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}
+        >
+          <X className="w-6 h-6 text-foreground/70" />
+        </button>
+
+        {/* Date Navigation */}
+        <div className="flex items-center justify-center gap-6 mb-2 mt-2">
+          <button
+            type="button"
+            onClick={goToPreviousDay}
+            className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
           >
-            {/* Drag Handle */}
-            <div className="flex justify-center mb-3">
-              <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+            <ChevronLeft className="w-6 h-6 text-foreground/60" />
+          </button>
+          
+          <h2 className="text-lg font-semibold text-foreground">
+            {format(currentDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
+          </h2>
+          
+          <button
+            type="button"
+            onClick={goToNextDay}
+            className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
+          >
+            <ChevronRight className="w-6 h-6 text-foreground/60" />
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable Content */}
+      <ScrollArea className="flex-1 px-3">
+        <div className="py-3 space-y-2.5 pb-24">
+          {renderCategoryCard(
+            CATEGORIES.flow,
+            [flowLevel],
+            (val) => {
+              const newVal = typeof val === 'function' ? val([flowLevel]) : val;
+              setFlowLevel((newVal[0] as FlowLevel) || 'none');
+            },
+            true
+          )}
+          {renderCategoryCard(CATEGORIES.mood, selectedMoods, setSelectedMoods)}
+          {renderCategoryCard(CATEGORIES.sexual, selectedSexual, setSelectedSexual)}
+          {renderCategoryCard(CATEGORIES.symptoms, selectedSymptoms, setSelectedSymptoms)}
+          {renderCategoryCard(CATEGORIES.discharge, selectedDischarge, setSelectedDischarge)}
+          {renderCategoryCard(CATEGORIES.digestion, selectedDigestion, setSelectedDigestion)}
+          {renderCategoryCard(CATEGORIES.pregnancy_test, selectedPregnancyTest, setSelectedPregnancyTest, true)}
+          {renderCategoryCard(CATEGORIES.ovulation_test, selectedOvulationTest, setSelectedOvulationTest, true)}
+          {renderCategoryCard(CATEGORIES.activity, selectedActivity, setSelectedActivity)}
+          {renderCategoryCard(CATEGORIES.other, selectedOther, setSelectedOther)}
+
+          {/* Water Tracking */}
+          <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg">💧</span>
+                <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Su' : 'Water'}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button type="button" onClick={decrementWater} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform">
+                  <Minus className="w-4 h-4 text-foreground/70" />
+                </button>
+                <button type="button" onClick={incrementWater} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform">
+                  <Plus className="w-4 h-4 text-foreground/70" />
+                </button>
+              </div>
             </div>
-
-            {/* Close button - moved to right */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onClose();
-              }}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-50 active:scale-90 transition-transform"
-            >
-              <X className="w-6 h-6 text-foreground/70" />
-            </button>
-
-            {/* Date Navigation */}
-            <div className="flex items-center justify-center gap-6 mb-4">
-              <button
-                type="button"
-                onClick={goToPreviousDay}
-                className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
-              >
-                <ChevronLeft className="w-6 h-6 text-foreground/60" />
-              </button>
-              
-              <h2 className="text-lg font-semibold text-foreground">
-                {format(currentDate, 'd MMMM', { locale: language === 'tr' ? tr : undefined })}
-              </h2>
-              
-              <button
-                type="button"
-                onClick={goToNextDay}
-                className="p-2 rounded-full hover:bg-muted active:scale-90 transition-all"
-              >
-                <ChevronRight className="w-6 h-6 text-foreground/60" />
-              </button>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-foreground">{waterLiters}</span>
+              <span className="text-sm text-muted-foreground">/ {waterGoalFormatted} L</span>
+            </div>
+            <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-sky rounded-full transition-all duration-300" style={{ width: `${waterProgress}%` }} />
             </div>
           </div>
 
-          {/* Scrollable Content */}
-          <ScrollArea className="flex-1 px-3">
-            <div className="py-3 space-y-2.5 pb-24">
-              {/* Flow Category */}
-              {renderCategoryCard(
-                CATEGORIES.flow,
-                [flowLevel],
-                (val) => {
-                  const newVal = typeof val === 'function' ? val([flowLevel]) : val;
-                  setFlowLevel((newVal[0] as FlowLevel) || 'none');
-                },
-                true
-              )}
-
-              {/* Mood Category */}
-              {renderCategoryCard(CATEGORIES.mood, selectedMoods, setSelectedMoods)}
-
-              {/* Sexual Activity Category */}
-              {renderCategoryCard(CATEGORIES.sexual, selectedSexual, setSelectedSexual)}
-
-              {/* Symptoms Category */}
-              {renderCategoryCard(CATEGORIES.symptoms, selectedSymptoms, setSelectedSymptoms)}
-
-              {/* Discharge Category */}
-              {renderCategoryCard(CATEGORIES.discharge, selectedDischarge, setSelectedDischarge)}
-
-              {/* Digestion Category */}
-              {renderCategoryCard(CATEGORIES.digestion, selectedDigestion, setSelectedDigestion)}
-
-              {/* Pregnancy Test Category */}
-              {renderCategoryCard(CATEGORIES.pregnancy_test, selectedPregnancyTest, setSelectedPregnancyTest, true)}
-
-              {/* Ovulation Test Category */}
-              {renderCategoryCard(CATEGORIES.ovulation_test, selectedOvulationTest, setSelectedOvulationTest, true)}
-
-              {/* Activity Category */}
-              {renderCategoryCard(CATEGORIES.activity, selectedActivity, setSelectedActivity)}
-
-              {/* Other Category */}
-              {renderCategoryCard(CATEGORIES.other, selectedOther, setSelectedOther)}
-
-              {/* Water Tracking - Inline */}
-              <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-lg">💧</span>
-                    <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Su' : 'Water'}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={decrementWater}
-                      className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-                    >
-                      <Minus className="w-4 h-4 text-foreground/70" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={incrementWater}
-                      className="w-8 h-8 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-                    >
-                      <Plus className="w-4 h-4 text-foreground/70" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-foreground">{waterLiters}</span>
-                  <span className="text-sm text-muted-foreground">/ {waterGoalFormatted} L</span>
-                </div>
-                <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-sky rounded-full transition-all duration-300"
-                    style={{ width: `${waterProgress}%` }}
-                  />
-                </div>
+          {/* Weight Tracking */}
+          <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg">⚖️</span>
+                <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
               </div>
-
-              {/* Weight Tracking - Inline */}
-              <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-lg">⚖️</span>
-                    <span className="font-medium text-foreground text-sm">{language === 'tr' ? 'Ağırlık' : 'Weight'}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={clearWeight}
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {language === 'tr' ? 'Temizle' : 'Clear'}
-                  </button>
-                </div>
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    type="button"
-                    onClick={decrementWeight}
-                    className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
-                  >
-                    −
-                  </button>
-                  <div className="flex items-baseline gap-1 min-w-[80px] justify-center">
-                    <span className="text-3xl font-bold text-foreground">
-                      {displayWeight ?? '--'}
-                    </span>
-                    <span className="text-base text-muted-foreground">kg</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={incrementWeight}
-                    className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70"
-                  >
-                    +
-                  </button>
-                </div>
-                <p className="text-xs text-center text-muted-foreground mt-2">
-                  {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
-                </p>
-              </div>
-
-              {/* Notes Section */}
-              <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-sm">📝</span>
-                  <h3 className="font-medium text-foreground text-sm">
-                    {language === 'tr' ? 'Notlar' : 'Notes'}
-                  </h3>
-                </div>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder={language === 'tr' ? 'Bugün hakkında bir şeyler yaz...' : 'Write something about today...'}
-                  className="rounded-lg resize-none border-border/40 focus:border-primary min-h-[70px] bg-muted/30 text-sm"
-                  rows={3}
-                />
-              </div>
+              <button type="button" onClick={clearWeight} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                {language === 'tr' ? 'Temizle' : 'Clear'}
+              </button>
             </div>
-          </ScrollArea>
-
-          {/* Fixed Save Button */}
-          <div className="absolute bottom-0 left-0 right-0 px-3 py-3 bg-gradient-to-t from-card via-card to-transparent safe-area-bottom">
-            <div className="active:scale-[0.98] transition-transform">
-              <Button
-                onClick={handleSave}
-                size="lg"
-                className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose to-pink"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                {language === 'tr' ? 'Kaydet' : 'Save'}
-              </Button>
+            <div className="flex items-center justify-center gap-4">
+              <button type="button" onClick={decrementWeight} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70">−</button>
+              <div className="flex items-baseline gap-1 min-w-[80px] justify-center">
+                <span className="text-3xl font-bold text-foreground">{displayWeight ?? '--'}</span>
+                <span className="text-base text-muted-foreground">kg</span>
+              </div>
+              <button type="button" onClick={incrementWeight} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform text-lg font-bold text-foreground/70">+</button>
             </div>
+            <p className="text-xs text-center text-muted-foreground mt-2">
+              {language === 'tr' ? '0.1 kg artış/azalış' : '0.1 kg increment'}
+            </p>
+          </div>
+
+          {/* Notes */}
+          <div className="bg-card rounded-xl p-3 shadow-sm border border-border/40">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-sm">📝</span>
+              <h3 className="font-medium text-foreground text-sm">{language === 'tr' ? 'Notlar' : 'Notes'}</h3>
+            </div>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={language === 'tr' ? 'Bugün hakkında bir şeyler yaz...' : 'Write something about today...'}
+              className="rounded-lg resize-none border-border/40 focus:border-primary min-h-[70px] bg-muted/30 text-sm"
+              rows={3}
+            />
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </ScrollArea>
+
+      {/* Fixed Save Button */}
+      <div className="px-3 py-3 bg-gradient-to-t from-card via-card to-transparent safe-area-bottom">
+        <div className="active:scale-[0.98] transition-transform">
+          <Button
+            onClick={handleSave}
+            size="lg"
+            className="w-full rounded-xl h-12 text-white font-semibold shadow-lg bg-gradient-to-r from-rose to-pink"
+          >
+            <Check className="w-4 h-4 mr-2" />
+            {language === 'tr' ? 'Kaydet' : 'Save'}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

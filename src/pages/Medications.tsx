@@ -415,41 +415,28 @@ export default function Medications() {
         )}
       </div>
 
-      {/* Add/Edit Medication Sheet */}
-      <Sheet open={isAddSheetOpen} onOpenChange={() => {}}>
-        <SheetContent 
-          side="bottom" 
-          className="h-[85vh] rounded-t-3xl backdrop-blur-xl bg-glass"
-          aria-describedby={undefined}
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
-        >
-          {/* Accessibility */}
-          <VisuallyHidden.Root>
-            <SheetDescription>İlaç ekleme ve düzenleme formu</SheetDescription>
-          </VisuallyHidden.Root>
-          
-          {/* Custom Close Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsAddSheetOpen(false);
-            }}
-            className="absolute right-4 top-4 z-50 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-90 transition-all"
-          >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-          
-          <SheetHeader className="pb-4">
-            <SheetTitle>
+      {/* Add/Edit Medication - Fullscreen Modal */}
+      {isAddSheetOpen && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-background animate-fade-in">
+          {/* Header */}
+          <div className="bg-card/80 backdrop-blur-sm border-b border-border/30 px-4 pt-4 pb-3 safe-area-top flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground mt-2">
               {editingMedication ? 'İlaç Düzenle' : 'Yeni İlaç Ekle'}
-            </SheetTitle>
-          </SheetHeader>
+            </h2>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsAddSheetOpen(false);
+              }}
+              className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-all mt-2"
+            >
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
 
-          <div className="space-y-4 overflow-y-auto h-[calc(100%-120px)] pb-4 px-1">
+          <div className="flex-1 overflow-y-auto px-4 pb-24 pt-4 space-y-4">
             {/* Name */}
             <div>
               <Label htmlFor="name">İlaç Adı</Label>
@@ -571,7 +558,7 @@ export default function Medications() {
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
+          <div className="px-4 py-3 bg-background border-t safe-area-bottom">
             <Button
               onClick={handleSaveMedication}
               className="w-full bg-gradient-to-r from-violet to-purple"
@@ -579,8 +566,8 @@ export default function Medications() {
               {editingMedication ? 'Güncelle' : 'Kaydet'}
             </Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      )}
 
       {/* Medication Detail Sheet */}
       <Sheet open={!!selectedMedication} onOpenChange={() => {}}>
