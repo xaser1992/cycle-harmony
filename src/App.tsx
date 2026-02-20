@@ -9,8 +9,6 @@ import { AppLockProvider } from "@/components/AppLockProvider";
 import { CycleDataProvider } from "@/contexts/CycleDataContext";
 import { UpdateSheetProvider } from "@/contexts/UpdateSheetContext";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
-import { AliveScope } from "react-activation";
-import KeepAlive from "react-activation";
 
 // 🚀 Eager load primary tabs for instant navigation (no loading delay)
 import Index from "./pages/Index";
@@ -47,19 +45,11 @@ const queryClient = new QueryClient({
 function AppContent() {
   return (
     <Routes>
-      {/* Primary tabs - KeepAlive cached for instant tab switching */}
-      <Route path="/" element={
-        <KeepAlive cacheKey="tab-home"><Index /></KeepAlive>
-      } />
-      <Route path="/calendar" element={
-        <KeepAlive cacheKey="tab-calendar"><CalendarPage /></KeepAlive>
-      } />
-      <Route path="/stats" element={
-        <KeepAlive cacheKey="tab-stats"><StatsPage /></KeepAlive>
-      } />
-      <Route path="/medications" element={
-        <KeepAlive cacheKey="tab-meds"><MedicationsPage /></KeepAlive>
-      } />
+      {/* Primary tabs - eager loaded for instant navigation */}
+      <Route path="/" element={<Index />} />
+      <Route path="/calendar" element={<CalendarPage />} />
+      <Route path="/stats" element={<StatsPage />} />
+      <Route path="/medications" element={<MedicationsPage />} />
       
       {/* Secondary pages - lazy loaded with minimal loader */}
       <Route path="/onboarding" element={
@@ -91,11 +81,9 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <CycleDataProvider>
-              <AliveScope>
-                <UpdateSheetProvider>
-                  <AppContent />
-                </UpdateSheetProvider>
-              </AliveScope>
+              <UpdateSheetProvider>
+                <AppContent />
+              </UpdateSheetProvider>
             </CycleDataProvider>
           </BrowserRouter>
         </TooltipProvider>
