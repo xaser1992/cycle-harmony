@@ -385,7 +385,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
       {/* Phase Details Modal - Fullscreen */}
       {showDetails && (
         <div
-          className="fixed inset-0 z-50 flex flex-col animate-fade-in"
+          className="fixed inset-0 z-[100] flex flex-col animate-fade-in"
           style={{ background: phaseGradientStyles[phase.type] }}
         >
           {/* Header */}
