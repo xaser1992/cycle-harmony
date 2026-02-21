@@ -10,8 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -555,115 +553,124 @@ export default function Medications() {
         </div>
       )}
 
-      {/* Medication Detail Sheet */}
-      <Sheet open={!!selectedMedication} onOpenChange={() => {}}>
-        <SheetContent 
-          side="bottom" 
-          className="h-[60vh] rounded-t-3xl"
-          aria-describedby={undefined}
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
-        >
-          {/* Accessibility */}
-          <VisuallyHidden.Root>
-            <SheetDescription>İlaç detayları</SheetDescription>
-          </VisuallyHidden.Root>
-          
-          {selectedMedication && (
-            <>
-              {/* Custom Close Button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedMedication(null);
-                }}
-                className="absolute right-4 top-4 z-50 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-90 transition-all"
+      {/* Medication Detail - Fullscreen Modal */}
+      {selectedMedication && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-background animate-fade-in">
+          {/* Header */}
+          <div className="bg-card/80 backdrop-blur-sm border-b border-border/30 px-4 pt-4 pb-3 safe-area-top flex items-center justify-between">
+            <div className="flex items-center gap-3 mt-2">
+              <div 
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                style={{ backgroundColor: `${selectedMedication.color}20` }}
               >
-                <X className="w-4 h-4 text-muted-foreground" />
-              </button>
-              
-              <SheetHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl"
-                    style={{ backgroundColor: `${selectedMedication.color}20` }}
-                  >
-                    {selectedMedication.icon}
-                  </div>
-                  <div>
-                    <SheetTitle>{selectedMedication.name}</SheetTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedMedication.dosage} • {MEDICATION_FREQUENCY_LABELS[selectedMedication.frequency].tr}
-                    </p>
-                  </div>
-                </div>
-              </SheetHeader>
-
-              <div className="space-y-4">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Kategori</span>
-                      <span className="font-medium">
-                        {MEDICATION_CATEGORY_LABELS[selectedMedication.category].emoji}{' '}
-                        {MEDICATION_CATEGORY_LABELS[selectedMedication.category].tr}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {selectedMedication.notes && (
-                  <Card>
-                    <CardContent className="p-4">
-                      <span className="text-sm text-muted-foreground block mb-1">Notlar</span>
-                      <p className="text-foreground">{selectedMedication.notes}</p>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {medicationStats[selectedMedication.id] !== undefined && (
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Haftalık Uyum</span>
-                        <span className="font-bold text-violet">
-                          {Math.round(medicationStats[selectedMedication.id])}%
-                        </span>
-                      </div>
-                      <Progress value={medicationStats[selectedMedication.id]} className="h-2" />
-                    </CardContent>
-                  </Card>
-                )}
-
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => {
-                      setSelectedMedication(null);
-                      openEditSheet(selectedMedication);
-                    }}
-                  >
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    Düzenle
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={() => handleDeleteMedication(selectedMedication.id)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Sil
-                  </Button>
-                </div>
+                {selectedMedication.icon}
               </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">{selectedMedication.name}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedMedication.dosage} • {MEDICATION_FREQUENCY_LABELS[selectedMedication.frequency].tr}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedMedication(null);
+              }}
+              className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-all mt-2"
+            >
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 pb-24 pt-4 space-y-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Kategori</span>
+                  <span className="font-medium">
+                    {MEDICATION_CATEGORY_LABELS[selectedMedication.category].emoji}{' '}
+                    {MEDICATION_CATEGORY_LABELS[selectedMedication.category].tr}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {selectedMedication.notes && (
+              <Card>
+                <CardContent className="p-4">
+                  <span className="text-sm text-muted-foreground block mb-1">Notlar</span>
+                  <p className="text-foreground">{selectedMedication.notes}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {medicationStats[selectedMedication.id] !== undefined && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Haftalık Uyum</span>
+                    <span className="font-bold text-violet">
+                      {Math.round(medicationStats[selectedMedication.id])}%
+                    </span>
+                  </div>
+                  <Progress value={medicationStats[selectedMedication.id]} className="h-2" />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Dose times for today */}
+            <Card>
+              <CardContent className="p-4">
+                <span className="text-sm text-muted-foreground block mb-3">Bugünkü Dozlar</span>
+                <div className="flex gap-2 flex-wrap">
+                  {selectedMedication.reminderTimes.map((time) => {
+                    const taken = isMedicationTakenAtTime(selectedMedication.id, time);
+                    return (
+                      <button
+                        key={time}
+                        onClick={() => handleToggleMedication(selectedMedication, time, taken)}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
+                          taken
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {taken ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                        {time}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="px-4 py-3 bg-background border-t safe-area-bottom flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setSelectedMedication(null);
+                openEditSheet(selectedMedication);
+              }}
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Düzenle
+            </Button>
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={() => handleDeleteMedication(selectedMedication.id)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Sil
+            </Button>
+          </div>
+        </div>
+      )}
 
       <BottomNav onCenterPress={(tab) => openUpdateSheet({ initialTab: tab })} />
     </div>
