@@ -33,12 +33,12 @@ interface TodayCardProps {
 
 // Phase gradient RGBA colors for glassmorphism
 const phaseGradientStyles: Record<string, string> = {
-  period: 'linear-gradient(to bottom right, rgba(251, 113, 133, 0.75), rgba(236, 72, 153, 0.75), rgba(225, 29, 72, 0.75))',
-  follicular: 'linear-gradient(to bottom right, rgba(52, 211, 153, 0.75), rgba(20, 184, 166, 0.75), rgba(6, 182, 212, 0.75))',
-  fertile: 'linear-gradient(to bottom right, rgba(251, 191, 36, 0.75), rgba(251, 146, 60, 0.75), rgba(250, 204, 21, 0.75))',
-  ovulation: 'linear-gradient(to bottom right, rgba(167, 139, 250, 0.75), rgba(168, 85, 247, 0.75), rgba(217, 70, 239, 0.75))',
-  luteal: 'linear-gradient(to bottom right, rgba(148, 163, 184, 0.75), rgba(100, 116, 139, 0.75), rgba(107, 114, 128, 0.75))',
-  pms: 'linear-gradient(to bottom right, rgba(251, 146, 60, 0.75), rgba(245, 158, 11, 0.75), rgba(250, 204, 21, 0.75))',
+  period: 'linear-gradient(to bottom right, rgb(251, 113, 133), rgb(236, 72, 153), rgb(225, 29, 72))',
+  follicular: 'linear-gradient(to bottom right, rgb(52, 211, 153), rgb(20, 184, 166), rgb(6, 182, 212))',
+  fertile: 'linear-gradient(to bottom right, rgb(251, 191, 36), rgb(251, 146, 60), rgb(250, 204, 21))',
+  ovulation: 'linear-gradient(to bottom right, rgb(167, 139, 250), rgb(168, 85, 247), rgb(217, 70, 239))',
+  luteal: 'linear-gradient(to bottom right, rgb(148, 163, 184), rgb(100, 116, 139), rgb(107, 114, 128))',
+  pms: 'linear-gradient(to bottom right, rgb(251, 146, 60), rgb(245, 158, 11), rgb(250, 204, 21))',
 };
 
 const phaseGradients = {
@@ -485,10 +485,10 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
           className="fixed inset-0 z-[100] flex flex-col animate-fade-in safe-area-top"
           style={{
             background: activeInfoCard === 'period' 
-              ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.97), rgba(236, 72, 153, 0.97))' 
+              ? 'linear-gradient(to bottom right, rgb(244, 114, 182), rgb(236, 72, 153))' 
               : activeInfoCard === 'ovulation' 
-              ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.97), rgba(168, 85, 247, 0.97))'
-              : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.97), rgba(20, 184, 166, 0.97))'
+              ? 'linear-gradient(to bottom right, rgb(139, 92, 246), rgb(168, 85, 247))'
+              : 'linear-gradient(to bottom right, rgb(34, 211, 238), rgb(20, 184, 166))'
           }}
         >
           {/* Header */}
