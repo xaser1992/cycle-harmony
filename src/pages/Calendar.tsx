@@ -1,6 +1,7 @@
 // 🌸 Calendar Page - Flo Inspired Design with Medication Integration
 import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Pill, X, Edit3, Bell } from 'lucide-react';
+import { useBackHandler } from '@/hooks/useBackHandler';
 import { 
   format, 
   startOfMonth, 
@@ -111,6 +112,11 @@ export default function CalendarPage() {
   const [medicationLogs, setMedicationLogs] = useState<Record<string, MedicationLog[]>>({});
   const [activeInfoCard, setActiveInfoCard] = useState<'period' | 'ovulation' | 'fertile' | null>(null);
   const [showPeriodConfirm, setShowPeriodConfirm] = useState(false);
+
+  // Android back button support for modals
+  useBackHandler(!!activeInfoCard, () => setActiveInfoCard(null));
+  useBackHandler(showDayDetail, () => setShowDayDetail(false));
+  useBackHandler(showPeriodConfirm, () => setShowPeriodConfirm(false));
 
   // Month navigation via buttons only (swipe disabled to allow tab switching)
 
