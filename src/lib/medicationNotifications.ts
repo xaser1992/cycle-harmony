@@ -27,7 +27,7 @@ export async function registerMedicationActionTypes(): Promise<void> {
             {
               id: 'take',
               title: 'Aldım ✓',
-              foreground: false,
+              foreground: true,
             },
             {
               id: 'snooze',
@@ -60,11 +60,12 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
     await recordMedicationDose(medicationId, today, true);
     console.log(`Medication ${medicationName} marked as taken`);
   } else if (actionId === 'snooze') {
-    // Schedule a reminder in 15 minutes
+    // Unique snooze ID per medication to avoid overwriting
+    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 90000 + (medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000);
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + 99999,
+        id: snoozeId,
         title: `💊 ${medicationName} - Hatırlatma`,
         body: `${extra.scheduledTime} dozunu almayı unutma!`,
         schedule: { at: snoozeTime },
@@ -75,7 +76,7 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
         extra: extra,
       }],
     });
-    console.log(`Medication ${medicationName} snoozed for 15 minutes`);
+    console.log(`Medication ${medicationName} snoozed for 15 minutes (id: ${snoozeId})`);
   }
 }
 
@@ -235,7 +236,7 @@ export async function scheduleOneTimeMedicationReminder(
   try {
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + 99999, // Special ID for snooze
+        id: MEDICATION_NOTIFICATION_BASE_ID + 90000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000),
         title: `💊 ${medication.name} - Hatırlatma`,
         body: `${medication.dosage} almayı unutma!`,
         schedule: { at: notificationTime },
