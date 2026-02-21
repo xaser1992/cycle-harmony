@@ -23,15 +23,22 @@ interface NotificationSettingsSheetProps {
   onClose: () => void;
 }
 
-const cycleNotificationTypes: { key: NotificationType; label: string; emoji: string; description: string }[] = [
-  { key: 'period_approaching', label: 'Regl Yaklaşıyor', emoji: '🌸', description: '2 gün önce hatırlatma' },
-  { key: 'period_expected', label: 'Regl Bugün', emoji: '📅', description: 'Beklenen gün bildirimi' },
-  { key: 'period_late', label: 'Regl Gecikti', emoji: '⏰', description: 'Gecikme uyarısı' },
-  { key: 'fertile_start', label: 'Doğurgan Dönem', emoji: '💐', description: 'Dönem başlangıcı' },
-  { key: 'ovulation_day', label: 'Yumurtlama Günü', emoji: '🥚', description: 'Tahmini yumurtlama' },
-  { key: 'fertile_ending', label: 'Dönem Bitiyor', emoji: '🌙', description: 'Dönem sonu uyarısı' },
-  { key: 'pms_reminder', label: 'PMS Hatırlatması', emoji: '⚡', description: 'PMS dönemi bildirimi' },
-  { key: 'daily_checkin', label: 'Günlük Check-in', emoji: '✅', description: 'Durumunu kaydet' },
+type NotifItem = { key: NotificationType; label: { tr: string; en: string }; emoji: string; description: { tr: string; en: string } };
+
+const cycleNotificationTypes: NotifItem[] = [
+  { key: 'period_approaching', label: { tr: 'Regl Yaklaşıyor', en: 'Period Approaching' }, emoji: '🌸', description: { tr: '2 gün önce hatırlatma', en: 'Reminder 2 days before' } },
+  { key: 'period_expected', label: { tr: 'Regl Bugün', en: 'Period Today' }, emoji: '📅', description: { tr: 'Beklenen gün bildirimi', en: 'Expected day notification' } },
+  { key: 'period_late', label: { tr: 'Regl Gecikti', en: 'Period Late' }, emoji: '⏰', description: { tr: 'Gecikme uyarısı', en: 'Late period alert' } },
+  { key: 'fertile_start', label: { tr: 'Doğurgan Dönem', en: 'Fertile Window' }, emoji: '💐', description: { tr: 'Dönem başlangıcı', en: 'Window start' } },
+  { key: 'ovulation_day', label: { tr: 'Yumurtlama Günü', en: 'Ovulation Day' }, emoji: '🥚', description: { tr: 'Tahmini yumurtlama', en: 'Estimated ovulation' } },
+  { key: 'fertile_ending', label: { tr: 'Dönem Bitiyor', en: 'Window Ending' }, emoji: '🌙', description: { tr: 'Dönem sonu uyarısı', en: 'Window end alert' } },
+  { key: 'pms_reminder', label: { tr: 'PMS Hatırlatması', en: 'PMS Reminder' }, emoji: '⚡', description: { tr: 'PMS dönemi bildirimi', en: 'PMS phase notification' } },
+  { key: 'daily_checkin', label: { tr: 'Günlük Check-in', en: 'Daily Check-in' }, emoji: '✅', description: { tr: 'Durumunu kaydet', en: 'Log your status' } },
+];
+
+const wellnessNotificationTypes: NotifItem[] = [
+  { key: 'water_reminder', label: { tr: 'Su Hatırlatması', en: 'Water Reminder' }, emoji: '💧', description: { tr: 'Düzenli su içme bildirimi', en: 'Stay hydrated reminder' } },
+  { key: 'exercise_reminder', label: { tr: 'Egzersiz Hatırlatması', en: 'Exercise Reminder' }, emoji: '🏃‍♀️', description: { tr: 'Hareket etme bildirimi', en: 'Stay active reminder' } },
 ];
 
 export const NotificationSettingsSheet = forwardRef<HTMLDivElement, NotificationSettingsSheetProps>(function NotificationSettingsSheet({ isOpen, onClose }, ref) {
@@ -58,22 +65,24 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
   // Handle Android back button
   useBackHandler(isOpen, onClose);
 
+  const lang = userSettings.language;
+
   const handleRequestPermissions = async () => {
     const granted = await requestNotificationPermissions();
     setHasPermission(granted);
     if (granted) {
-      toast.success('Bildirim izni verildi!');
+      toast.success(lang === 'tr' ? 'Bildirim izni verildi!' : 'Notification permission granted!');
     } else {
-      toast.error('Bildirim izni reddedildi');
+      toast.error(lang === 'tr' ? 'Bildirim izni reddedildi' : 'Notification permission denied');
     }
   };
 
   const handleTestNotification = async () => {
     try {
-      await sendTestNotification(userSettings.language);
-      toast.success('Test bildirimi gönderildi!');
+      await sendTestNotification(lang);
+      toast.success(lang === 'tr' ? 'Test bildirimi gönderildi!' : 'Test notification sent!');
     } catch (error) {
-      toast.error('Bildirim gönderilemedi');
+      toast.error(lang === 'tr' ? 'Bildirim gönderilemedi' : 'Failed to send notification');
     }
   };
 
@@ -120,17 +129,17 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
                       <Bell className="w-5 h-5 text-white" />
                     </div>
-                    <h2 className="text-lg font-semibold text-foreground">Bildirim Ayarları</h2>
+                    <h2 className="text-lg font-semibold text-foreground">{lang === 'tr' ? 'Bildirim Ayarları' : 'Notification Settings'}</h2>
                   </div>
                   {hasPermission ? (
                     <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-emerald/20 text-emerald text-xs font-medium">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse" />
-                      Bildirimler aktif
+                      {lang === 'tr' ? 'Bildirimler aktif' : 'Notifications active'}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-amber/20 text-amber text-xs font-medium">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-                      İzin gerekli
+                      {lang === 'tr' ? 'İzin gerekli' : 'Permission required'}
                     </span>
                   )}
                 </div>
@@ -150,9 +159,13 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                   <div className="flex items-start gap-3 mb-3">
                     <Bell className="w-5 h-5 text-amber mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-foreground mb-1">Bildirim izni gerekli</p>
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        {lang === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required'}
+                      </p>
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        Hatırlatmalar alabilmek için bildirim iznini etkinleştirin. İzin verdikten sonra bildirimler çalışmazsa, telefon ayarlarından "Uygulama etkinliğini duraklat" seçeneğini kapatın.
+                        {lang === 'tr'
+                          ? 'Hatırlatmalar alabilmek için bildirim iznini etkinleştirin. İzin verdikten sonra bildirimler çalışmazsa, telefon ayarlarından "Uygulama etkinliğini duraklat" seçeneğini kapatın.'
+                          : 'Enable notification permission to receive reminders. If notifications don\'t work after granting permission, disable "Pause app activity" in phone settings.'}
                       </p>
                     </div>
                   </div>
@@ -162,15 +175,20 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                       size="sm"
                       className="h-9 px-4 text-sm bg-amber hover:bg-amber/90 text-white"
                     >
-                      İzin Ver
+                      {lang === 'tr' ? 'İzin Ver' : 'Grant Permission'}
                     </Button>
                     <Button
-                      onClick={() => toast.info('Ayarlar > Uygulamalar > Luna Joy > Bildirimler yolunu izleyin. "Uygulama etkinliğini duraklat" kapalı olmalı.', { duration: 5000 })}
+                      onClick={() => toast.info(
+                        lang === 'tr'
+                          ? 'Ayarlar > Uygulamalar > Luna Joy > Bildirimler yolunu izleyin. "Uygulama etkinliğini duraklat" kapalı olmalı.'
+                          : 'Go to Settings > Apps > Luna Joy > Notifications. "Pause app activity" should be off.',
+                        { duration: 5000 }
+                      )}
                       size="sm"
                       variant="outline"
                       className="h-9 px-4 text-sm border-amber/30 text-amber"
                     >
-                      Ayarlar Yardımı
+                      {lang === 'tr' ? 'Ayarlar Yardımı' : 'Settings Help'}
                     </Button>
                   </div>
                 </div>
@@ -179,7 +197,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
               {/* Cycle Notifications Section */}
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <span>🌸</span> Döngü Bildirimleri
+                  <span>🌸</span> {lang === 'tr' ? 'Döngü Bildirimleri' : 'Cycle Notifications'}
                 </h3>
                 <div className="space-y-2">
                   {cycleNotificationTypes.map((type, index) => (
@@ -193,8 +211,38 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                       <div className="flex items-center gap-3">
                         <span className="text-xl">{type.emoji}</span>
                         <div>
-                          <p className="text-sm font-medium text-foreground">{type.label}</p>
-                          <p className="text-xs text-muted-foreground">{type.description}</p>
+                          <p className="text-sm font-medium text-foreground">{type.label[lang]}</p>
+                          <p className="text-xs text-muted-foreground">{type.description[lang]}</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notificationPrefs.togglesByType[type.key]}
+                        onCheckedChange={(checked) => handleNotificationToggle(type.key, checked)}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Wellness Notifications Section */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                  <span>🧘</span> {lang === 'tr' ? 'Sağlık Hatırlatıcıları' : 'Wellness Reminders'}
+                </h3>
+                <div className="space-y-2">
+                  {wellnessNotificationTypes.map((type, index) => (
+                    <motion.div
+                      key={type.key}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 + index * 0.03 }}
+                      className="flex items-center justify-between p-3 bg-card rounded-xl border border-border/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{type.emoji}</span>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{type.label[lang]}</p>
+                          <p className="text-xs text-muted-foreground">{type.description[lang]}</p>
                         </div>
                       </div>
                       <Switch
@@ -219,7 +267,7 @@ export const NotificationSettingsSheet = forwardRef<HTMLDivElement, Notification
                   disabled={!hasPermission}
                 >
                   <TestTube className="w-4 h-4 mr-2" />
-                  Test Bildirimi Gönder
+                  {lang === 'tr' ? 'Test Bildirimi Gönder' : 'Send Test Notification'}
                 </Button>
               </motion.div>
             </motion.div>
