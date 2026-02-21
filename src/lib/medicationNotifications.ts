@@ -67,9 +67,9 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
     }
     console.log(`Medication ${medicationName} marked as taken`);
   } else if (actionId === 'snooze') {
-    // Unique snooze ID: medHash * 10 + timestamp nonce (wide range to avoid collisions)
+    // Unique snooze ID: medHash * 10000 gives each medication its own 10k nonce block
     const medHash = medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000;
-    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 500000 + medHash * 10 + (Date.now() % 10000);
+    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 500000 + medHash * 10000 + (Date.now() % 10000);
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
     await LocalNotifications.schedule({
       notifications: [{
@@ -245,7 +245,7 @@ export async function scheduleOneTimeMedicationReminder(
   try {
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + 500000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000) * 10 + (Date.now() % 10000),
+        id: MEDICATION_NOTIFICATION_BASE_ID + 500000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000) * 10000 + (Date.now() % 10000),
         title: `💊 ${medication.name} - Hatırlatma`,
         body: `${medication.dosage} almayı unutma!`,
         schedule: { at: notificationTime },
