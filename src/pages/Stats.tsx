@@ -602,55 +602,103 @@ export default function StatsPage() {
     };
   }, [entries, userSettings?.targetWeight]);
 
-  // Calculate real cycle lengths and period durations from actual entries
+  // Calculate real cycle lengths and period durations from actual entries + cycleHistory + cycleSettings
   const { cycleLengthData, periodDurationData } = useMemo(() => {
     // Find all period entries sorted by date
     const periodEntries = entries
       .filter(e => e.flowLevel && e.flowLevel !== 'none')
       .sort((a, b) => a.date.localeCompare(b.date));
     
-    if (periodEntries.length === 0) {
-      return { cycleLengthData: [], periodDurationData: [] };
-    }
-    
     // Group consecutive period days into clusters (gap > 7 days = new cycle)
     const clusters: { startDate: string; endDate: string; duration: number }[] = [];
-    let clusterStart = periodEntries[0].date;
-    let clusterEnd = periodEntries[0].date;
     
-    for (let i = 1; i < periodEntries.length; i++) {
-      const prevParts = clusterEnd.split('-').map(Number);
-      const currParts = periodEntries[i].date.split('-').map(Number);
-      const prev = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]);
-      const curr = new Date(currParts[0], currParts[1] - 1, currParts[2]);
-      const daysDiff = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+    if (periodEntries.length > 0) {
+      let clusterStart = periodEntries[0].date;
+      let clusterEnd = periodEntries[0].date;
       
-      if (daysDiff <= 7) {
-        clusterEnd = periodEntries[i].date;
-      } else {
-        const sp = clusterStart.split('-').map(Number);
-        const ep = clusterEnd.split('-').map(Number);
-        const sd = new Date(sp[0], sp[1] - 1, sp[2]);
-        const ed = new Date(ep[0], ep[1] - 1, ep[2]);
-        const dur = Math.round((ed.getTime() - sd.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        clusters.push({ startDate: clusterStart, endDate: clusterEnd, duration: dur });
-        clusterStart = periodEntries[i].date;
-        clusterEnd = periodEntries[i].date;
+      for (let i = 1; i < periodEntries.length; i++) {
+        const prevParts = clusterEnd.split('-').map(Number);
+        const currParts = periodEntries[i].date.split('-').map(Number);
+        const prev = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]);
+        const curr = new Date(currParts[0], currParts[1] - 1, currParts[2]);
+        const daysDiff = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff <= 7) {
+          clusterEnd = periodEntries[i].date;
+        } else {
+          const sp = clusterStart.split('-').map(Number);
+          const ep = clusterEnd.split('-').map(Number);
+          const sd = new Date(sp[0], sp[1] - 1, sp[2]);
+          const ed = new Date(ep[0], ep[1] - 1, ep[2]);
+          const dur = Math.round((ed.getTime() - sd.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          clusters.push({ startDate: clusterStart, endDate: clusterEnd, duration: dur });
+          clusterStart = periodEntries[i].date;
+          clusterEnd = periodEntries[i].date;
+        }
       }
+      // Push last cluster
+      const sp = clusterStart.split('-').map(Number);
+      const ep = clusterEnd.split('-').map(Number);
+      const sd = new Date(sp[0], sp[1] - 1, sp[2]);
+      const ed = new Date(ep[0], ep[1] - 1, ep[2]);
+      const dur = Math.round((ed.getTime() - sd.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      clusters.push({ startDate: clusterStart, endDate: clusterEnd, duration: dur });
     }
-    // Push last cluster
-    const sp = clusterStart.split('-').map(Number);
-    const ep = clusterEnd.split('-').map(Number);
-    const sd = new Date(sp[0], sp[1] - 1, sp[2]);
-    const ed = new Date(ep[0], ep[1] - 1, ep[2]);
-    const dur = Math.round((ed.getTime() - sd.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    clusters.push({ startDate: clusterStart, endDate: clusterEnd, duration: dur });
+
+    // Also incorporate cycleHistory records (they may have period data not in entries)
+    cycleHistory.forEach(record => {
+      const alreadyExists = clusters.some(c => c.startDate === record.startDate);
+      if (!alreadyExists && record.startDate && record.endDate) {
+        clusters.push({
+          startDate: record.startDate,
+          endDate: record.endDate,
+          duration: record.length,
+        });
+      }
+    });
+
+    // If still no clusters, use cycleSettings as fallback
+    if (clusters.length === 0 && cycleSettings.lastPeriodStart) {
+      const startParts = cycleSettings.lastPeriodStart.split('-').map(Number);
+      const startD = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+      const endD = new Date(startD);
+      endD.setDate(endD.getDate() + cycleSettings.periodLength - 1);
+      clusters.push({
+        startDate: cycleSettings.lastPeriodStart,
+        endDate: format(endD, 'yyyy-MM-dd'),
+        duration: cycleSettings.periodLength,
+      });
+    }
+
+    // Sort clusters by start date
+    clusters.sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+    // Deduplicate clusters with overlapping dates (keep longer duration)
+    const deduped: typeof clusters = [];
+    for (const c of clusters) {
+      const last = deduped[deduped.length - 1];
+      if (last) {
+        const lastParts = last.startDate.split('-').map(Number);
+        const currParts = c.startDate.split('-').map(Number);
+        const lastD = new Date(lastParts[0], lastParts[1] - 1, lastParts[2]);
+        const currD = new Date(currParts[0], currParts[1] - 1, currParts[2]);
+        const gap = Math.round((currD.getTime() - lastD.getTime()) / (1000 * 60 * 60 * 24));
+        if (gap <= 7) {
+          // Merge: keep the one with more accurate duration
+          if (c.duration > last.duration) {
+            deduped[deduped.length - 1] = c;
+          }
+          continue;
+        }
+      }
+      deduped.push(c);
+    }
     
     // Calculate cycle lengths (days between consecutive cluster starts)
     const cycleLengths: { month: string; length: number }[] = [];
-    for (let i = 1; i < clusters.length; i++) {
-      const pp = clusters[i - 1].startDate.split('-').map(Number);
-      const cp = clusters[i].startDate.split('-').map(Number);
+    for (let i = 1; i < deduped.length; i++) {
+      const pp = deduped[i - 1].startDate.split('-').map(Number);
+      const cp = deduped[i].startDate.split('-').map(Number);
       const prevStart = new Date(pp[0], pp[1] - 1, pp[2]);
       const currStart = new Date(cp[0], cp[1] - 1, cp[2]);
       const length = Math.round((currStart.getTime() - prevStart.getTime()) / (1000 * 60 * 60 * 24));
@@ -664,7 +712,7 @@ export default function StatsPage() {
     }
     
     // Period durations per cluster
-    const periodDurations: { month: string; duration: number }[] = clusters.map(c => {
+    const periodDurations: { month: string; duration: number }[] = deduped.map(c => {
       const parts = c.startDate.split('-').map(Number);
       const d = new Date(parts[0], parts[1] - 1, parts[2]);
       return {
@@ -678,7 +726,7 @@ export default function StatsPage() {
       cycleLengthData: cycleLengths.slice(-6),
       periodDurationData: periodDurations.slice(-6),
     };
-  }, [entries]);
+  }, [entries, cycleHistory, cycleSettings]);
 
   // Weekly overview data - last 4 weeks
   const weeklyOverviewData = useMemo(() => {
