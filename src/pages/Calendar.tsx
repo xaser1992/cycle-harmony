@@ -1,6 +1,5 @@
 // 🌸 Calendar Page - Flo Inspired Design with Medication Integration
 import { useState, useMemo, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pill, X, Edit3, Bell } from 'lucide-react';
 import { 
   format, 
@@ -469,48 +468,35 @@ export default function CalendarPage() {
           </div>
         )}
 
-        {/* Info Modal for Upcoming Dates */}
-        <AnimatePresence>
-          {activeInfoCard && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+        {/* Info Modal for Upcoming Dates - Fullscreen */}
+        {activeInfoCard && (
+          <div className="fixed inset-0 z-[100] flex flex-col animate-fade-in safe-area-top"
+            style={{
+              background: activeInfoCard === 'period' 
+                ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.97), rgba(236, 72, 153, 0.97))' 
+                : activeInfoCard === 'ovulation' 
+                ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.97), rgba(168, 85, 247, 0.97))'
+                : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.97), rgba(20, 184, 166, 0.97))'
+            }}
+          >
+            {/* Header with back button */}
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <button
                 onClick={() => setActiveInfoCard(null)}
-              />
-              {/* Close Button - Inside AnimatePresence for synchronized exit */}
-              <motion.button
-                type="button"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveInfoCard(null);
-                }}
-                className="fixed top-6 right-6 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[110] active:scale-90 transition-transform safe-area-top"
+                className="flex items-center gap-1.5 text-white/90 active:scale-90 transition-transform"
               >
-                <X className="w-5 h-5 text-white" />
-              </motion.button>
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-[101] flex flex-col overflow-y-auto safe-area-top"
-                style={{
-                  background: activeInfoCard === 'period' 
-                    ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.95), rgba(236, 72, 153, 0.95))' 
-                    : activeInfoCard === 'ovulation' 
-                    ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.95), rgba(168, 85, 247, 0.95))'
-                    : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.95), rgba(20, 184, 166, 0.95))'
-                }}
+                <ChevronLeft className="w-6 h-6" />
+                <span className="font-medium text-sm">Takvim</span>
+              </button>
+              <button
+                onClick={() => setActiveInfoCard(null)}
+                className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition-transform"
               >
-                <div className="p-6 pt-8 pb-24 space-y-0">
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 pb-24 space-y-0">
 
                 {/* Period Info */}
                 {activeInfoCard === 'period' && (
@@ -746,11 +732,9 @@ export default function CalendarPage() {
                     </div>
                   );
                 })()}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Day Detail - Fullscreen Modal */}
