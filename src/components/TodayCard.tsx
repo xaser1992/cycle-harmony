@@ -1,5 +1,6 @@
 // 🌸 Today Status Card Component - Performance Optimized
 import { useState, useEffect, forwardRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { getPhaseInfo } from '@/lib/predictions';
 import { scheduleCustomReminder } from '@/lib/notifications';
@@ -383,7 +384,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
       </div>
 
       {/* Phase Details Modal - Fullscreen */}
-      {showDetails && (
+      {showDetails && createPortal(
         <div
           className="fixed inset-0 z-[100] flex flex-col animate-fade-in"
           style={{ background: phaseGradientStyles[phase.type] }}
@@ -477,10 +478,10 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* Upcoming Date Info Modals - Fullscreen */}
-      {activeInfoCard && prediction && (
+      {activeInfoCard && prediction && createPortal(
         <div
           className="fixed inset-0 z-[100] flex flex-col animate-fade-in"
           style={{
@@ -729,7 +730,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
             })()}
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }
