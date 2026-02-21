@@ -385,7 +385,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
       {/* Phase Details Modal - Fullscreen */}
       {showDetails && (
         <div
-          className="fixed inset-0 z-50 flex flex-col animate-fade-in safe-area-top"
+          className="fixed inset-0 z-50 flex flex-col animate-fade-in"
           style={{ background: phaseGradientStyles[phase.type] }}
         >
           {/* Header */}
@@ -482,7 +482,7 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
       {/* Upcoming Date Info Modals - Fullscreen */}
       {activeInfoCard && prediction && (
         <div
-          className="fixed inset-0 z-[100] flex flex-col animate-fade-in safe-area-top"
+          className="fixed inset-0 z-[100] flex flex-col animate-fade-in"
           style={{
             background: activeInfoCard === 'period' 
               ? 'linear-gradient(to bottom right, rgb(244, 114, 182), rgb(236, 72, 153))' 
