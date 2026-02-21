@@ -491,25 +491,26 @@ export default function CalendarPage() {
                   e.stopPropagation();
                   setActiveInfoCard(null);
                 }}
-                className="fixed top-24 right-8 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[110] active:scale-90 transition-transform"
+                className="fixed top-6 right-6 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-[110] active:scale-90 transition-transform safe-area-top"
               >
                 <X className="w-5 h-5 text-white" />
               </motion.button>
               
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="fixed inset-x-4 top-20 bottom-20 z-[101] rounded-3xl p-6 pt-12 shadow-2xl overflow-y-auto backdrop-blur-xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-[101] flex flex-col overflow-y-auto safe-area-top"
                 style={{
                   background: activeInfoCard === 'period' 
-                    ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.75), rgba(236, 72, 153, 0.75))' 
+                    ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.95), rgba(236, 72, 153, 0.95))' 
                     : activeInfoCard === 'ovulation' 
-                    ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.75), rgba(168, 85, 247, 0.75))'
-                    : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.75), rgba(20, 184, 166, 0.75))'
+                    ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.95), rgba(168, 85, 247, 0.95))'
+                    : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.95), rgba(20, 184, 166, 0.95))'
                 }}
               >
+                <div className="p-6 pt-8 pb-24 space-y-0">
 
                 {/* Period Info */}
                 {activeInfoCard === 'period' && (
@@ -745,6 +746,7 @@ export default function CalendarPage() {
                     </div>
                   );
                 })()}
+                </div>
               </motion.div>
             </>
           )}
@@ -781,16 +783,30 @@ export default function CalendarPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 pb-24 pt-4 space-y-4">
-            {/* Day Type Badge */}
+            {/* Day Type Badge + Fertility Chance */}
             {(() => {
               const dayType = getDayType(selectedDate);
               const typeInfo = getDayTypeLabel(dayType);
+              const fertilityChance = prediction ? (() => {
+                const ovDate = parseISO(prediction.ovulationDate);
+                const diff = differenceInDays(selectedDate, ovDate);
+                return getFertilityChance(diff);
+              })() : 0;
+              
               return (
-                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${typeInfo.color} text-white text-sm font-medium`}>
-                  <span>
-                    {dayType === 'period' ? '🩸' : dayType === 'fertile' ? '🌱' : dayType === 'ovulation' ? '🥚' : dayType === 'pms' ? '🌙' : '📅'}
-                  </span>
-                  {typeInfo.label}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${typeInfo.color} text-white text-sm font-medium`}>
+                    <span>
+                      {dayType === 'period' ? '🩸' : dayType === 'fertile' ? '🌱' : dayType === 'ovulation' ? '🥚' : dayType === 'pms' ? '🌙' : '📅'}
+                    </span>
+                    {typeInfo.label}
+                  </div>
+                  {fertilityChance > 0 && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-cyan to-teal text-white text-sm font-medium">
+                      <span>🌡️</span>
+                      Doğurganlık: %{fertilityChance}
+                    </div>
+                  )}
                 </div>
               );
             })()}
