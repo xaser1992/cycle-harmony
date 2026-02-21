@@ -67,9 +67,9 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
   const medicationName = extra.medicationName;
   
   if (actionId === 'take') {
-    // Record the dose as taken using the scheduled time from extra
+    // Idempotent: set taken=true (not toggle)
     const today = format(new Date(), 'yyyy-MM-dd');
-    const scheduledTime = extra.scheduledTime || new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    const scheduledTime = (extra.scheduledTime as string | undefined) || format(new Date(), 'HH:mm');
     await toggleMedicationLog(medicationId, today, scheduledTime, true);
     if (notification?.id) {
       try { await LocalNotifications.cancel({ notifications: [{ id: notification.id }] }); } catch {}
@@ -82,17 +82,18 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
     const nonce = (Date.now() + (_snoozeSeq++ % 10000)) % 10000;
     const snoozeId = snoozeBase + medHash * 10000 + nonce;
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
+    const newTimeLabel = format(snoozeTime, 'HH:mm');
     await LocalNotifications.schedule({
       notifications: [{
         id: snoozeId,
         title: `💊 ${medicationName} - Hatırlatma`,
-        body: `${extra.scheduledTime} dozunu almayı unutma!`,
+        body: `${medicationName} dozunu almayı unutma! (Ertelendi: ${newTimeLabel})`,
         schedule: { at: snoozeTime },
         channelId: MEDICATION_NOTIFICATION_CHANNEL,
         sound: 'notification.wav',
         smallIcon: 'ic_stat_icon',
         actionTypeId: 'MEDICATION_ACTIONS',
-        extra: extra,
+        extra: { ...extra, scheduledTime: newTimeLabel, originalScheduledTime: extra.originalScheduledTime || extra.scheduledTime },
       }],
     });
     console.log(`Medication ${medicationName} snoozed for 15 minutes (id: ${snoozeId})`);
@@ -281,7 +282,7 @@ export async function sendTestMedicationNotification(): Promise<void> {
   try {
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + 99998,
+        id: MEDICATION_NOTIFICATION_BASE_ID + MEDICATION_ID_MAX - 1,
         title: '💊 Test İlaç Hatırlatması',
         body: 'İlaç bildirimleri düzgün çalışıyor!',
         schedule: { at: new Date(Date.now() + 1000) }, // 1 second from now
