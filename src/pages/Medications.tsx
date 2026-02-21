@@ -276,6 +276,10 @@ export default function Medications() {
   };
 
   const addReminderTime = () => {
+    if (formData.reminderTimes.length >= 8) {
+      toast.error('En fazla 8 hatırlatma saati eklenebilir');
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       reminderTimes: [...prev.reminderTimes, '12:00'],
@@ -770,7 +774,7 @@ export default function Medications() {
                       variant="outline"
                       size="sm"
                       className="w-full mt-1"
-                      onClick={() => setEditingTimes([...editingTimes, '12:00'])}
+                      onClick={() => editingTimes.length < 8 ? setEditingTimes([...editingTimes, '12:00']) : toast.error('En fazla 8 hatırlatma saati eklenebilir')}
                     >
                       <Plus className="w-3.5 h-3.5 mr-1" />
                       Saat Ekle
