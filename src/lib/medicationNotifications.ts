@@ -12,11 +12,16 @@ const isNative = () => Capacitor.isNativePlatform();
 export const MEDICATION_NOTIFICATION_CHANNEL = 'medication_reminders';
 
 // ID layout for medication notifications:
-// Schedule IDs: BASE + medKey(1000..9999) * 10000 + dayOffset(0..29) * 100 + timeIndex(0..99)
-// Snooze IDs:   BASE + 500000 + medHash(0..8999) * 10 + nonce(0..9999 via timestamp)
-// Range:        BASE .. BASE + 99_999_999 (all within one band for cancel/pending filter)
+// Schedule IDs: BASE + medKey(1000..9999) * 10000 + dayOffset(0..29) * 100 + timeIndex(0..23)
+// Snooze IDs:   BASE + 500000 + medHash(0..8999) * 10000 + nonce(0..9999 via monotonic counter)
+// Max schedule:  BASE + 9999*10000 + 29*100 + 23 = BASE + 99,993,023
+// Max snooze:    BASE + 500000 + 8999*10000 + 9999 = BASE + 90,499,999
+// Cancel range:  BASE .. BASE + 100_000_000
 const MEDICATION_NOTIFICATION_BASE_ID = 20000;
-const MEDICATION_ID_MAX = 99_999_999;
+const MEDICATION_ID_MAX = 100_000_000;
+
+// Monotonic counter for snooze nonce to avoid same-ms collisions
+let _snoozeSeq = 0;
 
 // Register action types for medication notifications
 export async function registerMedicationActionTypes(): Promise<void> {
@@ -69,7 +74,8 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
   } else if (actionId === 'snooze') {
     // Unique snooze ID: medHash * 10000 gives each medication its own 10k nonce block
     const medHash = medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000;
-    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 500000 + medHash * 10000 + (Date.now() % 10000);
+    const nonce = (Date.now() + (_snoozeSeq++ % 10000)) % 10000;
+    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 500000 + medHash * 10000 + nonce;
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
     await LocalNotifications.schedule({
       notifications: [{
@@ -109,11 +115,12 @@ export async function createMedicationNotificationChannel(): Promise<void> {
 }
 
 // Generate a unique notification ID for a medication at a specific time
-// Each medication gets a 10,000 ID block (medKey * 10000): supports 30 days × 100 time slots
+// Each medication gets a 10,000 ID block (medKey * 10000): supports 30 days × 24 time slots
 function generateNotificationId(medicationId: string, dayOffset: number, timeIndex: number): number {
   const hash = medicationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const medKey = (hash % 9000) + 1000; // 1000..9999
-  return MEDICATION_NOTIFICATION_BASE_ID + medKey * 10000 + dayOffset * 100 + (timeIndex % 100);
+  const safeTimeIndex = Math.min(timeIndex, 99); // guard: max 100 slots per day
+  return MEDICATION_NOTIFICATION_BASE_ID + medKey * 10000 + dayOffset * 100 + safeTimeIndex;
 }
 
 // Cancel all medication notifications
@@ -245,7 +252,7 @@ export async function scheduleOneTimeMedicationReminder(
   try {
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + 500000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000) * 10000 + (Date.now() % 10000),
+        id: MEDICATION_NOTIFICATION_BASE_ID + 500000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000) * 10000 + (Date.now() + (_snoozeSeq++ % 10000)) % 10000,
         title: `💊 ${medication.name} - Hatırlatma`,
         body: `${medication.dosage} almayı unutma!`,
         schedule: { at: notificationTime },
