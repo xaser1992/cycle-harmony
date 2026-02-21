@@ -470,7 +470,7 @@ export default function CalendarPage() {
 
         {/* Info Modal for Upcoming Dates - Fullscreen */}
         {activeInfoCard && (
-          <div className="fixed inset-0 z-[100] flex flex-col animate-fade-in safe-area-top"
+          <div className="fixed inset-0 z-[100] flex flex-col animate-fade-in"
             style={{
               background: activeInfoCard === 'period' 
                 ? 'linear-gradient(to bottom right, rgb(244, 114, 182), rgb(236, 72, 153))' 
