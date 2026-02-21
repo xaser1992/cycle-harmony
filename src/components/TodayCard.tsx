@@ -1,13 +1,12 @@
 // 🌸 Today Status Card Component - Performance Optimized
 import { useState, useEffect, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { getPhaseInfo } from '@/lib/predictions';
 import { scheduleCustomReminder } from '@/lib/notifications';
 import type { CyclePhase, CyclePrediction } from '@/types/cycle';
 import { format, parseISO, differenceInDays, addDays, eachDayOfInterval } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { X, ChevronRight, CalendarDays, Bell, Check } from 'lucide-react';
+import { ChevronLeft, X, ChevronRight, CalendarDays, Bell, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBackHandler } from '@/hooks/useBackHandler';
 
@@ -292,18 +291,11 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
             {/* Info Cards - Clickable with animated icons */}
             <div className="flex-1 space-y-3">
               {phase.type !== 'period' && !phase.isLate && daysUntilPeriod > 0 && (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={(e) => { e.stopPropagation(); setActiveInfoCard('period'); }}
-                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2"
+                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2 active:scale-95 transition-transform"
                 >
-                  <motion.span 
-                    className="text-lg"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  >
-                    🌸
-                  </motion.span>
+                  <span className="text-lg">🌸</span>
                   <div className="flex-1">
                     <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
                       {language === 'tr' ? 'Sonraki Regl' : 'Next Period'}
@@ -316,25 +308,19 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                     </div>
                   </div>
                   <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
-                </motion.button>
+                </button>
               )}
 
               {(phase.type === 'fertile' || phase.type === 'follicular') && daysUntilOvulation >= 0 && (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={(e) => { e.stopPropagation(); setActiveInfoCard('ovulation'); }}
-                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2"
+                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left flex items-center gap-2 active:scale-95 transition-transform"
                 >
-                  <motion.div
-                    animate={{ scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
-                      <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
-                      <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
-                    </svg>
-                  </motion.div>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="8" fill="white" opacity="0.9" />
+                    <circle cx="12" cy="12" r="5" fill="#a855f7" opacity="0.6" />
+                    <circle cx="10" cy="10" r="2" fill="white" opacity="0.8" />
+                  </svg>
                   <div className="flex-1">
                     <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
                       {language === 'tr' ? 'Yumurtlama' : 'Ovulation'}
@@ -346,23 +332,16 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                     </p>
                   </div>
                   <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
-                </motion.button>
+                </button>
               )}
 
               {phase.type === 'period' && (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={(e) => { e.stopPropagation(); setActiveInfoCard('period'); }}
-                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left"
+                  className="w-full bg-white/15 backdrop-blur-sm rounded-2xl p-3 text-left active:scale-95 transition-transform"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <motion.span 
-                      className="text-lg"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      🩸
-                    </motion.span>
+                    <span className="text-lg">🩸</span>
                     <div className="flex-1">
                       <p className={`text-xs ${phaseAccentColors[phase.type]} mb-0.5`}>
                         {language === 'tr' ? 'Regl Dönemi' : 'Period'}
@@ -373,28 +352,24 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
                     </div>
                     <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
                   </div>
-                  {/* Period Progress Bar */}
                   <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-white/80 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(phase.dayNumber / 5) * 100}%` }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    <div 
+                      className="h-full bg-white/80 rounded-full transition-all duration-500"
+                      style={{ width: `${(phase.dayNumber / 5) * 100}%` }}
                     />
                   </div>
-                </motion.button>
+                </button>
               )}
             </div>
           </div>
 
           {/* Bottom tip - Opens phase details */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
+          <button
             onClick={(e) => {
               e.stopPropagation();
               setShowDetails(true);
             }}
-            className="mt-4 w-full bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3"
+            className="mt-4 w-full bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3 active:scale-[0.97] transition-transform"
           >
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               <span className="text-lg">💡</span>
@@ -403,374 +378,358 @@ export function TodayCard({ phase, prediction, language = 'tr', onTap }: TodayCa
               {language === 'tr' ? 'Faz detayları ve öneriler' : 'Phase details & tips'}
             </p>
             <ChevronRight className={`w-4 h-4 ${phaseAccentColors[phase.type]}`} />
-          </motion.button>
+          </button>
         </div>
       </div>
 
-      {/* Phase Details Modal */}
-      <AnimatePresence>
-        {showDetails && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+      {/* Phase Details Modal - Fullscreen */}
+      {showDetails && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col animate-fade-in safe-area-top"
+          style={{ background: phaseGradientStyles[phase.type] }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <button
               onClick={() => setShowDetails(false)}
-            />
-
-            {/* Modal Content */}
-            <motion.div
-              className="fixed inset-x-3 top-1/2 z-[51] rounded-2xl backdrop-blur-xl p-4 shadow-2xl max-h-[75vh] overflow-y-auto"
-              style={{ background: phaseGradientStyles[phase.type] }}
-              initial={{ opacity: 0, scale: 0.95, y: '-45%' }}
-              animate={{ opacity: 1, scale: 1, y: '-50%' }}
-              exit={{ opacity: 0, scale: 0.95, y: '-45%' }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="flex items-center gap-1.5 text-white/90 active:scale-90 transition-transform"
             >
-              {/* Close button - high z-index, positioned at top */}
-              <button
-                type="button"
-                onClick={() => setShowDetails(false)}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center z-[60] active:scale-90 transition-transform"
-              >
-                <X className="w-4 h-4 text-white" />
-              </button>
+              <ChevronLeft className="w-6 h-6" />
+              <span className="font-medium text-sm">{language === 'tr' ? 'Geri' : 'Back'}</span>
+            </button>
+            <button
+              onClick={() => setShowDetails(false)}
+              className="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center active:scale-90 transition-transform"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+          </div>
 
-              {/* Header - compact */}
-              <div className="flex items-center gap-3 mb-4 pr-10">
-                <span className="text-4xl">{phaseInfo.emoji}</span>
-                <div>
-                  <h2 className="text-xl font-bold text-white">{phaseInfo.title}</h2>
-                  <p className={`text-xs ${phaseAccentColors[phase.type]}`}>{phaseInfo.subtitle}</p>
+          <div className="flex-1 overflow-y-auto px-5 pb-24">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-5">
+              <span className="text-4xl">{phaseInfo.emoji}</span>
+              <div>
+                <h2 className="text-xl font-bold text-white">{phaseInfo.title}</h2>
+                <p className={`text-xs ${phaseAccentColors[phase.type]}`}>{phaseInfo.subtitle}</p>
+              </div>
+            </div>
+
+            {/* Content sections */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xs font-semibold text-white/80 mb-1.5 flex items-center gap-1.5">
+                  <span>💡</span>
+                  {language === 'tr' ? 'İpuçları' : 'Tips'}
+                </h3>
+                <div className="space-y-1.5">
+                  {details.tips.map((tip, i) => (
+                    <div key={i} className="bg-white/15 rounded-lg px-3 py-2">
+                      <p className="text-xs text-white">{tip}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Content sections - compact spacing */}
-              <div className="space-y-3">
-                {/* Tips */}
-                <div>
-                  <h3 className="text-xs font-semibold text-white/80 mb-1.5 flex items-center gap-1.5">
-                    <span>💡</span>
-                    {language === 'tr' ? 'İpuçları' : 'Tips'}
-                  </h3>
-                  <div className="space-y-1.5">
-                    {details.tips.map((tip, i) => (
-                      <div key={i} className="bg-white/15 rounded-lg px-3 py-2">
-                        <p className="text-xs text-white">{tip}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Activities */}
-                <div>
-                  <h3 className="text-xs font-semibold text-white/80 mb-1.5 flex items-center gap-1.5">
-                    <span>🏃‍♀️</span>
-                    {language === 'tr' ? 'Aktiviteler' : 'Activities'}
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {details.activities.map((activity, i) => (
-                      <span key={i} className="px-2.5 py-1 bg-white/20 rounded-full text-xs text-white font-medium">
-                        {activity}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Nutrition */}
-                <div>
-                  <h3 className="text-xs font-semibold text-white/80 mb-1.5 flex items-center gap-1.5">
-                    <span>🥗</span>
-                    {language === 'tr' ? 'Beslenme' : 'Nutrition'}
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {details.nutrition.map((item, i) => (
-                      <span key={i} className="px-2.5 py-1 bg-white/20 rounded-full text-xs text-white font-medium">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Deep dive - compact grid */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-white/15 rounded-lg p-2.5">
-                    <p className="text-xs font-semibold text-white mb-1">😴 {language === 'tr' ? 'Uyku' : 'Sleep'}</p>
-                    <p className="text-[10px] text-white/80 leading-tight">{deepDive.sleep[0]}</p>
-                  </div>
-                  <div className="bg-white/15 rounded-lg p-2.5">
-                    <p className="text-xs font-semibold text-white mb-1">✨ {language === 'tr' ? 'Cilt' : 'Skin'}</p>
-                    <p className="text-[10px] text-white/80 leading-tight">{deepDive.skin[0]}</p>
-                  </div>
-                  <div className="bg-white/15 rounded-lg p-2.5">
-                    <p className="text-xs font-semibold text-white mb-1">🧬 {language === 'tr' ? 'Hormon' : 'Hormones'}</p>
-                    <p className="text-[10px] text-white/80 leading-tight">{deepDive.hormones[0]}</p>
-                  </div>
+              <div>
+                <h3 className="text-xs font-semibold text-white/80 mb-1.5 flex items-center gap-1.5">
+                  <span>🏃‍♀️</span>
+                  {language === 'tr' ? 'Aktiviteler' : 'Activities'}
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {details.activities.map((activity, i) => (
+                    <span key={i} className="px-2.5 py-1 bg-white/20 rounded-full text-xs text-white font-medium">
+                      {activity}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
-      {/* Upcoming Date Info Modals */}
-      <AnimatePresence>
-        {activeInfoCard && prediction && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+              <div>
+                <h3 className="text-xs font-semibold text-white/80 mb-1.5 flex items-center gap-1.5">
+                  <span>🥗</span>
+                  {language === 'tr' ? 'Beslenme' : 'Nutrition'}
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {details.nutrition.map((item, i) => (
+                    <span key={i} className="px-2.5 py-1 bg-white/20 rounded-full text-xs text-white font-medium">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Deep dive */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-white/15 rounded-lg p-2.5">
+                  <p className="text-xs font-semibold text-white mb-1">😴 {language === 'tr' ? 'Uyku' : 'Sleep'}</p>
+                  <p className="text-[10px] text-white/80 leading-tight">{deepDive.sleep[0]}</p>
+                </div>
+                <div className="bg-white/15 rounded-lg p-2.5">
+                  <p className="text-xs font-semibold text-white mb-1">✨ {language === 'tr' ? 'Cilt' : 'Skin'}</p>
+                  <p className="text-[10px] text-white/80 leading-tight">{deepDive.skin[0]}</p>
+                </div>
+                <div className="bg-white/15 rounded-lg p-2.5">
+                  <p className="text-xs font-semibold text-white mb-1">🧬 {language === 'tr' ? 'Hormon' : 'Hormones'}</p>
+                  <p className="text-[10px] text-white/80 leading-tight">{deepDive.hormones[0]}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upcoming Date Info Modals - Fullscreen */}
+      {activeInfoCard && prediction && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col animate-fade-in safe-area-top"
+          style={{
+            background: activeInfoCard === 'period' 
+              ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.97), rgba(236, 72, 153, 0.97))' 
+              : activeInfoCard === 'ovulation' 
+              ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.97), rgba(168, 85, 247, 0.97))'
+              : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.97), rgba(20, 184, 166, 0.97))'
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <button
               onClick={() => setActiveInfoCard(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-3 top-20 z-[101] rounded-2xl p-3 shadow-2xl max-h-[75vh] overflow-y-auto backdrop-blur-xl"
-              style={{
-                background: activeInfoCard === 'period' 
-                  ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.75), rgba(236, 72, 153, 0.75))' 
-                  : activeInfoCard === 'ovulation' 
-                  ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.75), rgba(168, 85, 247, 0.75))'
-                  : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.75), rgba(20, 184, 166, 0.75))'
-              }}
+              className="flex items-center gap-1.5 text-white/90 active:scale-90 transition-transform"
             >
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => setActiveInfoCard(null)}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center z-[110] active:scale-90 transition-transform"
-              >
-                <X className="w-4 h-4 text-white" />
-              </button>
+              <ChevronLeft className="w-6 h-6" />
+              <span className="font-medium text-sm">{language === 'tr' ? 'Geri' : 'Back'}</span>
+            </button>
+            <button
+              onClick={() => setActiveInfoCard(null)}
+              className="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center active:scale-90 transition-transform"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+          </div>
 
-              {/* Period Info */}
-              {activeInfoCard === 'period' && (
-                <div className="space-y-2 pt-8">
+          <div className="flex-1 overflow-y-auto px-5 pb-24">
+            {/* Period Info */}
+            {activeInfoCard === 'period' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl">🌸</span>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">
+                      {phase?.type === 'period' 
+                        ? (language === 'tr' ? 'Regl Dönemi' : 'Period') 
+                        : (language === 'tr' ? 'Sonraki Regl' : 'Next Period')}
+                    </h3>
+                    <p className="text-xs text-white/80">
+                      {phase?.type === 'period'
+                        ? (language === 'tr' ? `${phase.dayNumber}. gün` : `Day ${phase.dayNumber}`)
+                        : format(parseISO(prediction.nextPeriodStart), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="bg-white/15 rounded-xl p-2.5">
+                    <h4 className="font-semibold text-white text-xs mb-1">📋 {language === 'tr' ? 'Ne Beklemeli?' : 'What to Expect?'}</h4>
+                    <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                      <li>• {language === 'tr' ? 'Adet kanaması ortalama 3-7 gün sürer' : 'Period bleeding lasts 3-7 days'}</li>
+                      <li>• {language === 'tr' ? 'İlk 1-2 gün akış daha yoğun olabilir' : 'Flow may be heavier first 1-2 days'}</li>
+                      <li>• {language === 'tr' ? 'Kramp ve yorgunluk normal' : 'Cramps and fatigue are normal'}</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/15 rounded-xl p-2.5">
+                    <h4 className="font-semibold text-white text-xs mb-1">💡 {language === 'tr' ? 'İpuçları' : 'Tips'}</h4>
+                    <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                      <li>• {language === 'tr' ? 'Bol su ve demir zengin gıdalar tüketin' : 'Drink water and eat iron-rich foods'}</li>
+                      <li>• {language === 'tr' ? 'Sıcak kompres ağrıları hafifletir' : 'Warm compress relieves pain'}</li>
+                      <li>• {language === 'tr' ? 'Hafif egzersiz faydalı olabilir' : 'Light exercise can help'}</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={() => handleNavigateToCalendar(prediction.nextPeriodStart)}
+                    className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <CalendarDays className="w-4 h-4 text-white" />
+                    <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const success = await scheduleCustomReminder(
+                        language === 'tr' ? 'Regl Yaklaşıyor 🌸' : 'Period Approaching 🌸',
+                        language === 'tr' ? 'Regl dönemin yarın başlayabilir!' : 'Period may start tomorrow!',
+                        addDays(parseISO(prediction.nextPeriodStart), -1),
+                        language
+                      );
+                      if (success) {
+                        toast.success(language === 'tr' ? 'Hatırlatıcı kuruldu!' : 'Reminder set!');
+                      } else {
+                        toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
+                      }
+                    }}
+                    className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
+                  >
+                    <Bell className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Ovulation Info */}
+            {activeInfoCard === 'ovulation' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
+                    <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
+                    <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
+                  </svg>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">{language === 'tr' ? 'Yumurtlama Günü' : 'Ovulation Day'}</h3>
+                    <p className="text-xs text-white/80">{format(parseISO(prediction.ovulationDate), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="bg-white/15 rounded-xl p-2.5">
+                    <h4 className="font-semibold text-white text-xs mb-1">🥚 {language === 'tr' ? 'Yumurtlama Nedir?' : 'What is Ovulation?'}</h4>
+                    <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                      <li>• {language === 'tr' ? 'Yumurtalıktan olgun bir yumurta salınır' : 'A mature egg is released'}</li>
+                      <li>• {language === 'tr' ? 'En verimli gün - hamilelik şansı en yüksek' : 'Most fertile day - highest pregnancy chance'}</li>
+                      <li>• {language === 'tr' ? 'Yumurta 12-24 saat döllenebilir' : 'Egg can be fertilized for 12-24 hours'}</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/15 rounded-xl p-2.5">
+                    <h4 className="font-semibold text-white text-xs mb-1">✨ {language === 'tr' ? 'Belirtiler' : 'Symptoms'}</h4>
+                    <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                      <li>• {language === 'tr' ? 'Vücut sıcaklığında hafif artış' : 'Slight body temperature increase'}</li>
+                      <li>• {language === 'tr' ? 'Servikal mukus yumurta akı kıvamında' : 'Egg white cervical mucus'}</li>
+                      <li>• {language === 'tr' ? 'Hafif kasık ağrısı olabilir' : 'Mild pelvic pain possible'}</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={() => handleNavigateToCalendar(prediction.ovulationDate)}
+                    className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <CalendarDays className="w-4 h-4 text-white" />
+                    <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const success = await scheduleCustomReminder(
+                        language === 'tr' ? 'Yumurtlama Günü 🥚' : 'Ovulation Day 🥚',
+                        language === 'tr' ? 'Bugün tahmini yumurtlama günün!' : 'Estimated ovulation day!',
+                        parseISO(prediction.ovulationDate),
+                        language
+                      );
+                      if (success) {
+                        toast.success(language === 'tr' ? 'Hatırlatıcı kuruldu!' : 'Reminder set!');
+                      } else {
+                        toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
+                      }
+                    }}
+                    className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
+                  >
+                    <Bell className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Fertile Window Info */}
+            {activeInfoCard === 'fertile' && prediction && (() => {
+              const ovulationDate = parseISO(prediction.ovulationDate);
+              const fertileStart = parseISO(prediction.fertileWindowStart);
+              const fertileEnd = parseISO(prediction.fertileWindowEnd);
+              const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
+              
+              return (
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl">🌸</span>
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
+                      <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
+                      <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
+                    </svg>
                     <div>
-                      <h3 className="text-lg font-bold text-white">
-                        {phase?.type === 'period' 
-                          ? (language === 'tr' ? 'Regl Dönemi' : 'Period') 
-                          : (language === 'tr' ? 'Sonraki Regl' : 'Next Period')}
-                      </h3>
+                      <h3 className="text-lg font-bold text-white">{language === 'tr' ? 'Doğurgan Dönem' : 'Fertile Window'}</h3>
                       <p className="text-xs text-white/80">
-                        {phase?.type === 'period'
-                          ? (language === 'tr' ? `${phase.dayNumber}. gün` : `Day ${phase.dayNumber}`)
-                          : format(parseISO(prediction.nextPeriodStart), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}
+                        {format(fertileStart, 'd MMM', { locale: language === 'tr' ? tr : undefined })} - {format(fertileEnd, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="bg-white/15 rounded-xl p-2.5">
-                      <h4 className="font-semibold text-white text-xs mb-1">📋 {language === 'tr' ? 'Ne Beklemeli?' : 'What to Expect?'}</h4>
-                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
-                        <li>• {language === 'tr' ? 'Adet kanaması ortalama 3-7 gün sürer' : 'Period bleeding lasts 3-7 days'}</li>
-                        <li>• {language === 'tr' ? 'İlk 1-2 gün akış daha yoğun olabilir' : 'Flow may be heavier first 1-2 days'}</li>
-                        <li>• {language === 'tr' ? 'Kramp ve yorgunluk normal' : 'Cramps and fatigue are normal'}</li>
-                      </ul>
-                    </div>
-                    <div className="bg-white/15 rounded-xl p-2.5">
-                      <h4 className="font-semibold text-white text-xs mb-1">💡 {language === 'tr' ? 'İpuçları' : 'Tips'}</h4>
-                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
-                        <li>• {language === 'tr' ? 'Bol su ve demir zengin gıdalar tüketin' : 'Drink water and eat iron-rich foods'}</li>
-                        <li>• {language === 'tr' ? 'Sıcak kompres ağrıları hafifletir' : 'Warm compress relieves pain'}</li>
-                        <li>• {language === 'tr' ? 'Hafif egzersiz faydalı olabilir' : 'Light exercise can help'}</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={() => handleNavigateToCalendar(prediction.nextPeriodStart)}
-                      className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <CalendarDays className="w-4 h-4 text-white" />
-                      <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
-                    </button>
-                    <button
-                      onClick={async () => {
-                        const success = await scheduleCustomReminder(
-                          language === 'tr' ? 'Regl Yaklaşıyor 🌸' : 'Period Approaching 🌸',
-                          language === 'tr' ? 'Regl dönemin yarın başlayabilir!' : 'Period may start tomorrow!',
-                          addDays(parseISO(prediction.nextPeriodStart), -1),
-                          language
-                        );
-                        if (success) {
-                          toast.success(language === 'tr' ? 'Hatırlatıcı kuruldu!' : 'Reminder set!');
-                        } else {
-                          toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
-                        }
-                      }}
-                      className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
-                    >
-                      <Bell className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Ovulation Info */}
-              {activeInfoCard === 'ovulation' && (
-                <div className="space-y-2 pt-8">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" fill="white" opacity="0.9" />
-                      <circle cx="12" cy="12" r="6" fill="#a855f7" opacity="0.6" />
-                      <circle cx="9" cy="9" r="2.5" fill="white" opacity="0.8" />
-                    </svg>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">{language === 'tr' ? 'Yumurtlama Günü' : 'Ovulation Day'}</h3>
-                      <p className="text-xs text-white/80">{format(parseISO(prediction.ovulationDate), 'd MMMM EEEE', { locale: language === 'tr' ? tr : undefined })}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <div className="bg-white/15 rounded-xl p-2.5">
-                      <h4 className="font-semibold text-white text-xs mb-1">🥚 {language === 'tr' ? 'Yumurtlama Nedir?' : 'What is Ovulation?'}</h4>
-                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
-                        <li>• {language === 'tr' ? 'Yumurtalıktan olgun bir yumurta salınır' : 'A mature egg is released'}</li>
-                        <li>• {language === 'tr' ? 'En verimli gün - hamilelik şansı en yüksek' : 'Most fertile day - highest pregnancy chance'}</li>
-                        <li>• {language === 'tr' ? 'Yumurta 12-24 saat döllenebilir' : 'Egg can be fertilized for 12-24 hours'}</li>
-                      </ul>
-                    </div>
-                    <div className="bg-white/15 rounded-xl p-2.5">
-                      <h4 className="font-semibold text-white text-xs mb-1">✨ {language === 'tr' ? 'Belirtiler' : 'Symptoms'}</h4>
-                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
-                        <li>• {language === 'tr' ? 'Vücut sıcaklığında hafif artış' : 'Slight body temperature increase'}</li>
-                        <li>• {language === 'tr' ? 'Servikal mukus yumurta akı kıvamında' : 'Egg white cervical mucus'}</li>
-                        <li>• {language === 'tr' ? 'Hafif kasık ağrısı olabilir' : 'Mild pelvic pain possible'}</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={() => handleNavigateToCalendar(prediction.ovulationDate)}
-                      className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <CalendarDays className="w-4 h-4 text-white" />
-                      <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
-                    </button>
-                    <button
-                      onClick={async () => {
-                        const success = await scheduleCustomReminder(
-                          language === 'tr' ? 'Yumurtlama Günü 🥚' : 'Ovulation Day 🥚',
-                          language === 'tr' ? 'Bugün tahmini yumurtlama günün!' : 'Estimated ovulation day!',
-                          parseISO(prediction.ovulationDate),
-                          language
-                        );
-                        if (success) {
-                          toast.success(language === 'tr' ? 'Hatırlatıcı kuruldu!' : 'Reminder set!');
-                        } else {
-                          toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
-                        }
-                      }}
-                      className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
-                    >
-                      <Bell className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Fertile Window Info */}
-              {activeInfoCard === 'fertile' && prediction && (() => {
-                const ovulationDate = parseISO(prediction.ovulationDate);
-                const fertileStart = parseISO(prediction.fertileWindowStart);
-                const fertileEnd = parseISO(prediction.fertileWindowEnd);
-                const fertileDays = eachDayOfInterval({ start: fertileStart, end: fertileEnd });
-                
-                return (
-                  <div className="space-y-2 pt-8">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 22c-2-2-8-6.5-8-13a8 8 0 1 1 16 0c0 6.5-6 11-8 13z" fill="white" opacity="0.9" />
-                        <path d="M12 18c-1.3-1.3-5-4.5-5-9a5 5 0 1 1 10 0c0 4.5-3.7 7.7-5 9z" fill="#14b8a6" opacity="0.5" />
-                        <circle cx="10" cy="9" r="2" fill="white" opacity="0.8" />
-                      </svg>
-                      <div>
-                        <h3 className="text-lg font-bold text-white">{language === 'tr' ? 'Doğurgan Dönem' : 'Fertile Window'}</h3>
-                        <p className="text-xs text-white/80">
-                          {format(fertileStart, 'd MMM', { locale: language === 'tr' ? tr : undefined })} - {format(fertileEnd, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Compact chance display */}
-                    <div className="bg-white/15 rounded-xl p-2.5">
-                      <h4 className="font-semibold text-white text-xs mb-1.5">📊 {language === 'tr' ? 'Hamilelik Şansı' : 'Pregnancy Chance'}</h4>
-                      <div className="space-y-1">
-                        {fertileDays.map((day) => {
-                          const daysFromOvulation = differenceInDays(day, ovulationDate);
-                          const chance = getFertilityChance(daysFromOvulation);
-                          const isOvulationDay = daysFromOvulation === 0;
-                          
-                          return (
-                            <div key={day.toISOString()} className="flex items-center gap-1.5">
-                              <div className="w-10 text-[9px] text-white/80">
-                                {format(day, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
-                              </div>
-                              <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-all ${isOvulationDay ? 'bg-gradient-to-r from-violet-400 to-purple-500' : 'bg-white/60'}`}
-                                  style={{ width: `${chance}%` }}
-                                />
-                              </div>
-                              <div className={`w-7 text-right text-[10px] font-bold ${isOvulationDay ? 'text-white' : 'text-white/80'}`}>
-                                {chance}%
-                              </div>
-                              {isOvulationDay && <span className="text-[9px]">🥚</span>}
+                  
+                  <div className="bg-white/15 rounded-xl p-2.5">
+                    <h4 className="font-semibold text-white text-xs mb-1.5">📊 {language === 'tr' ? 'Hamilelik Şansı' : 'Pregnancy Chance'}</h4>
+                    <div className="space-y-1">
+                      {fertileDays.map((day) => {
+                        const daysFromOvulation = differenceInDays(day, ovulationDate);
+                        const chance = getFertilityChance(daysFromOvulation);
+                        const isOvulationDay = daysFromOvulation === 0;
+                        
+                        return (
+                          <div key={day.toISOString()} className="flex items-center gap-1.5">
+                            <div className="w-10 text-[9px] text-white/80">
+                              {format(day, 'd MMM', { locale: language === 'tr' ? tr : undefined })}
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/15 rounded-xl p-2.5">
-                      <h4 className="font-semibold text-white text-xs mb-1">🎯 {language === 'tr' ? 'Bilgi' : 'Info'}</h4>
-                      <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
-                        <li>• {language === 'tr' ? 'Yumurtlama günü en yüksek şans (%33)' : 'Ovulation day: highest chance (33%)'}</li>
-                        <li>• {language === 'tr' ? 'Sperm 5 güne kadar canlı kalabilir' : 'Sperm can survive up to 5 days'}</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        onClick={() => handleNavigateToCalendar(prediction.fertileWindowStart)}
-                        className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
-                      >
-                        <CalendarDays className="w-4 h-4 text-white" />
-                        <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
-                      </button>
-                      <button
-                        onClick={async () => {
-                          const success = await scheduleCustomReminder(
-                            language === 'tr' ? 'Doğurgan Dönem Başlıyor 💐' : 'Fertile Window Starting 💐',
-                            language === 'tr' ? 'Yumurtlama dönemin başlıyor!' : 'Fertile window is starting!',
-                            fertileStart,
-                            language
-                          );
-                          if (success) {
-                            toast.success(language === 'tr' ? 'Hatırlatıcı kuruldu!' : 'Reminder set!');
-                          } else {
-                            toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
-                          }
-                        }}
-                        className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
-                      >
-                        <Bell className="w-4 h-4 text-white" />
-                      </button>
+                            <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all ${isOvulationDay ? 'bg-gradient-to-r from-violet-400 to-purple-500' : 'bg-white/60'}`}
+                                style={{ width: `${chance}%` }}
+                              />
+                            </div>
+                            <div className={`w-7 text-right text-[10px] font-bold ${isOvulationDay ? 'text-white' : 'text-white/80'}`}>
+                              {chance}%
+                            </div>
+                            {isOvulationDay && <span className="text-[9px]">🥚</span>}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                );
-              })()}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                  
+                  <div className="bg-white/15 rounded-xl p-2.5">
+                    <h4 className="font-semibold text-white text-xs mb-1">🎯 {language === 'tr' ? 'Bilgi' : 'Info'}</h4>
+                    <ul className="text-[11px] text-white/90 space-y-0.5 leading-tight">
+                      <li>• {language === 'tr' ? 'Yumurtlama günü en yüksek şans (%33)' : 'Ovulation day: highest chance (33%)'}</li>
+                      <li>• {language === 'tr' ? 'Sperm 5 güne kadar canlı kalabilir' : 'Sperm can survive up to 5 days'}</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => handleNavigateToCalendar(prediction.fertileWindowStart)}
+                      className="flex-1 bg-white/20 active:bg-white/30 rounded-xl py-2 flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <CalendarDays className="w-4 h-4 text-white" />
+                      <span className="font-semibold text-white text-xs">{language === 'tr' ? 'Takvim' : 'Calendar'}</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const success = await scheduleCustomReminder(
+                          language === 'tr' ? 'Doğurgan Dönem Başlıyor 💐' : 'Fertile Window Starting 💐',
+                          language === 'tr' ? 'Yumurtlama dönemin başlıyor!' : 'Fertile window is starting!',
+                          fertileStart,
+                          language
+                        );
+                        if (success) {
+                          toast.success(language === 'tr' ? 'Hatırlatıcı kuruldu!' : 'Reminder set!');
+                        } else {
+                          toast.error(language === 'tr' ? 'Bildirim izni gerekli' : 'Notification permission required');
+                        }
+                      }}
+                      className="bg-white/20 active:bg-white/30 rounded-xl px-3 py-2 flex items-center justify-center transition-colors"
+                    >
+                      <Bell className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </>
   );
 }
