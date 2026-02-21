@@ -1,9 +1,10 @@
 // 💊 Medication Tracking Page - Flo Inspired Design
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect, useMemo, forwardRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Check, X, Clock, Trash2, Edit2, ChevronRight, TrendingUp } from 'lucide-react';
-import { format, isToday } from 'date-fns';
+import { format, isToday, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from 'recharts';
 import { BottomNav } from '@/components/BottomNav';
 import { useUpdateSheet } from '@/contexts/UpdateSheetContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +23,7 @@ import {
   saveMedication,
   deleteMedication,
   getMedicationLogsForDate,
+  getMedicationLogsForMedication,
   toggleMedicationLog,
   getMedicationStats,
 } from '@/lib/medicationStorage';
@@ -97,6 +99,7 @@ export default function Medications() {
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
+  const [weeklyLogs, setWeeklyLogs] = useState<MedicationLog[]>([]);
   const [medicationStats, setMedicationStats] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -121,6 +124,32 @@ export default function Medications() {
   // Handle Android back button for sheets
   useBackHandler(isAddSheetOpen, () => setIsAddSheetOpen(false));
   useBackHandler(!!selectedMedication, () => setSelectedMedication(null));
+
+  // Load 7-day logs when a medication is selected
+  useEffect(() => {
+    if (!selectedMedication) return;
+    getMedicationLogsForMedication(selectedMedication.id).then(setWeeklyLogs);
+  }, [selectedMedication]);
+
+  // Build 7-day chart data
+  const weeklyChartData = useMemo(() => {
+    if (!selectedMedication) return [];
+    const now = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = subDays(now, 6 - i);
+      const dateStr = format(day, 'yyyy-MM-dd');
+      const dayLogs = weeklyLogs.filter(l => l.date === dateStr);
+      const totalDoses = selectedMedication.reminderTimes.length;
+      const takenDoses = dayLogs.filter(l => l.taken).length;
+      return {
+        day: format(day, 'EEE', { locale: tr }),
+        taken: takenDoses,
+        total: totalDoses,
+        pct: totalDoses > 0 ? Math.round((takenDoses / totalDoses) * 100) : 0,
+      };
+    });
+  }, [selectedMedication, weeklyLogs]);
+
   const loadData = async () => {
     try {
       const [meds, logs] = await Promise.all([
@@ -607,19 +636,56 @@ export default function Medications() {
               </Card>
             )}
 
-            {medicationStats[selectedMedication.id] !== undefined && (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Haftalık Uyum</span>
-                    <span className="font-bold text-violet">
-                      {Math.round(medicationStats[selectedMedication.id])}%
+            {/* 7-Day Adherence Chart */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-foreground">Son 7 Gün</span>
+                  {medicationStats[selectedMedication.id] !== undefined && (
+                    <span className="text-sm font-bold text-violet">
+                      %{Math.round(medicationStats[selectedMedication.id])}
                     </span>
-                  </div>
-                  <Progress value={medicationStats[selectedMedication.id]} className="h-2" />
-                </CardContent>
-              </Card>
-            )}
+                  )}
+                </div>
+                <div className="h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={weeklyChartData} barCategoryGap="20%">
+                      <XAxis 
+                        dataKey="day" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} 
+                      />
+                      <Bar dataKey="pct" radius={[6, 6, 0, 0]} maxBarSize={28}>
+                        {weeklyChartData.map((entry, index) => (
+                          <Cell 
+                            key={index} 
+                            fill={entry.pct === 100 
+                              ? 'hsl(142, 71%, 45%)' 
+                              : entry.pct > 0 
+                                ? selectedMedication.color 
+                                : 'hsl(var(--muted))'
+                            } 
+                            opacity={entry.pct === 0 ? 0.4 : 1}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-green-500 inline-block" /> Tam
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: selectedMedication.color }} /> Kısmi
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-muted inline-block opacity-40" /> Alınmadı
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Dose times for today */}
             <Card>
