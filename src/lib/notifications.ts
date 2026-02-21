@@ -69,6 +69,50 @@ const isSystemNotificationId = (id: number): boolean => {
   return id >= SYSTEM_NOTIFICATION_ID_BASE;
 };
 
+// Varied water reminder messages
+function getRandomWaterContent(language: 'tr' | 'en', privacyMode: PrivacyMode): NotificationContent {
+  const waterMessages: { title: string; body: string }[] = language === 'tr' ? [
+    { title: 'Bir Yudum Alsana 💧', body: 'Vücudun su bekliyor! Bir bardak iç, kendine iyi bak 🌿' },
+    { title: 'Su Molası ☕', body: 'Bir bardak su iç, enerjin yerine gelsin! Hedefine yaklaşıyorsun 💪' },
+    { title: 'Susadın mı? 💦', body: 'Cildinin parlaması için su şart! Hadi bir bardak daha 🌸' },
+    { title: 'Hatırlatma 💧', body: 'Bugün yeterince su içtin mi? Sağlığın için bir bardak daha!' },
+    { title: 'Su Zamanı 🥤', body: 'Metabolizmanı hızlandır, bir bardak su iç! Sen bunu hak ediyorsun ✨' },
+  ] : [
+    { title: 'Hydration Check 💧', body: 'Your body needs water! Grab a glass and keep glowing 🌿' },
+    { title: 'Water Break ☕', body: 'A glass of water will boost your energy! You\'re doing great 💪' },
+    { title: 'Feeling Thirsty? 💦', body: 'Water is the secret to glowing skin! Have another glass 🌸' },
+    { title: 'Gentle Reminder 💧', body: 'Have you had enough water today? One more glass for your health!' },
+    { title: 'Water Time 🥤', body: 'Speed up your metabolism with a glass of water! You deserve it ✨' },
+  ];
+  const pick = waterMessages[Math.floor(Math.random() * waterMessages.length)];
+  const priv = language === 'tr'
+    ? { privateTitle: 'Hatırlatma', privateBody: 'Sağlık hatırlatması.' }
+    : { privateTitle: 'Reminder', privateBody: 'Health reminder.' };
+  return { ...pick, ...priv };
+}
+
+// Varied exercise reminder messages
+function getRandomExerciseContent(language: 'tr' | 'en', privacyMode: PrivacyMode): NotificationContent {
+  const exerciseMessages: { title: string; body: string }[] = language === 'tr' ? [
+    { title: 'Haydi Hareket! 🏃‍♀️', body: 'Bugün hareket etmeyi unutma! En az 10.000 adım hedefle 🎯' },
+    { title: 'Adım Zamanı 👟', body: 'Öğleden sonra enerjini topla, kısa bir yürüyüşe çık! Vücudun sana teşekkür edecek 💜' },
+    { title: 'Kımılda Biraz 🧘‍♀️', body: 'Masa başında kaldıysan biraz esneme yap! 10 dakika bile fark yaratır ✨' },
+    { title: 'Hareket Molası 🚶‍♀️', body: 'Bugünkü adım hedefine ulaştın mı? Hadi bir tur daha at! 🌸' },
+    { title: 'Spora Var mısın? 💪', body: 'Kısa bir yürüyüş, dans veya esneme… Ne yaparsan yap, hareket et! 🎶' },
+  ] : [
+    { title: 'Let\'s Move! 🏃‍♀️', body: 'Don\'t forget to move today! Aim for at least 10,000 steps 🎯' },
+    { title: 'Step It Up 👟', body: 'Boost your afternoon energy with a short walk! Your body will thank you 💜' },
+    { title: 'Stretch Break 🧘‍♀️', body: 'Been sitting too long? Do some stretching! Even 10 minutes make a difference ✨' },
+    { title: 'Movement Break 🚶‍♀️', body: 'Have you hit your step goal today? Take one more lap! 🌸' },
+    { title: 'Ready to Move? 💪', body: 'A short walk, dance, or stretch… Whatever it is, just move! 🎶' },
+  ];
+  const pick = exerciseMessages[Math.floor(Math.random() * exerciseMessages.length)];
+  const priv = language === 'tr'
+    ? { privateTitle: 'Hatırlatma', privateBody: 'Sağlık hatırlatması.' }
+    : { privateTitle: 'Reminder', privateBody: 'Health reminder.' };
+  return { ...pick, ...priv };
+}
+
 // Get notification content based on type and privacy mode
 export function getNotificationContent(
   type: NotificationType,
@@ -141,22 +185,8 @@ export function getNotificationContent(
       privateTitle: language === 'tr' ? 'Günlük Hatırlatma' : 'Daily Reminder',
       privateBody: language === 'tr' ? 'Günlük kaydını yap.' : 'Make your daily log.',
     },
-    water_reminder: {
-      title: language === 'tr' ? 'Su İç 💧' : 'Drink Water 💧',
-      body: language === 'tr' 
-        ? 'Günlük su hedefin için bir bardak su iç!' 
-        : 'Drink a glass of water for your daily goal!',
-      privateTitle: language === 'tr' ? 'Su Hatırlatması' : 'Water Reminder',
-      privateBody: language === 'tr' ? 'Su içme hatırlatması.' : 'Water intake reminder.',
-    },
-    exercise_reminder: {
-      title: language === 'tr' ? 'Hareket Zamanı 🏃‍♀️' : 'Time to Move 🏃‍♀️',
-      body: language === 'tr' 
-        ? 'Kısa bir yürüyüş veya esneme yapmaya ne dersin?' 
-        : 'How about a short walk or some stretching?',
-      privateTitle: language === 'tr' ? 'Egzersiz Hatırlatması' : 'Exercise Reminder',
-      privateBody: language === 'tr' ? 'Harekete geçme vakti.' : 'Time to exercise.',
-    },
+    water_reminder: getRandomWaterContent(language, privacyMode),
+    exercise_reminder: getRandomExerciseContent(language, privacyMode),
   };
 
   const content = contents[type];
@@ -593,10 +623,10 @@ async function _doScheduleNotifications(
     }
   }
   
-  // Exercise reminders: 1 per day at 17:00
+  // Exercise reminders: 1 per day at 14:00
   if (prefs.togglesByType.exercise_reminder) {
     for (let i = 0; i <= 30; i++) {
-      let exerciseDate = setMinutes(setHours(addDays(now, i), 17), 0);
+      let exerciseDate = setMinutes(setHours(addDays(now, i), 14), 0);
       exerciseDate = getNextValidTime(exerciseDate, format(exerciseDate, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
 
       if (!isAfter(exerciseDate, now)) continue;
