@@ -107,7 +107,14 @@ export default function Medications() {
   // Save edited reminder times from detail modal
   const handleSaveReminderTimes = async () => {
     if (!selectedMedication || !editingTimes) return;
-    const updated: Medication = { ...selectedMedication, reminderTimes: editingTimes.filter(t => t) };
+    const cleanedTimes = Array.from(
+      new Set(editingTimes.map(t => t.trim()).filter(Boolean))
+    ).sort();
+    if (cleanedTimes.length === 0) {
+      toast.error('En az bir hatırlatma saati gerekli');
+      return;
+    }
+    const updated: Medication = { ...selectedMedication, reminderTimes: cleanedTimes };
     await saveMedication(updated);
     const allMeds = await getMedications();
     await scheduleMedicationNotifications(allMeds.filter(m => m.isActive));
@@ -175,7 +182,7 @@ export default function Medications() {
       setTodayLogs(logs.filter(l => activeIds.has(l.medicationId)));
 
       // Load stats for each medication
-      const statsPromises = meds.map(async (med) => {
+      const statsPromises = activeMeds.map(async (med) => {
         const stats = await getMedicationStats(med.id, 7);
         return { id: med.id, rate: stats.adherenceRate };
       });
