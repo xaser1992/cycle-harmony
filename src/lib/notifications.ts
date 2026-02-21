@@ -1,5 +1,5 @@
 // 🌸 Notification Service using Capacitor Local Notifications
-import { LocalNotifications, ScheduleOptions, LocalNotificationSchema } from '@capacitor/local-notifications';
+import { LocalNotifications, LocalNotificationSchema } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
 import { parseISO, addDays, setHours, setMinutes, addMinutes, isBefore, isAfter, format } from 'date-fns';
 import type { 
@@ -617,7 +617,7 @@ async function _doScheduleNotifications(
           });
           if (alreadyWaterAtMinute) return;
           const content = getNotificationContent('water_reminder', language, prefs.privacyMode);
-          const idx = i * 10 + slotIndex;
+          const idx = i * 3 + slotIndex; // 0..89 for 30 days * 3 slots
           notifications.push(
             buildNotificationPayload(makeNotificationId('water_reminder', idx), content.title, content.body, waterTime, NOTIFICATION_CHANNELS.WELLNESS)
           );
