@@ -99,11 +99,24 @@ export default function Medications() {
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
+  const [editingTimes, setEditingTimes] = useState<string[] | null>(null);
   const [weeklyLogs, setWeeklyLogs] = useState<MedicationLog[]>([]);
   const [medicationStats, setMedicationStats] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const today = format(new Date(), 'yyyy-MM-dd');
-  
+  // Save edited reminder times from detail modal
+  const handleSaveReminderTimes = async () => {
+    if (!selectedMedication || !editingTimes) return;
+    const updated: Medication = { ...selectedMedication, reminderTimes: editingTimes.filter(t => t) };
+    await saveMedication(updated);
+    const allMeds = await getMedications();
+    await scheduleMedicationNotifications(allMeds.filter(m => m.isActive));
+    setSelectedMedication(updated);
+    setEditingTimes(null);
+    await loadData();
+    toast.success('Hatırlatma saatleri güncellendi');
+  };
+
 
   // Form state
   const [formData, setFormData] = useState({
@@ -123,7 +136,7 @@ export default function Medications() {
 
   // Handle Android back button for sheets
   useBackHandler(isAddSheetOpen, () => setIsAddSheetOpen(false));
-  useBackHandler(!!selectedMedication, () => setSelectedMedication(null));
+  useBackHandler(!!selectedMedication, () => { setSelectedMedication(null); setEditingTimes(null); });
 
   // Load 7-day logs when a medication is selected
   useEffect(() => {
@@ -230,6 +243,7 @@ export default function Medications() {
     await deleteMedication(id);
     await loadData();
     setSelectedMedication(null);
+    setEditingTimes(null);
     toast.success('İlaç silindi');
   };
 
@@ -607,6 +621,7 @@ export default function Medications() {
                 e.preventDefault();
                 e.stopPropagation();
                 setSelectedMedication(null);
+                setEditingTimes(null);
               }}
               className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-all mt-2"
             >
@@ -687,29 +702,104 @@ export default function Medications() {
               </CardContent>
             </Card>
 
-            {/* Dose times for today */}
+            {/* Reminder Times (editable) + Today's Doses */}
             <Card>
               <CardContent className="p-4">
-                <span className="text-sm text-muted-foreground block mb-3">Bugünkü Dozlar</span>
-                <div className="flex gap-2 flex-wrap">
-                  {selectedMedication.reminderTimes.map((time) => {
-                    const taken = isMedicationTakenAtTime(selectedMedication.id, time);
-                    return (
-                      <button
-                        key={time}
-                        onClick={() => handleToggleMedication(selectedMedication, time, taken)}
-                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
-                          taken
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-foreground">Hatırlatma Saatleri</span>
+                  {editingTimes === null ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-violet h-7 px-2 text-xs"
+                      onClick={() => setEditingTimes([...selectedMedication.reminderTimes])}
+                    >
+                      <Edit2 className="w-3 h-3 mr-1" />
+                      Düzenle
+                    </Button>
+                  ) : (
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground h-7 px-2 text-xs"
+                        onClick={() => setEditingTimes(null)}
                       >
-                        {taken ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                        {time}
-                      </button>
-                    );
-                  })}
+                        İptal
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-violet h-7 px-3 text-xs"
+                        onClick={handleSaveReminderTimes}
+                      >
+                        Kaydet
+                      </Button>
+                    </div>
+                  )}
                 </div>
+
+                {editingTimes !== null ? (
+                  <div className="space-y-2">
+                    {editingTimes.map((time, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          type="time"
+                          value={time}
+                          onChange={(e) => {
+                            const updated = [...editingTimes];
+                            updated[index] = e.target.value;
+                            setEditingTimes(updated);
+                          }}
+                          className="flex-1"
+                        />
+                        {editingTimes.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive h-9 w-9"
+                            onClick={() => setEditingTimes(editingTimes.filter((_, i) => i !== index))}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-1"
+                      onClick={() => setEditingTimes([...editingTimes, '12:00'])}
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" />
+                      Saat Ekle
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2 flex-wrap">
+                      {selectedMedication.reminderTimes.map((time) => {
+                        const taken = isMedicationTakenAtTime(selectedMedication.id, time);
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => handleToggleMedication(selectedMedication, time, taken)}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
+                              taken
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {taken ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                            {time}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">Bugünkü dozları işaretlemek için dokunun</p>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
