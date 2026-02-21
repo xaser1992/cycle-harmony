@@ -60,8 +60,9 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
     await recordMedicationDose(medicationId, today, true);
     console.log(`Medication ${medicationName} marked as taken`);
   } else if (actionId === 'snooze') {
-    // Unique snooze ID per medication to avoid overwriting
-    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 90000 + (medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000);
+    // Unique snooze ID: medication hash + timestamp remainder to handle repeated snoozes
+    const medHash = medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 900;
+    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 900000 + medHash * 100 + (Date.now() % 100);
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
     await LocalNotifications.schedule({
       notifications: [{
@@ -101,10 +102,11 @@ export async function createMedicationNotificationChannel(): Promise<void> {
 }
 
 // Generate a unique notification ID for a medication at a specific time
+// Each medication gets a 10,000 ID block: supports 30 days × 100 time slots
 function generateNotificationId(medicationId: string, dayOffset: number, timeIndex: number): number {
-  // Create a hash from the medication ID
   const hash = medicationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return MEDICATION_NOTIFICATION_BASE_ID + (hash % 1000) * 100 + dayOffset * 10 + timeIndex;
+  const medKey = (hash % 9000) + 1000; // 1000..9999
+  return MEDICATION_NOTIFICATION_BASE_ID + medKey * 100 + dayOffset * 10 + timeIndex;
 }
 
 // Cancel all medication notifications
@@ -236,7 +238,7 @@ export async function scheduleOneTimeMedicationReminder(
   try {
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + 90000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000),
+        id: MEDICATION_NOTIFICATION_BASE_ID + 900000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 900) * 100 + (Date.now() % 100),
         title: `💊 ${medication.name} - Hatırlatma`,
         body: `${medication.dosage} almayı unutma!`,
         schedule: { at: notificationTime },
