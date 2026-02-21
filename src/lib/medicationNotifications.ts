@@ -67,29 +67,36 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
   const medicationName = extra.medicationName;
   
   if (actionId === 'take') {
-    // Idempotent: set taken=true (toggleMedicationLog sets, not toggles)
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const scheduledTime = (extra.scheduledTime as string | undefined) || format(new Date(), 'HH:mm');
-    await toggleMedicationLog(medicationId, today, scheduledTime, true);
+    // Use the original scheduled date/time from extra (handles midnight crossover)
+    const scheduledAt = extra.scheduledAtISO ? new Date(extra.scheduledAtISO as string) : new Date();
+    const day = format(scheduledAt, 'yyyy-MM-dd');
+    const timeLabel = (extra.scheduledTime as string | undefined) || format(scheduledAt, 'HH:mm');
+    await toggleMedicationLog(medicationId, day, timeLabel, true);
     if (notification?.id) {
       try { await LocalNotifications.cancel({ notifications: [{ id: notification.id }] }); } catch {}
     }
-    // Also cancel any pending snooze notifications for this medication
+    // Cancel any pending snooze notifications for this medication (extra-based, collision-proof)
     try {
-      const snoozeBase = MEDICATION_NOTIFICATION_BASE_ID + SNOOZE_OFFSET;
-      const medHash = medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % SNOOZE_MEDHASH_MOD;
-      const snoozeStart = snoozeBase + medHash * 10000;
-      const snoozeEnd = snoozeStart + 9999;
       const pending = await LocalNotifications.getPending();
-      const toCancel = pending.notifications.filter(n => n.id >= snoozeStart && n.id <= snoozeEnd);
+      const snoozeFloor = MEDICATION_NOTIFICATION_BASE_ID + SNOOZE_OFFSET;
+      const snoozeCeil = snoozeFloor + 9_000_000;
+      const toCancel = pending.notifications.filter(n =>
+        n.id >= snoozeFloor && n.id < snoozeCeil &&
+        (n.extra as any)?.type === 'medication_reminder' &&
+        (n.extra as any)?.medicationId === medicationId
+      );
       if (toCancel.length) await LocalNotifications.cancel({ notifications: toCancel });
     } catch {}
     console.log(`Medication ${medicationName} marked as taken`);
   } else if (actionId === 'snooze') {
+    // Cancel the current notification first to prevent double-tap
+    if (notification?.id) {
+      try { await LocalNotifications.cancel({ notifications: [{ id: notification.id }] }); } catch {}
+    }
     // Snooze IDs use SNOOZE_OFFSET band to avoid schedule collision
     const snoozeBase = MEDICATION_NOTIFICATION_BASE_ID + SNOOZE_OFFSET;
     const medHash = medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % SNOOZE_MEDHASH_MOD;
-    const nonce = (Date.now() + (_snoozeSeq++ % 10000)) % 10000;
+    const nonce = ((Date.now() % 10000) ^ (_snoozeSeq++ % 10000)) % 10000;
     const snoozeId = snoozeBase + medHash * 10000 + nonce;
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
     const newTimeLabel = format(snoozeTime, 'HH:mm');
@@ -103,7 +110,12 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
         sound: 'notification.wav',
         smallIcon: 'ic_stat_icon',
         actionTypeId: 'MEDICATION_ACTIONS',
-        extra: { ...extra, scheduledTime: newTimeLabel, originalScheduledTime: extra.originalScheduledTime || extra.scheduledTime },
+        extra: {
+          ...extra,
+          scheduledTime: newTimeLabel,
+          scheduledAtISO: snoozeTime.toISOString(),
+          originalScheduledTime: extra.originalScheduledTime || extra.scheduledTime,
+        },
       }],
     });
     console.log(`Medication ${medicationName} snoozed for 15 minutes (id: ${snoozeId})`);
@@ -192,10 +204,11 @@ export async function scheduleMedicationNotification(medication: Medication): Pr
           sound: 'notification.wav',
           smallIcon: 'ic_stat_icon',
           actionTypeId: 'MEDICATION_ACTIONS',
-          extra: {
+           extra: {
             medicationId: medication.id,
             medicationName: medication.name,
             scheduledTime: time,
+            scheduledAtISO: notificationTime.toISOString(),
             type: 'medication_reminder',
           },
         });
@@ -271,7 +284,7 @@ export async function scheduleOneTimeMedicationReminder(
     const timeLabel = format(notificationTime, 'HH:mm');
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + SNOOZE_OFFSET + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % SNOOZE_MEDHASH_MOD) * 10000 + (Date.now() + (_snoozeSeq++ % 10000)) % 10000,
+        id: MEDICATION_NOTIFICATION_BASE_ID + SNOOZE_OFFSET + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % SNOOZE_MEDHASH_MOD) * 10000 + ((Date.now() % 10000) ^ (_snoozeSeq++ % 10000)) % 10000,
         title: `💊 ${medication.name} - Hatırlatma`,
         body: `${medication.dosage} almayı unutma! (${timeLabel})`,
         schedule: { at: notificationTime },
@@ -283,6 +296,7 @@ export async function scheduleOneTimeMedicationReminder(
           medicationId: medication.id,
           medicationName: medication.name,
           scheduledTime: timeLabel,
+          scheduledAtISO: notificationTime.toISOString(),
           type: 'medication_reminder',
         },
       }],
