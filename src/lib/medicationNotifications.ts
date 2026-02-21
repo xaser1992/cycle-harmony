@@ -12,12 +12,12 @@ const isNative = () => Capacitor.isNativePlatform();
 export const MEDICATION_NOTIFICATION_CHANNEL = 'medication_reminders';
 
 // ID layout for medication notifications:
-// Schedule IDs: BASE + medKey(1000..9999) * 10000 + dayOffset(0..29) * 100 + timeIndex(0..23)
+// Schedule IDs: BASE + medKey(1000..9999) * 10000 + dayOffset(0..29) * 100 + timeIndex(0..7)
 // Snooze IDs:   BASE + 500000 + medHash(0..8999) * 10000 + nonce(0..9999 via time+counter mix)
-// Max schedule:  BASE + 9999*10000 + 29*100 + 23 = BASE + 99,993,023
+// Max schedule:  BASE + 9999*10000 + 29*100 + 7 = BASE + 99,992,907
 // Max snooze:    BASE + 500000 + 8999*10000 + 9999 = BASE + 90,499,999
-// Cancel range:  BASE .. BASE + 100_000_000
-const MEDICATION_NOTIFICATION_BASE_ID = 20000;
+// Cancel range:  BASE .. BASE + MEDICATION_ID_MAX
+const MEDICATION_NOTIFICATION_BASE_ID = 20_000_000; // 20M–120M band reserved for medications
 const MEDICATION_ID_MAX = 100_000_000;
 
 // Monotonic counter for snooze nonce to avoid same-ms collisions
@@ -115,12 +115,12 @@ export async function createMedicationNotificationChannel(): Promise<void> {
 }
 
 // Generate a unique notification ID for a medication at a specific time
-// Each medication gets a 10,000 ID block (medKey * 10000): supports 30 days × 24 time slots
-function generateNotificationId(medicationId: string, dayOffset: number, timeIndex: number): number | null {
+// Each medication gets a 10,000 ID block (medKey * 10000): supports 30 days × 8 time slots
+function generateNotificationId(medicationId: string, dayOffset: number, timeIndex: number): number {
   const hash = medicationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const medKey = (hash % 9000) + 1000; // 1000..9999
-  if (timeIndex >= 24) return null; // guard: max 24 time slots per day
-  return MEDICATION_NOTIFICATION_BASE_ID + medKey * 10000 + dayOffset * 100 + timeIndex;
+  const safeTimeIndex = Math.min(timeIndex, 7); // UI limited to 8 slots
+  return MEDICATION_NOTIFICATION_BASE_ID + medKey * 10000 + dayOffset * 100 + safeTimeIndex;
 }
 
 // Cancel all medication notifications
@@ -158,13 +158,13 @@ export async function scheduleMedicationNotification(medication: Medication): Pr
     const targetDate = addDays(now, dayOffset);
     
     medication.reminderTimes.forEach((time, timeIndex) => {
+      if (timeIndex >= 8) return; // UI limited to 8 reminder times
       const [hour, minute] = time.split(':').map(Number);
       const notificationTime = setMinutes(setHours(targetDate, hour), minute);
       
       // Only schedule if in the future
       if (isAfter(notificationTime, now)) {
         const notificationId = generateNotificationId(medication.id, dayOffset, timeIndex);
-        if (notificationId === null) return; // skip if timeIndex out of range
         notifications.push({
           id: notificationId,
           title: `💊 ${medication.name}`,
