@@ -751,328 +751,273 @@ export default function CalendarPage() {
         </AnimatePresence>
       </main>
 
-      {/* Day Detail Bottom Sheet */}
-      <AnimatePresence>
-        {showDayDetail && selectedDate && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowDayDetail(false)}
-            />
-            
-            {/* Detail Card */}
-            <motion.div
-              initial={{ y: '100%', opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[101] rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden backdrop-blur-xl bg-glass"
-            >
-              {/* Handle */}
-              <div className="flex justify-center pt-3 pb-2">
-                <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
-              </div>
+      {/* Day Detail - Fullscreen Modal */}
+      {showDayDetail && selectedDate && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-background animate-fade-in">
+          {/* Header */}
+          <div className="bg-card/80 backdrop-blur-sm border-b border-border/30 px-4 pt-4 pb-3 safe-area-top flex items-center justify-between">
+            <div className="mt-2">
+              <p className="text-sm text-muted-foreground">
+                {isSameDay(selectedDate, new Date()) ? 'Bugün' : format(selectedDate, 'EEEE', { locale: tr })}
+              </p>
+              <h2 className="text-xl font-bold text-foreground">
+                {format(selectedDate, 'd MMMM yyyy', { locale: tr })}
+              </h2>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleEditDay}
+                className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <Edit3 className="w-5 h-5 text-primary" />
+              </button>
+              <button
+                onClick={() => setShowDayDetail(false)}
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+          </div>
 
-              {/* Header */}
-              <div className="px-6 pb-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {isSameDay(selectedDate, new Date()) ? 'Bugün' : format(selectedDate, 'EEEE', { locale: tr })}
-                    </p>
-                    <h2 className="text-2xl font-bold text-foreground">
-                      {format(selectedDate, 'd MMMM yyyy', { locale: tr })}
-                    </h2>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleEditDay}
-                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center active:scale-90 transition-transform"
-                    >
-                      <Edit3 className="w-5 h-5 text-primary" />
-                    </button>
-                    <button
-                      onClick={() => setShowDayDetail(false)}
-                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-90 transition-transform"
-                    >
-                      <X className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                  </div>
+          <div className="flex-1 overflow-y-auto px-4 pb-24 pt-4 space-y-4">
+            {/* Day Type Badge */}
+            {(() => {
+              const dayType = getDayType(selectedDate);
+              const typeInfo = getDayTypeLabel(dayType);
+              return (
+                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${typeInfo.color} text-white text-sm font-medium`}>
+                  <span>
+                    {dayType === 'period' ? '🩸' : dayType === 'fertile' ? '🌱' : dayType === 'ovulation' ? '🥚' : dayType === 'pms' ? '🌙' : '📅'}
+                  </span>
+                  {typeInfo.label}
                 </div>
+              );
+            })()}
 
-                {/* Day Type Badge */}
-                {(() => {
-                  const dayType = getDayType(selectedDate);
-                  const typeInfo = getDayTypeLabel(dayType);
-                  return (
-                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${typeInfo.color} text-white text-sm font-medium mb-4`}>
-                      <span>
-                        {dayType === 'period' ? '🩸' : dayType === 'fertile' ? '🌱' : dayType === 'ovulation' ? '🥚' : dayType === 'pms' ? '🌙' : '📅'}
-                      </span>
-                      {typeInfo.label}
+            {/* Entry Summary */}
+            {(() => {
+              const entry = getEntryForDate(selectedDate);
+              const isPastDate = selectedDate < new Date() && !isSameDay(selectedDate, new Date());
+              const isOnPeriod = entry?.flowLevel !== 'none' && entry?.flowLevel !== undefined;
+              
+              if (!entry && getMedicationProgress(selectedDate).total === 0) {
+                return (
+                  <div className="space-y-4">
+                    {isPastDate && (
+                      <button
+                        onClick={() => setShowPeriodConfirm(true)}
+                        className="w-full p-4 rounded-2xl bg-gradient-to-r from-rose to-pink text-white flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-lg shadow-rose/30"
+                      >
+                        <span className="text-xl">🩸</span>
+                        <span className="font-semibold">Bu Gün Regl Başladı</span>
+                      </button>
+                    )}
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-sm">Bu gün için kayıt yok</p>
+                      <button
+                        onClick={handleEditDay}
+                        className="mt-3 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium active:scale-95 transition-transform"
+                      >
+                        Detaylı Kayıt Ekle
+                      </button>
                     </div>
-                  );
-                })()}
-              </div>
+                  </div>
+                );
+              }
 
-              {/* Content */}
-              <div className="px-6 pb-8 space-y-4 overflow-y-auto max-h-[40vh]">
-                {/* Entry Summary */}
-                {(() => {
-                  const entry = getEntryForDate(selectedDate);
-                  const isPastDate = selectedDate < new Date() && !isSameDay(selectedDate, new Date());
-                  const isOnPeriod = entry?.flowLevel !== 'none' && entry?.flowLevel !== undefined;
-                  
-                  if (!entry && getMedicationProgress(selectedDate).total === 0) {
+              return (
+                <div className="space-y-4">
+                  {isPastDate && (
+                    <button
+                      onClick={() => setShowPeriodConfirm(true)}
+                      className={`w-full p-3 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-lg ${
+                        isOnPeriod 
+                          ? 'bg-gradient-to-r from-emerald to-teal text-white shadow-emerald/30'
+                          : 'bg-gradient-to-r from-rose to-pink text-white shadow-rose/30'
+                      }`}
+                    >
+                      <span className="text-lg">{isOnPeriod ? '✓' : '🩸'}</span>
+                      <span className="font-medium text-sm">
+                        {isOnPeriod ? 'Regl Kaydını Kaldır' : 'Bu Gün Regl Başladı'}
+                      </span>
+                    </button>
+                  )}
+
+                  {entry && entry.flowLevel !== 'none' && (
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-rose-light dark:bg-rose/20">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
+                        <span className="text-lg">{FLOW_LABELS[entry.flowLevel].emoji}</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Akış</p>
+                        <p className="font-semibold text-foreground">{FLOW_LABELS[entry.flowLevel].tr}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.mood && (
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-light dark:bg-amber/20">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber to-orange flex items-center justify-center">
+                        <span className="text-lg">{MOOD_LABELS[entry.mood]?.emoji || '😊'}</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Ruh Hali</p>
+                        <p className="font-semibold text-foreground">{MOOD_LABELS[entry.mood]?.tr || entry.mood}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry && entry.symptoms.length > 0 && (
+                    <div className="p-3 rounded-2xl bg-violet-light dark:bg-violet/20">
+                      <p className="text-xs text-muted-foreground mb-2">Semptomlar</p>
+                      <div className="flex flex-wrap gap-2">
+                        {entry.symptoms.map(symptom => {
+                          const label = SYMPTOM_LABELS[symptom];
+                          return (
+                            <span key={symptom} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light">
+                              <span>{label?.emoji || '•'}</span>
+                              {label?.tr || symptom}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.sexualActivity && entry.sexualActivity.length > 0 && (
+                    <div className="p-3 rounded-2xl bg-pink-light dark:bg-pink/20">
+                      <p className="text-xs text-muted-foreground mb-2">Cinsel Aktivite</p>
+                      <div className="flex flex-wrap gap-2">
+                        {entry.sexualActivity.map(item => (
+                          <span key={item} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-light dark:bg-pink/30 text-xs font-medium text-pink dark:text-pink-light">
+                            💕 {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.discharge && entry.discharge.length > 0 && (
+                    <div className="p-3 rounded-2xl bg-violet-light dark:bg-violet/20">
+                      <p className="text-xs text-muted-foreground mb-2">Vajinal Akıntı</p>
+                      <div className="flex flex-wrap gap-2">
+                        {entry.discharge.map(item => (
+                          <span key={item} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light">
+                            💧 {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.activity && entry.activity.length > 0 && (
+                    <div className="p-3 rounded-2xl bg-green-light dark:bg-green/20">
+                      <p className="text-xs text-muted-foreground mb-2">Fiziksel Aktivite</p>
+                      <div className="flex flex-wrap gap-2">
+                        {entry.activity.map(item => (
+                          <span key={item} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-light dark:bg-green/30 text-xs font-medium text-green dark:text-green-light">
+                            🏃 {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.waterGlasses && entry.waterGlasses > 0 && (
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-sky-light dark:bg-sky/20">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky to-blue flex items-center justify-center">
+                        <span className="text-lg">💧</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Su Tüketimi</p>
+                        <p className="font-semibold text-foreground">{(entry.waterGlasses * 0.25).toFixed(2)} L</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.weight && (
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-light dark:bg-slate/20">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate to-slate flex items-center justify-center">
+                        <span className="text-lg">⚖️</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Ağırlık</p>
+                        <p className="font-semibold text-foreground">{entry.weight} kg</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.pregnancyTest && entry.pregnancyTest !== 'not_taken' && (
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-light dark:bg-orange/20">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange to-amber flex items-center justify-center">
+                        <span className="text-lg">🧪</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Gebelik Testi</p>
+                        <p className="font-semibold text-foreground">
+                          {entry.pregnancyTest === 'positive' ? 'Pozitif' : 
+                           entry.pregnancyTest === 'negative' ? 'Negatif' : 
+                           entry.pregnancyTest === 'faint_line' ? 'Soluk çizgi' : entry.pregnancyTest}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.ovulationTest && entry.ovulationTest !== 'not_taken' && (
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-teal-light dark:bg-teal/20">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-cyan flex items-center justify-center">
+                        <span className="text-lg">📊</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Ovülasyon Testi</p>
+                        <p className="font-semibold text-foreground">
+                          {entry.ovulationTest === 'positive' ? 'Pozitif' : 
+                           entry.ovulationTest === 'negative' ? 'Negatif' : 
+                           entry.ovulationTest === 'own_method' ? 'Kendi yöntemim' : entry.ovulationTest}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry?.notes && (
+                    <div className="p-3 rounded-2xl bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1">Notlar</p>
+                      <p className="text-sm text-foreground">{entry.notes}</p>
+                    </div>
+                  )}
+
+                  {(() => {
+                    const medProgress = getMedicationProgress(selectedDate);
+                    if (medProgress.total === 0) return null;
                     return (
-                      <div className="space-y-4">
-                        {/* Quick Period Log for Past Dates */}
-                        {isPastDate && (
-                          <button
-                            onClick={() => setShowPeriodConfirm(true)}
-                            className="w-full p-4 rounded-2xl bg-gradient-to-r from-rose to-pink text-white flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-lg shadow-rose/30"
-                          >
-                            <span className="text-xl">🩸</span>
-                            <span className="font-semibold">Bu Gün Regl Başladı</span>
-                          </button>
-                        )}
-                        
-                        <div className="text-center py-4 text-muted-foreground">
-                          <p className="text-sm">Bu gün için kayıt yok</p>
-                          <button
-                            onClick={handleEditDay}
-                            className="mt-3 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium active:scale-95 transition-transform"
-                          >
-                            Detaylı Kayıt Ekle
-                          </button>
+                      <div className="p-3 rounded-2xl bg-emerald/10 dark:bg-emerald/20">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
+                            <Pill className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-muted-foreground">İlaç Durumu</p>
+                            <p className="font-semibold text-foreground">
+                              {medProgress.taken} / {medProgress.total} doz alındı
+                            </p>
+                          </div>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-emerald to-green rounded-full transition-all"
+                            style={{ width: `${(medProgress.taken / medProgress.total) * 100}%` }}
+                          />
                         </div>
                       </div>
                     );
-                  }
-
-                  return (
-                    <div className="space-y-4">
-                      {/* Quick Period Toggle for Past Dates */}
-                      {isPastDate && (
-                        <button
-                          onClick={() => setShowPeriodConfirm(true)}
-                          className={`w-full p-3 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-lg ${
-                            isOnPeriod 
-                              ? 'bg-gradient-to-r from-emerald to-teal text-white shadow-emerald/30'
-                              : 'bg-gradient-to-r from-rose to-pink text-white shadow-rose/30'
-                          }`}
-                        >
-                          <span className="text-lg">{isOnPeriod ? '✓' : '🩸'}</span>
-                          <span className="font-medium text-sm">
-                            {isOnPeriod ? 'Regl Kaydını Kaldır' : 'Bu Gün Regl Başladı'}
-                          </span>
-                        </button>
-                      )}
-                      {/* Flow Level */}
-                      {entry && entry.flowLevel !== 'none' && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-rose-light dark:bg-rose/20">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose to-pink flex items-center justify-center">
-                            <span className="text-lg">{FLOW_LABELS[entry.flowLevel].emoji}</span>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Akış</p>
-                            <p className="font-semibold text-foreground">{FLOW_LABELS[entry.flowLevel].tr}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Mood */}
-                      {entry?.mood && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-light dark:bg-amber/20">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber to-orange flex items-center justify-center">
-                            <span className="text-lg">{MOOD_LABELS[entry.mood]?.emoji || '😊'}</span>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Ruh Hali</p>
-                            <p className="font-semibold text-foreground">{MOOD_LABELS[entry.mood]?.tr || entry.mood}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Symptoms */}
-                      {entry && entry.symptoms.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-violet-light dark:bg-violet/20">
-                          <p className="text-xs text-muted-foreground mb-2">Semptomlar</p>
-                          <div className="flex flex-wrap gap-2">
-                            {entry.symptoms.map(symptom => {
-                              const label = SYMPTOM_LABELS[symptom];
-                              return (
-                                <span
-                                  key={symptom}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light"
-                                >
-                                  <span>{label?.emoji || '•'}</span>
-                                  {label?.tr || symptom}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Sexual Activity */}
-                      {entry?.sexualActivity && entry.sexualActivity.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-pink-light dark:bg-pink/20">
-                          <p className="text-xs text-muted-foreground mb-2">Cinsel Aktivite</p>
-                          <div className="flex flex-wrap gap-2">
-                            {entry.sexualActivity.map(item => (
-                              <span
-                                key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-light dark:bg-pink/30 text-xs font-medium text-pink dark:text-pink-light"
-                              >
-                                💕 {item}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Discharge */}
-                      {entry?.discharge && entry.discharge.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-violet-light dark:bg-violet/20">
-                          <p className="text-xs text-muted-foreground mb-2">Vajinal Akıntı</p>
-                          <div className="flex flex-wrap gap-2">
-                            {entry.discharge.map(item => (
-                              <span
-                                key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-light dark:bg-violet/30 text-xs font-medium text-violet dark:text-violet-light"
-                              >
-                                💧 {item}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Activity */}
-                      {entry?.activity && entry.activity.length > 0 && (
-                        <div className="p-3 rounded-2xl bg-green-light dark:bg-green/20">
-                          <p className="text-xs text-muted-foreground mb-2">Fiziksel Aktivite</p>
-                          <div className="flex flex-wrap gap-2">
-                            {entry.activity.map(item => (
-                              <span
-                                key={item}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-light dark:bg-green/30 text-xs font-medium text-green dark:text-green-light"
-                              >
-                                🏃 {item}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Water Intake */}
-                      {entry?.waterGlasses && entry.waterGlasses > 0 && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-sky-light dark:bg-sky/20">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky to-blue flex items-center justify-center">
-                            <span className="text-lg">💧</span>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Su Tüketimi</p>
-                            <p className="font-semibold text-foreground">{(entry.waterGlasses * 0.25).toFixed(2)} L</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Weight */}
-                      {entry?.weight && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-light dark:bg-slate/20">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate to-slate flex items-center justify-center">
-                            <span className="text-lg">⚖️</span>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Ağırlık</p>
-                            <p className="font-semibold text-foreground">{entry.weight} kg</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Pregnancy Test */}
-                      {entry?.pregnancyTest && entry.pregnancyTest !== 'not_taken' && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-orange-light dark:bg-orange/20">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange to-amber flex items-center justify-center">
-                            <span className="text-lg">🧪</span>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Gebelik Testi</p>
-                            <p className="font-semibold text-foreground">
-                              {entry.pregnancyTest === 'positive' ? 'Pozitif' : 
-                               entry.pregnancyTest === 'negative' ? 'Negatif' : 
-                               entry.pregnancyTest === 'faint_line' ? 'Soluk çizgi' : entry.pregnancyTest}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Ovulation Test */}
-                      {entry?.ovulationTest && entry.ovulationTest !== 'not_taken' && (
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-teal-light dark:bg-teal/20">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-cyan flex items-center justify-center">
-                            <span className="text-lg">📊</span>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Ovülasyon Testi</p>
-                            <p className="font-semibold text-foreground">
-                              {entry.ovulationTest === 'positive' ? 'Pozitif' : 
-                               entry.ovulationTest === 'negative' ? 'Negatif' : 
-                               entry.ovulationTest === 'own_method' ? 'Kendi yöntemim' : entry.ovulationTest}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Notes */}
-                      {entry?.notes && (
-                        <div className="p-3 rounded-2xl bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-1">Notlar</p>
-                          <p className="text-sm text-foreground">{entry.notes}</p>
-                        </div>
-                      )}
-
-                      {/* Medication Status */}
-                      {(() => {
-                        const medProgress = getMedicationProgress(selectedDate);
-                        if (medProgress.total === 0) return null;
-                        
-                        return (
-                          <div className="p-3 rounded-2xl bg-emerald/10 dark:bg-emerald/20">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald to-green flex items-center justify-center">
-                                <Pill className="w-5 h-5 text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">İlaç Durumu</p>
-                                <p className="font-semibold text-foreground">
-                                  {medProgress.taken} / {medProgress.total} doz alındı
-                                </p>
-                              </div>
-                            </div>
-                            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-gradient-to-r from-emerald to-green rounded-full transition-all"
-                                style={{ width: `${(medProgress.taken / medProgress.total) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  );
-                })()}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                  })()}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Period Confirmation Modal */}
       {showPeriodConfirm && selectedDate && (
