@@ -70,7 +70,7 @@ const isSystemNotificationId = (id: number): boolean => {
 };
 
 // Varied water reminder messages
-function getRandomWaterContent(language: 'tr' | 'en', privacyMode: PrivacyMode): NotificationContent {
+function getRandomWaterContent(language: 'tr' | 'en', _privacyMode?: PrivacyMode): NotificationContent {
   const waterMessages: { title: string; body: string }[] = language === 'tr' ? [
     { title: 'Bir Yudum Alsana 💧', body: 'Vücudun su bekliyor! Bir bardak iç, kendine iyi bak 🌿' },
     { title: 'Su Molası ☕', body: 'Bir bardak su iç, enerjin yerine gelsin! Hedefine yaklaşıyorsun 💪' },
@@ -92,7 +92,7 @@ function getRandomWaterContent(language: 'tr' | 'en', privacyMode: PrivacyMode):
 }
 
 // Varied exercise reminder messages
-function getRandomExerciseContent(language: 'tr' | 'en', privacyMode: PrivacyMode): NotificationContent {
+function getRandomExerciseContent(language: 'tr' | 'en', _privacyMode?: PrivacyMode): NotificationContent {
   const exerciseMessages: { title: string; body: string }[] = language === 'tr' ? [
     { title: 'Haydi Hareket! 🏃‍♀️', body: 'Bugün hareket etmeyi unutma! En az 10.000 adım hedefle 🎯' },
     { title: 'Adım Zamanı 👟', body: 'Öğleden sonra enerjini topla, kısa bir yürüyüşe çık! Vücudun sana teşekkür edecek 💜' },
@@ -402,8 +402,12 @@ export function scheduleNotifications(
         await new Promise(r => setTimeout(r, 100));
       }
       
-      const result = await _doScheduleNotifications(args.prediction, args.prefs, args.language);
-      resolve(result);
+      try {
+        const result = await _doScheduleNotifications(args.prediction, args.prefs, args.language);
+        resolve(result);
+      } catch (e) {
+        resolve({ scheduled: 0, errors: [`Unexpected error: ${e}`] });
+      }
     }, 500); // 500ms debounce - coalesces rapid calls
   });
 }
@@ -588,24 +592,23 @@ async function _doScheduleNotifications(
   const pmsDate = parseISO(prediction.pmsStart);
   addNotification('pms_reminder', pmsDate);
   
-  // Daily check-ins: 1 per day for 30 days
+  // Daily check-ins: 1 per day for 30 days (0..29)
   if (prefs.togglesByType.daily_checkin) {
-    for (let i = 0; i <= 30; i++) {
+    for (let i = 0; i < 30; i++) {
       const checkInDate = addDays(now, i);
       addNotification('daily_checkin', checkInDate);
     }
   }
   
-  // Water reminders: 3 per day at 10:00, 14:00, 18:00
+  // Water reminders: 3 per day at 10:00, 14:00, 18:00 (30 days: 0..29)
   if (prefs.togglesByType.water_reminder) {
-    for (let i = 0; i <= 30; i++) {
+    for (let i = 0; i < 30; i++) {
       const baseDate = addDays(now, i);
       [10, 14, 18].forEach((hour, slotIndex) => {
         let waterTime = setMinutes(setHours(baseDate, hour), 0);
         waterTime = getNextValidTime(waterTime, format(waterTime, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
         if (isAfter(waterTime, now)) {
           waterTime = ensureNonOverlappingTime(waterTime);
-          // Dedup: same type + same minute => skip
           const waterMinuteMs = minuteKey(waterTime);
           const alreadyWaterAtMinute = notifications.some(n => {
             const at = n.schedule?.at instanceof Date ? n.schedule.at : null;
@@ -623,10 +626,10 @@ async function _doScheduleNotifications(
     }
   }
   
-  // Exercise reminders: 1 per day at 14:00
+  // Exercise reminders: 1 per day at 13:00 (30 days: 0..29)
   if (prefs.togglesByType.exercise_reminder) {
-    for (let i = 0; i <= 30; i++) {
-      let exerciseDate = setMinutes(setHours(addDays(now, i), 14), 0);
+    for (let i = 0; i < 30; i++) {
+      let exerciseDate = setMinutes(setHours(addDays(now, i), 13), 0);
       exerciseDate = getNextValidTime(exerciseDate, format(exerciseDate, 'HH:mm'), prefs.quietHoursStart, prefs.quietHoursEnd);
 
       if (!isAfter(exerciseDate, now)) continue;
