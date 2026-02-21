@@ -11,8 +11,12 @@ const isNative = () => Capacitor.isNativePlatform();
 // Medication notification channel
 export const MEDICATION_NOTIFICATION_CHANNEL = 'medication_reminders';
 
-// Base ID for medication notifications (start from 20000 to avoid conflicts)
+// ID layout for medication notifications:
+// Schedule IDs: BASE + medKey(1000..9999) * 10000 + dayOffset(0..29) * 100 + timeIndex(0..99)
+// Snooze IDs:   BASE + 500000 + medHash(0..8999) * 10 + nonce(0..9999 via timestamp)
+// Range:        BASE .. BASE + 99_999_999 (all within one band for cancel/pending filter)
 const MEDICATION_NOTIFICATION_BASE_ID = 20000;
+const MEDICATION_ID_MAX = 99_999_999;
 
 // Register action types for medication notifications
 export async function registerMedicationActionTypes(): Promise<void> {
@@ -55,14 +59,17 @@ export async function handleMedicationNotificationAction(action: ActionPerformed
   const medicationName = extra.medicationName;
   
   if (actionId === 'take') {
-    // Record the dose as taken
+    // Record the dose as taken and dismiss the notification
     const today = format(new Date(), 'yyyy-MM-dd');
     await recordMedicationDose(medicationId, today, true);
+    if (notification?.id) {
+      try { await LocalNotifications.cancel({ notifications: [{ id: notification.id }] }); } catch {}
+    }
     console.log(`Medication ${medicationName} marked as taken`);
   } else if (actionId === 'snooze') {
-    // Unique snooze ID: medication hash + timestamp remainder to handle repeated snoozes
-    const medHash = medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 900;
-    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 900000 + medHash * 100 + (Date.now() % 100);
+    // Unique snooze ID: medHash * 10 + timestamp nonce (wide range to avoid collisions)
+    const medHash = medicationId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000;
+    const snoozeId = MEDICATION_NOTIFICATION_BASE_ID + 500000 + medHash * 10 + (Date.now() % 10000);
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
     await LocalNotifications.schedule({
       notifications: [{
@@ -102,11 +109,11 @@ export async function createMedicationNotificationChannel(): Promise<void> {
 }
 
 // Generate a unique notification ID for a medication at a specific time
-// Each medication gets a 10,000 ID block: supports 30 days × 100 time slots
+// Each medication gets a 10,000 ID block (medKey * 10000): supports 30 days × 100 time slots
 function generateNotificationId(medicationId: string, dayOffset: number, timeIndex: number): number {
   const hash = medicationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const medKey = (hash % 9000) + 1000; // 1000..9999
-  return MEDICATION_NOTIFICATION_BASE_ID + medKey * 100 + dayOffset * 10 + timeIndex;
+  return MEDICATION_NOTIFICATION_BASE_ID + medKey * 10000 + dayOffset * 100 + (timeIndex % 100);
 }
 
 // Cancel all medication notifications
@@ -116,7 +123,7 @@ export async function cancelMedicationNotifications(): Promise<void> {
   try {
     const pending = await LocalNotifications.getPending();
     const medicationNotifications = pending.notifications.filter(
-      n => n.id >= MEDICATION_NOTIFICATION_BASE_ID && n.id < MEDICATION_NOTIFICATION_BASE_ID + 100000
+      n => n.id >= MEDICATION_NOTIFICATION_BASE_ID && n.id < MEDICATION_NOTIFICATION_BASE_ID + MEDICATION_ID_MAX
     );
     
     if (medicationNotifications.length > 0) {
@@ -218,7 +225,7 @@ export async function getPendingMedicationNotifications(): Promise<LocalNotifica
   try {
     const pending = await LocalNotifications.getPending();
     return pending.notifications.filter(
-      n => n.id >= MEDICATION_NOTIFICATION_BASE_ID && n.id < MEDICATION_NOTIFICATION_BASE_ID + 100000
+      n => n.id >= MEDICATION_NOTIFICATION_BASE_ID && n.id < MEDICATION_NOTIFICATION_BASE_ID + MEDICATION_ID_MAX
     );
   } catch (error) {
     console.error('Error getting pending medication notifications:', error);
@@ -238,7 +245,7 @@ export async function scheduleOneTimeMedicationReminder(
   try {
     await LocalNotifications.schedule({
       notifications: [{
-        id: MEDICATION_NOTIFICATION_BASE_ID + 900000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 900) * 100 + (Date.now() % 100),
+        id: MEDICATION_NOTIFICATION_BASE_ID + 500000 + (medication.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 9000) * 10 + (Date.now() % 10000),
         title: `💊 ${medication.name} - Hatırlatma`,
         body: `${medication.dosage} almayı unutma!`,
         schedule: { at: notificationTime },
