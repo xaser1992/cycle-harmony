@@ -169,8 +169,10 @@ export default function Medications() {
         getMedications(),
         getMedicationLogsForDate(today),
       ]);
-      setMedications(meds.filter(m => m.isActive));
-      setTodayLogs(logs);
+      const activeMeds = meds.filter(m => m.isActive);
+      const activeIds = new Set(activeMeds.map(m => m.id));
+      setMedications(activeMeds);
+      setTodayLogs(logs.filter(l => activeIds.has(l.medicationId)));
 
       // Load stats for each medication
       const statsPromises = meds.map(async (med) => {
@@ -241,6 +243,9 @@ export default function Medications() {
 
   const handleDeleteMedication = async (id: string) => {
     await deleteMedication(id);
+    // Re-schedule notifications so deleted med's pending notifications are cleared
+    const allMeds = await getMedications();
+    await scheduleMedicationNotifications(allMeds.filter(m => m.isActive));
     await loadData();
     setSelectedMedication(null);
     setEditingTimes(null);
