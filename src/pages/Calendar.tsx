@@ -473,10 +473,10 @@ export default function CalendarPage() {
           <div className="fixed inset-0 z-[100] flex flex-col animate-fade-in safe-area-top"
             style={{
               background: activeInfoCard === 'period' 
-                ? 'linear-gradient(to bottom right, rgba(244, 114, 182, 0.97), rgba(236, 72, 153, 0.97))' 
+                ? 'linear-gradient(to bottom right, rgb(244, 114, 182), rgb(236, 72, 153))' 
                 : activeInfoCard === 'ovulation' 
-                ? 'linear-gradient(to bottom right, rgba(139, 92, 246, 0.97), rgba(168, 85, 247, 0.97))'
-                : 'linear-gradient(to bottom right, rgba(34, 211, 238, 0.97), rgba(20, 184, 166, 0.97))'
+                ? 'linear-gradient(to bottom right, rgb(139, 92, 246), rgb(168, 85, 247))'
+                : 'linear-gradient(to bottom right, rgb(34, 211, 238), rgb(20, 184, 166))'
             }}
           >
             {/* Header with back button */}
