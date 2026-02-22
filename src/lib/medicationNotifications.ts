@@ -111,11 +111,15 @@ export async function cancelMedicationNotifications(): Promise<void> {
 
   try {
     const pending = await LocalNotifications.getPending();
+    // ✅ SADECE schedule notification'larını iptal et, snooze bandına dokunma
+    const scheduleFloor = MEDICATION_NOTIFICATION_BASE_ID;
+    const scheduleCeil = MEDICATION_NOTIFICATION_BASE_ID + SNOOZE_OFFSET; // snooze bandı başlangıcı
+
     const medicationNotifications = pending.notifications.filter(
       (n) =>
         typeof n.id === 'number' &&
-        n.id >= MEDICATION_NOTIFICATION_BASE_ID &&
-        n.id < MEDICATION_NOTIFICATION_BASE_ID + MEDICATION_ID_MAX
+        n.id >= scheduleFloor &&
+        n.id < scheduleCeil
     );
 
     if (medicationNotifications.length > 0) {
